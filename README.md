@@ -40,28 +40,47 @@ Authentication is **pass-through**: the client supplies an `Authorization: Beare
 
 > **Status:** the server packages under [`packages/`](packages/) are being populated via PRs. The connection patterns below describe how a client registers an MCP server over each transport; the concrete package name and endpoint land with those PRs. See [CHANGELOG](CHANGELOG.md).
 
-There are two ways to connect, matching the two transports:
+Every client connects the same two ways, matching the two transports: point it at the server's HTTP endpoint (`<server-url>/mcp`) with an `Authorization: Bearer <token>` header, or run the server locally over stdio (`npx -y @production-master/mcp`).
 
-### Over HTTP (`POST /mcp`)
-
-Point your MCP client at the server's HTTP endpoint and pass your token as a bearer header. With Claude Code (available once the first packages land):
+### Claude Code
 
 ```
+# HTTP
 claude mcp add --transport http production-master <server-url>/mcp \
   --header "Authorization: Bearer <your-token>"
-```
 
-Any HTTP-capable MCP client can connect the same way — give it the `<server-url>/mcp` endpoint and an `Authorization: Bearer <token>` header.
-
-### Over stdio (local)
-
-Run the server as a local subprocess of your client. With Claude Code (available once the first packages land):
-
-```
+# or stdio (local)
 claude mcp add production-master -- npx -y @production-master/mcp
 ```
 
-For other clients, register a stdio MCP server that launches the same command. Full walkthrough: [docs/user/quick-start.md](docs/user/quick-start.md).
+### Cursor
+
+Register the server in `.cursor/mcp.json`:
+
+```jsonc
+{
+  "mcpServers": {
+    "production-master": {
+      "url": "<server-url>/mcp",
+      "headers": { "Authorization": "Bearer <your-token>" }
+    }
+  }
+}
+```
+
+### Codex
+
+Register the server in `.codex/config.toml` (stdio):
+
+```toml
+[mcp_servers.production-master]
+command = "npx"
+args = ["-y", "@production-master/mcp"]
+```
+
+### OpenCode / other MCP clients
+
+Any MCP-capable client works: give it the `<server-url>/mcp` HTTP endpoint plus the bearer header, or a stdio server entry launching `npx -y @production-master/mcp`. Full walkthrough: [docs/user/quick-start.md](docs/user/quick-start.md).
 
 ## Architecture
 
