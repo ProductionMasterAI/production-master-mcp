@@ -1,0 +1,11 @@
+# Codex MCP server registration stub.
+#
+# production-master-mcp registers with Codex through this file once the server packages
+# land (see packages/ and the README Quick Start). Until then this stub only marks the
+# repo as Codex-aware; there is no MCP server entry to configure yet.
+#
+# Once released, run over stdio:
+#
+# [mcp_servers.production-master]
+# command = "npx"
+# args = ["-y", "@production-master/mcp"]

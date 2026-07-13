@@ -1,0 +1,25 @@
+---
+description: production-master-mcp — canonical agent policy pointer
+alwaysApply: true
+---
+
+# production-master-mcp — canonical agent policy
+
+The single source of truth for how agents work in this repo is **`AGENTS.md`** at the
+repo root. Read it before making any change.
+
+Key points it enforces (see `AGENTS.md` for the full, authoritative text):
+
+- This repo is the **standalone MCP server** for the Production Master hosted service —
+  it terminates the Model Context Protocol (Streamable HTTP `POST /mcp` and stdio) and
+  forwards tool calls upstream. **All investigation logic is server-side and never lives
+  here.**
+- Auth is **opaque bearer pass-through** — never log, store, or persist a forwarded token.
+- **No LLM/provider SDK imports** and **no server-side investigation logic** — CI
+  grep-enforces both (the ip-guard job).
+- Tool schemas come from the shared `@production-master/mcp-tool-contract` package; never
+  redefine them here.
+- CI runs on GitHub-hosted `ubuntu-latest` only; no secrets in code/config.
+- Conventional Commits, `feat/`|`fix/` branches, squash-merge, green CI before merge.
+
+Do not fork policy into this file — edit `AGENTS.md` instead.
