@@ -2,8 +2,8 @@
 
 > **Read this first.** This is the **single canonical agent policy** for this repo, for
 > all AI coding agents (Claude Code, Cursor, Copilot, Codex, …). `CLAUDE.md` starts with
-> `@AGENTS.md`; `.cursor/rules/000-project.mdc` and `docs/agent-guidelines/README.md` are
-> thin pointers back here. Edit the policy **here** — never fork it into the adapters.
+> `@AGENTS.md`; `.cursor/rules/000-project.mdc` is a
+> thin pointer back here. Edit the policy **here** — never fork it into the adapters.
 
 ## What this repo is
 
@@ -28,7 +28,7 @@ tool set to any MCP-capable client. It is a protocol boundary and nothing more.
 | Path | Role |
 |---|---|
 | `packages/*` | Server packages: transport (HTTP + stdio), auth pass-through, tool routing |
-| `docs/` | Contributor and agent guidelines; `docs/agent-guidelines/` points back to this file |
+| `docs/` | User-facing docs only (install/operate) plus CONTRIBUTING/CHANGELOG — this repo is PUBLIC |
 | `.github/` | CI workflows, issue/PR templates, Dependabot config |
 
 TypeScript, npm **workspaces** (`packages/*`). Tool input/output schemas are consumed
@@ -129,5 +129,5 @@ dependency.
 
 The repo follows [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html). Record every
 user-facing change in the root [`CHANGELOG.md`](CHANGELOG.md) under `## [Unreleased]`
-as part of the PR that makes the change. Full policy:
-[versioning policy](docs/engineering/build-and-release/versioning.md).
+as part of the PR that makes the change. The full versioning policy lives in the
+private cockpit repo (`docs/engineering/mcp-server/`), not here.

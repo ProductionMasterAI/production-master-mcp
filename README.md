@@ -100,7 +100,7 @@ flowchart LR
     M -- "MCP responses" --> A
 ```
 
-Three concerns live here: **transport** (Streamable HTTP `POST /mcp` and stdio), **auth pass-through** (forward the caller's bearer token upstream, store nothing), and **tool routing** (validate against the schemas from `@production-master/mcp-tool-contract` and relay to the service). See [docs/engineering/architecture/overview.md](docs/engineering/architecture/overview.md).
+Three concerns live here: **transport** (Streamable HTTP `POST /mcp` and stdio), **auth pass-through** (forward the caller's bearer token upstream, store nothing), and **tool routing** (validate against the schemas from `@production-master/mcp-tool-contract` and relay to the service).
 
 ## Documentation
 
@@ -110,8 +110,6 @@ Three concerns live here: **transport** (Streamable HTTP `POST /mcp` and stdio),
 | [Usage](docs/user/usage.md) | Common workflows — connect from each client, bearer pass-through |
 | [Commands](docs/user/reference/commands.md) | Endpoint, transports, and config reference |
 | [Troubleshooting](docs/user/troubleshooting.md) | Auth (401), connectivity, Node version, transport mismatch |
-| [Architecture](docs/engineering/architecture/overview.md) | Components and data flow |
-| [ADR-001](docs/engineering/decisions/ADR-001-initial-architecture.md) | Standard MCP server over the hosted service |
 | [Contributing](docs/CONTRIBUTING.md) | How to contribute |
 | [Changelog](CHANGELOG.md) | Release history |
 
