@@ -24,6 +24,8 @@ There is nothing to persist on the server side — it stores no credentials. If 
 
 For the Streamable HTTP transport the client posts to `<server-url>/mcp`. Verify the URL is the bare endpoint (no trailing slash issues), that it's reachable from your machine, and that any proxy or firewall allows the connection. A proxy that buffers or drops long-lived responses can interfere — try a direct connection to isolate it.
 
+**Claude Code:** start with `claude mcp list` (or `/mcp` in a session). Since Claude Code 2.1.219 a failing server entry shows the HTTP status and error text of the failed connection — a `401` there points you at [auth](#auth-failures), a timeout or DNS error at the network path, and a `404` at a wrong endpoint URL. Claude Code also warns when an MCP config value carries hidden leading/trailing whitespace — a classic cause of an `Authorization` header that looks right but fails upstream. If you run Claude Code headless (`claude -p`), config entries that fail validation are skipped and reported in the init event's `mcp_server_errors` field, so a CI job can assert the server registered cleanly.
+
 ### Calls reach the server but fail upstream
 
 If the server is reachable but every tool call errors, the server may not be able to reach the hosted service. The upstream endpoint is configured for the server; those configuration specifics are defined as the packages land. Check the server's logs (never the tokens — those are never logged) for an upstream connection error.
