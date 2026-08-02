@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Server packages under `packages/*` (populated via subsequent PRs).
+- **`.claude-code-version` — tracked Claude Code target release (2.1.220).** New root
+  file recording the latest Claude Code release this repo targets as an MCP client
+  host, so version-support updates are diffable and automatable. Reviewed the Claude
+  Code 2.0.0 → 2.1.220 changelog for MCP-facing changes: the documented registration
+  flows (`claude mcp add --transport http` / stdio) are unchanged, and client-side
+  improvements (capability-discovery retries, `claude mcp login`/`logout`, headersHelper
+  re-auth on 401/403) require no server-side changes to the planned pass-through-auth
+  design.
 
 ## [0.1.0] - 2026-07-13
 
