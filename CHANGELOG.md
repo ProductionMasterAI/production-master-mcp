@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **`CONTRIBUTING.md`.** Contributor guide covering scope (what belongs in this
+  repository and what belongs upstream on the hosted service), the pass-through-auth
+  and contract-driven-schema invariants, local setup, the pre-push gates, the three
+  required CI jobs, and PR/licensing expectations. Completes the standard open-source
+  file set alongside `README`, `LICENSE`, `SECURITY`, `CODE_OF_CONDUCT`, and `CHANGELOG`
+  — the `0.1.0` entry below listed a contributing guide as part of the initial scaffold,
+  but the file was never committed.
 - Server packages under `packages/*` (populated via subsequent PRs).
 - **Troubleshooting: diagnose connections with `claude mcp list` (Claude Code 2.1.219).**
   The connectivity section now leads with Claude Code's improved failure output —
