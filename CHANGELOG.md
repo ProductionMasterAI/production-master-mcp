@@ -8,11 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- **Claude Code target bumped to 2.1.221** (from 2.1.220) in `.claude-code-version`.
+- **Claude Code target bumped to 2.1.222** (from 2.1.220) in `.claude-code-version`.
   Troubleshooting's headless (`claude -p`) guidance now covers the 2.1.221 fix for
   `--mcp-config` servers not being connected before the first turn in print mode —
   the failure mode where a first-turn tool call is emitted as literal text, which
-  reads like a server bug and isn't one.
+  reads like a server bug and isn't one. The 2.1.222 delta is client-side fix-only
+  for MCP servers: tool errors are now shown for tools that disappear locally
+  (e.g. after a server is removed mid-session), and `/usage` no longer
+  overattributes usage to MCP servers — both are host fixes needing no
+  server-side change; the documented registration flows are unchanged.
 
 ### Added
 - Server packages under `packages/*` (populated via subsequent PRs).
