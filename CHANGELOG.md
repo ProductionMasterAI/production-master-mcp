@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Claude Code target bumped to 2.1.223** (from 2.1.222) in `.claude-code-version`.
+  The 2.1.223 delta contains nothing MCP-facing: its fixes are host-side
+  (permission-prompt spoofing, a Bash permission bypass, a workflow-script sandbox
+  escape, gateway model-discovery and `modelOverrides` corrections) and its one
+  behavior change relevant to clients — `/review` becoming an alias of
+  `/code-review` — touches no documented flow here. The registration flows
+  (`claude mcp add --transport http` / stdio) and the pass-through-auth design are
+  unaffected; no server-side change required.
+
 - **Claude Code target bumped to 2.1.222** (from 2.1.220) in `.claude-code-version`.
   Troubleshooting's headless (`claude -p`) guidance now covers the 2.1.221 fix for
   `--mcp-config` servers not being connected before the first turn in print mode —
