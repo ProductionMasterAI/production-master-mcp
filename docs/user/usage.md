@@ -33,6 +33,8 @@ Authentication is deliberately simple: **the token is yours, not the server's.**
 
 Because the server holds no credentials, rotating or revoking a token is entirely a matter of what your client sends next time; there is nothing to clear on the server.
 
+**Protecting the token in sandboxed Claude Code sessions (2.1.224+).** If you keep your Production Master token in an environment variable and shell commands in your session call the endpoint directly (e.g. `curl` against `<server-url>/mcp` in a smoke test), Claude Code 2.1.224 adds sandbox credential-masking options so the raw token stays out of what the model sees: `extract` (with `onExtractNoMatch`) pulls the secret out of structured env values, and `decode: "jwt"` with `maskClaims` masks claims if your token is a JWT. These options require `network.tlsTerminate` and are honored only from user, managed, or `--settings` settings — not from project settings. This is client-side hygiene on top of the pass-through design; the server's behavior is unchanged either way.
+
 ## Which tools exist
 
 The tool surface is defined by `@production-master/mcp-tool-contract` (publication pending) and is discovered through the standard MCP tool-listing call — your client shows the current set once connected. Tool names, inputs, and outputs are versioned by that package, so every client sees the same surface; this repo does not define or fork it.

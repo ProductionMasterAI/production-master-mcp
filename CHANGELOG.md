@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Claude Code target bumped to 2.1.224** (from 2.1.223) in `.claude-code-version`.
+  The 2.1.224 delta is MCP-facing for once: it fixes MCP tools that connect
+  mid-turn being deferred for tool search without their names announced to the
+  model (a "connected but the model can't see the tools" symptom that reads like
+  a server bug), surfaces sandbox violation details in Bash tool results, and
+  adds sandbox credential-masking options for keeping tokens out of what the
+  model sees. All are host-side; the registration flows (`claude mcp add
+  --transport http` / stdio) and the pass-through-auth design are unchanged and
+  no server-side change is required. Troubleshooting and Usage now reference
+  these where they affect diagnosis (see Added below).
+
 - **Claude Code target bumped to 2.1.223** (from 2.1.222) in `.claude-code-version`.
   The 2.1.223 delta contains nothing MCP-facing: its fixes are host-side
   (permission-prompt spoofing, a Bash permission bypass, a workflow-script sandbox
@@ -28,6 +39,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   server-side change; the documented registration flows are unchanged.
 
 ### Added
+- **Troubleshooting: "connected but no tools" mid-turn case is version-scoped (Claude Code 2.1.224).**
+  The transport-mismatch section now separates the config-shape cause from the
+  Claude Code pre-2.1.224 bug where a server connecting mid-turn had its tools
+  deferred for tool search without their names announced to the model — a
+  symptom that reads like a server-side tool-listing failure and is fixed by
+  updating the client. Connectivity guidance also notes that since 2.1.224
+  sandbox violation details appear in Bash tool results, so a sandboxed `curl`
+  probe of `<server-url>/mcp` that hits sandbox policy no longer masquerades as
+  a generic network failure.
+- **Usage: sandbox credential-masking note for the bearer token (Claude Code 2.1.224).**
+  The bearer pass-through section now points users who keep their token in an
+  env var and call the endpoint from sandboxed commands at 2.1.224's masking
+  options (`extract`/`onExtractNoMatch`, `decode: "jwt"` with `maskClaims`),
+  including their constraints: they require `network.tlsTerminate` and are
+  honored only from user, managed, or `--settings` settings.
 - Server packages under `packages/*` (populated via subsequent PRs).
 - **Troubleshooting: diagnose connections with `claude mcp list` (Claude Code 2.1.219).**
   The connectivity section now leads with Claude Code's improved failure output —
