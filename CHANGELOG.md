@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and Team MCP / team-marketplace distribution with org-group access (3.10+) for
   the HTTP transport — no server-side change; registration remains client-side
   pass-through auth.
+- **Cursor working tips** — side chats (3.11) for transport/auth debugging; Automations
+  (3.8) for CI / `ip-guard` triage with optional computer-use demos.
 - **Claude Code target bumped to 2.1.224** (from 2.1.223) in `.claude-code-version`.
   The 2.1.224 delta is MCP-facing for once: it fixes MCP tools that connect
   mid-turn being deferred for tool search without their names announced to the

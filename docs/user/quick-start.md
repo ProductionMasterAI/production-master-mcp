@@ -40,6 +40,11 @@ the same entry from Cursor's **Customize** page (3.9+):
 > including org-group access controls. Members then install the approved server without
 > copying bearer headers by hand. Cursor pin: [`.cursor-version`](../../.cursor-version)
 > (`3.11`, changelog through 2026-08-03).
+>
+> **Working tips:** use a side chat (`/side` / `/btw`, 3.11) to debug transport shape
+> or bearer headers without interrupting the main session. Cursor Automations (3.8,
+> `/automate`) can triage **Workflow run completed** failures (including `ip-guard`)
+> and open a fix PR; computer use is available when you want a demo artifact.
 
 ### Any MCP client
 
