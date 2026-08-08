@@ -21,7 +21,8 @@ claude mcp add --transport http production-master <server-url>/mcp \
 
 ### Cursor
 
-Add to `.cursor/mcp.json` in your project (or your global Cursor config):
+Add to `.cursor/mcp.json` in your project (or your global Cursor config), or manage
+the same entry from Cursor's **Customize** page (3.9+):
 
 ```jsonc
 {
@@ -33,6 +34,12 @@ Add to `.cursor/mcp.json` in your project (or your global Cursor config):
   }
 }
 ```
+
+> **Teams / Enterprise (Cursor 3.10+):** admins can configure this HTTP MCP once as a
+> Team MCP and distribute it via a team marketplace (Dashboard → Integrations & MCP),
+> including org-group access controls. Members then install the approved server without
+> copying bearer headers by hand. Cursor pin: [`.cursor-version`](../../.cursor-version)
+> (`3.11`, changelog through 2026-08-03).
 
 ### Any MCP client
 

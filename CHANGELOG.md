@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Cursor target pinned to 3.11** (changelog covered through **2026-08-03**) via
+  new root [`.cursor-version`](.cursor-version). README Cursor badge moves from
+  `pending` to **3.11**. Quick Start documents Customize-page MCP management (3.9+)
+  and Team MCP / team-marketplace distribution with org-group access (3.10+) for
+  the HTTP transport — no server-side change; registration remains client-side
+  pass-through auth.
 - **Claude Code target bumped to 2.1.224** (from 2.1.223) in `.claude-code-version`.
   The 2.1.224 delta is MCP-facing for once: it fixes MCP tools that connect
   mid-turn being deferred for tool search without their names announced to the
