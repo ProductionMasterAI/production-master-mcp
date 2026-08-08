@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Claude Code target bumped to 2.1.226** (from 2.1.224) in `.claude-code-version`.
+  The 2.1.225 + 2.1.226 delta needs no server-side change: 2.1.226 is fix-only
+  ("bug fixes and reliability improvements"), and 2.1.225's two auth fixes are
+  client-side but produce 401 symptoms that read like server auth failures, so
+  troubleshooting's 401 section now covers both — the macOS keychain-timeout bug
+  that made MCP OAuth servers intermittently fail with a burst of 401s (this
+  server's pass-through bearer auth is not in that path, but co-registered OAuth
+  servers 401ing alongside it point at the host, not the token), and the headless
+  (`claude -p`) bug where a transient 401 replaced a long-lived
+  `CLAUDE_CODE_OAUTH_TOKEN` with a short-lived token, breaking a CI session's auth
+  until restart. The registration flows (`claude mcp add --transport http` /
+  stdio) and the pass-through design are unchanged.
+
 - **Claude Code target bumped to 2.1.224** (from 2.1.223) in `.claude-code-version`.
   The 2.1.224 delta is MCP-facing for once: it fixes MCP tools that connect
   mid-turn being deferred for tool search without their names announced to the
