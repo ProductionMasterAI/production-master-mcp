@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`.codex-version` — tracked Codex target release (0.147.0).** New root marker
+  recording the latest Codex release this server targets, mirroring
+  `.claude-code-version`, so supported-client updates are diffable and automatable.
+  Compatibility scope: nothing in the 0.147.0 delta changes the documented
+  `.codex/config.toml` stdio registration or the pass-through-auth design. Its one
+  protocol-facing item — an **opt-in** MCP 2026-07-28 protocol — is opt-in on the
+  host side and is noted here as a future consideration, not adopted: `packages/`
+  is still empty, so there is no server implementation to negotiate it. This is a
+  review of the release notes, not an end-to-end host test.
+
 ### Changed
 - **Claude Code target bumped to 2.1.224** (from 2.1.223) in `.claude-code-version`.
   The 2.1.224 delta is MCP-facing for once: it fixes MCP tools that connect
