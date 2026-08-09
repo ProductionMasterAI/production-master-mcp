@@ -11,15 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Claude Code target bumped to 2.1.226** (from 2.1.224) in `.claude-code-version`.
   The 2.1.225 + 2.1.226 delta needs no server-side change: 2.1.226 is fix-only
   ("bug fixes and reliability improvements"), and 2.1.225's two auth fixes are
-  client-side but produce 401 symptoms that read like server auth failures, so
-  troubleshooting's 401 section now covers both — the macOS keychain-timeout bug
-  that made MCP OAuth servers intermittently fail with a burst of 401s (this
-  server's pass-through bearer auth is not in that path, but co-registered OAuth
-  servers 401ing alongside it point at the host, not the token), and the headless
-  (`claude -p`) bug where a transient 401 replaced a long-lived
-  `CLAUDE_CODE_OAUTH_TOKEN` with a short-lived token, breaking a CI session's auth
-  until restart. The registration flows (`claude mcp add --transport http` /
-  stdio) and the pass-through design are unchanged.
+  client-side and produce 401s *elsewhere in the same session* that read like
+  server auth failures, so troubleshooting's 401 section now lists both to be
+  ruled out while keeping token validation as the answer to a Production Master
+  tool-call 401 — neither can cause one. The macOS keychain-timeout bug hit **MCP
+  OAuth** servers, and this server uses pass-through bearer auth; co-registered
+  OAuth servers 401ing alongside it is the shared symptom that points at the host.
+  The headless (`claude -p`) bug swapped a long-lived `CLAUDE_CODE_OAUTH_TOKEN`
+  for a short-lived one, and that credential authenticates Claude Code itself to
+  Anthropic — this server never sees it. The registration flows (`claude mcp add
+  --transport http` / stdio) and the pass-through design are unchanged.
 
 - **Claude Code target bumped to 2.1.224** (from 2.1.223) in `.claude-code-version`.
   The 2.1.224 delta is MCP-facing for once: it fixes MCP tools that connect
