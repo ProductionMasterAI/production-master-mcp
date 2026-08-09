@@ -53,3 +53,5 @@ If your client "connects but sees no tools" or "fails to start," the usual cause
 ## Still stuck?
 
 Open a GitHub issue with your MCP client and version, the transport you used (HTTP or stdio), the server version, and the redacted output or log excerpt. Never include tokens or service credentials.
+
+**Cursor:** if the server shows as connected in Customize / MCP but the model never calls Production Master tools, confirm the entry is the HTTP shape (`url` + `Authorization` header) rather than a stdio `command`, and that the bearer token is current. Team-distributed Team MCPs (Cursor 3.10+) use the same pass-through auth — a stale team-installed token fails the same way as a hand-edited `mcp.json`.

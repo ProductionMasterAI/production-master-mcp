@@ -19,6 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   review of the release notes, not an end-to-end host test.
 
 ### Changed
+- **Cursor target pinned to 3.11** (changelog covered through **2026-08-03**) via
+  new root [`.cursor-version`](.cursor-version). The 3.11 delta was reviewed against
+  the documented `.cursor/mcp.json` HTTP registration and the pass-through-auth
+  design and needs no server-side change. The README badge row tracks *validation*,
+  so Cursor's badge stays `pending` — nothing here is an end-to-end host test, and
+  no platform has cleared that axis. Quick Start documents Customize-page MCP
+  management (3.9+) and Team MCP / team-marketplace distribution with org-group
+  access (3.10+) for the HTTP transport.
+- **Cursor working tips** — side chats (3.11) for transport/auth debugging; Automations
+  (3.8) for CI / `ip-guard` triage with optional computer-use demos.
 - **Claude Code target bumped to 2.1.226** (from 2.1.224) in `.claude-code-version`.
   The 2.1.225 + 2.1.226 delta needs no server-side change: 2.1.226 is fix-only
   ("bug fixes and reliability improvements"), and 2.1.225's two auth fixes are
