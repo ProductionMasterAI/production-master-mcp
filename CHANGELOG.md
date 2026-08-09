@@ -28,7 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   management (3.9+) and Team MCP / team-marketplace distribution with org-group
   access (3.10+) for the HTTP transport.
 - **Cursor working tips** — side chats (3.11) for transport/auth debugging; Automations
-  (3.8) for CI / `ip-guard` triage with optional computer-use demos.
+  (3.8) for CI / `ip-guard` triage with optional computer-use demos; Inbox
+  **multi-PR sessions** (2026-07-29).
 - **Claude Code target bumped to 2.1.226** (from 2.1.224) in `.claude-code-version`.
   The 2.1.225 + 2.1.226 delta needs no server-side change: 2.1.226 is fix-only
   ("bug fixes and reliability improvements"), and 2.1.225's two auth fixes are

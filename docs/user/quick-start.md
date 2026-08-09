@@ -45,6 +45,8 @@ the same entry from Cursor's **Customize** page (3.9+):
 > or bearer headers without interrupting the main session. Cursor Automations (3.8,
 > `/automate`) can triage **Workflow run completed** failures (including `ip-guard`)
 > and open a fix PR; computer use is available when you want a demo artifact.
+> **Inbox multi-PR sessions (2026-07-29):** when one chat opens several related PRs,
+> open every PR from the session — not only the last.
 
 ### Any MCP client
 
