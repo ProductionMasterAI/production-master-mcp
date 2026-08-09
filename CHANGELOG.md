@@ -7,15 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`.codex-version` — tracked Codex target release (0.147.0).** New root marker
+  recording the latest Codex release this server targets, mirroring
+  `.claude-code-version`, so supported-client updates are diffable and automatable.
+  Compatibility scope: nothing in the 0.147.0 delta changes the documented
+  `.codex/config.toml` stdio registration or the pass-through-auth design. Its one
+  protocol-facing item — an **opt-in** MCP 2026-07-28 protocol — is opt-in on the
+  host side and is noted here as a future consideration, not adopted: `packages/`
+  is still empty, so there is no server implementation to negotiate it. This is a
+  review of the release notes, not an end-to-end host test.
+
 ### Changed
 - **Cursor target pinned to 3.11** (changelog covered through **2026-08-03**) via
-  new root [`.cursor-version`](.cursor-version). README Cursor badge moves from
-  `pending` to **3.11**. Quick Start documents Customize-page MCP management (3.9+)
-  and Team MCP / team-marketplace distribution with org-group access (3.10+) for
-  the HTTP transport — no server-side change; registration remains client-side
-  pass-through auth.
+  new root [`.cursor-version`](.cursor-version). The 3.11 delta was reviewed against
+  the documented `.cursor/mcp.json` HTTP registration and the pass-through-auth
+  design and needs no server-side change. The README badge row tracks *validation*,
+  so Cursor's badge stays `pending` — nothing here is an end-to-end host test, and
+  no platform has cleared that axis. Quick Start documents Customize-page MCP
+  management (3.9+) and Team MCP / team-marketplace distribution with org-group
+  access (3.10+) for the HTTP transport.
 - **Cursor working tips** — side chats (3.11) for transport/auth debugging; Automations
   (3.8) for CI / `ip-guard` triage with optional computer-use demos.
+- **Claude Code target bumped to 2.1.226** (from 2.1.224) in `.claude-code-version`.
+  The 2.1.225 + 2.1.226 delta needs no server-side change: 2.1.226 is fix-only
+  ("bug fixes and reliability improvements"), and 2.1.225's two auth fixes are
+  client-side and produce 401s *elsewhere in the same session* that read like
+  server auth failures, so troubleshooting's 401 section now lists both to be
+  ruled out while keeping token validation as the answer to a Production Master
+  tool-call 401 — neither can cause one. The macOS keychain-timeout bug hit **MCP
+  OAuth** servers, and this server uses pass-through bearer auth; co-registered
+  OAuth servers 401ing alongside it is the shared symptom that points at the host.
+  The headless (`claude -p`) bug swapped a long-lived `CLAUDE_CODE_OAUTH_TOKEN`
+  for a short-lived one, and that credential authenticates Claude Code itself to
+  Anthropic — this server never sees it. The registration flows (`claude mcp add
+  --transport http` / stdio) and the pass-through design are unchanged.
+
 - **Claude Code target bumped to 2.1.224** (from 2.1.223) in `.claude-code-version`.
   The 2.1.224 delta is MCP-facing for once: it fixes MCP tools that connect
   mid-turn being deferred for tool search without their names announced to the

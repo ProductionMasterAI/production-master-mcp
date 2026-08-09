@@ -10,7 +10,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Claude%20Code-pending-lightgrey" alt="Claude Code: validation pending" />
-  <img src="https://img.shields.io/badge/Cursor-3.11-000000" alt="Cursor: 3.11" />
+  <img src="https://img.shields.io/badge/Cursor-pending-lightgrey" alt="Cursor: validation pending" />
   <img src="https://img.shields.io/badge/Codex-pending-lightgrey" alt="Codex: validation pending" />
   <img src="https://img.shields.io/badge/OpenCode-pending-lightgrey" alt="OpenCode: validation pending" />
 </p>

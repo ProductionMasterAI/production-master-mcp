@@ -10,6 +10,11 @@ Authentication is pass-through — the server forwards your `Authorization: Bear
 
 The token is missing or expired. Check that your MCP client is actually sending an `Authorization: Bearer <token>` header (HTTP) or is configured to pass your token (stdio), and that the token is current. Refresh it in your client and retry.
 
+**Validate the token first — neither of the following can produce a 401 on a Production Master tool call.** Two Claude Code 2.1.225 bugs cause 401s *elsewhere in the same session* and are easy to mistake for this one, so they are listed to be ruled out, not as an alternative diagnosis:
+
+- On macOS, a timed-out keychain read could make an **MCP OAuth** server fail with a burst of 401s as if never authenticated. This server uses pass-through bearer auth, not MCP OAuth, so it is not in that path — but if OAuth-based servers registered in the same session are 401ing too, that shared symptom is the host bug, and updating Claude Code fixes those entries. It does not explain a 401 on a Production Master tool call, which still means the bearer header is missing, wrong, or expired.
+- In headless (`claude -p`) runs, a transient 401 could replace a long-lived `CLAUDE_CODE_OAUTH_TOKEN` with a stored login's short-lived token, breaking the session until restart. That credential authenticates **Claude Code itself to Anthropic** — this server never sees it and never uses it. A CI job where the model's own requests start failing hit that bug; a CI job where only `production-master` tool calls 401 has a token problem, and the fix is to re-issue the bearer token and update the client configuration.
+
 ### Tool calls return `403`
 
 The token is valid but your account lacks access to the requested operation on the hosted service. Confirm your account has the needed access; the server cannot grant it — authorization is decided upstream.
