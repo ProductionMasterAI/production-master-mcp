@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Cursor currency (desktop 3.15.6).** `.cursor-version` keeps feature **3.11** / **2026-08-03** and records `desktop_cli: 3.15.6`. Docs note Agent Plugins + desktop `workspaceOpen`.
+
 ### Added
 - **`.codex-version` — tracked Codex target release (0.147.0).** New root marker
   recording the latest Codex release this server targets, mirroring

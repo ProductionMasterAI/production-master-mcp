@@ -41,7 +41,7 @@ the same entry from Cursor's **Customize** page (3.9+):
 > copying bearer headers by hand. Cursor pin: [`.cursor-version`](../../.cursor-version)
 > (`3.11`, changelog through 2026-08-03).
 >
-> **Working tips:** use a side chat (`/side` / `/btw`, 3.11) to debug transport shape
+> **Working tips:** feature pin **3.11** / **2026-08-03** (desktop CLI observed **3.15.6**). Optional desktop `workspaceOpen` hook can return `pluginPaths`. Cursor loads [Agent Plugins](https://agent-plugins.org) alongside Cursor Plugins. Use a side chat (`/side` / `/btw`, 3.11) to debug transport shape
 > or bearer headers without interrupting the main session. Cursor Automations (3.8,
 > `/automate`) can triage **Workflow run completed** failures (including `ip-guard`)
 > and open a fix PR; computer use is available when you want a demo artifact.
