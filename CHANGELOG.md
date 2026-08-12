@@ -30,6 +30,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cursor working tips** — side chats (3.11) for transport/auth debugging; Automations
   (3.8) for CI / `ip-guard` triage with optional computer-use demos; Inbox
   **multi-PR sessions** (2026-07-29).
+- **Claude Code target bumped to 2.1.228** (from 2.1.226) in `.claude-code-version`.
+  The 2.1.227 + 2.1.228 delta needs no server-side change — nothing in it touches
+  MCP transport, registration, or the pass-through-auth design this server
+  documents. Reviewed against this repo's surfaces: the 2.1.227
+  `claude-code-action` fix (Bash commands failing when `allowed_non_write_users` is
+  set on GitHub-hosted runners) does not affect `.github/workflows/claude.yml`,
+  which gates by author association and never sets that input; 2.1.228's
+  duplicate deferred-tools reminder fix is host-side and this server's tools were
+  never affected differently either way; and 2.1.228's Vertex AI credential
+  fail-fast concerns the host's own model credentials, not MCP bearer tokens —
+  a Production Master tool-call 401 still means the service token, as
+  troubleshooting already states. The rest of the delta (self-hosted-runner,
+  Remote Control, and cross-session-messaging fixes, a Write-tool rule change for
+  newer models, UI polish) is host-side with no server surface.
+
 - **Claude Code target bumped to 2.1.226** (from 2.1.224) in `.claude-code-version`.
   The 2.1.225 + 2.1.226 delta needs no server-side change: 2.1.226 is fix-only
   ("bug fixes and reliability improvements"), and 2.1.225's two auth fixes are
