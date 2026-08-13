@@ -39,9 +39,9 @@ the same entry from Cursor's **Customize** page (3.9+):
 > Team MCP and distribute it via a team marketplace (Dashboard → Integrations & MCP),
 > including org-group access controls. Members then install the approved server without
 > copying bearer headers by hand. Cursor pin: [`.cursor-version`](../../.cursor-version)
-> (`3.11`, changelog through 2026-08-03).
+> (`3.11`, changelog through 2026-08-13).
 >
-> **Working tips:** feature pin **3.11** / **2026-08-03** (desktop CLI observed **3.15.19**). Optional desktop `workspaceOpen` hook can return `pluginPaths`. Cursor loads [Agent Plugins](https://agent-plugins.org) alongside Cursor Plugins. Use a side chat (`/side` / `/btw`, 3.11) to debug transport shape
+> **Working tips:** feature pin **3.11** / **2026-08-13** (desktop CLI observed **3.15.19**). **Cloud Agent Builds (2026-08-13)** warm environment install snapshots — enable on the Cloud Agents dashboard Builds tab so MCP/server validation boots faster; put durable deps in `install`, fresh services in `start`. Optional desktop `workspaceOpen` hook can return `pluginPaths`. Cursor loads [Agent Plugins](https://agent-plugins.org) alongside Cursor Plugins. Use a side chat (`/side` / `/btw`, 3.11) to debug transport shape
 > or bearer headers without interrupting the main session. Cursor Automations (3.8,
 > `/automate`) can **delete memory files** from the UI (or when prompted) and can triage **Workflow run completed** failures (including `ip-guard`)
 > and open a fix PR; computer use is available when you want a demo artifact.
