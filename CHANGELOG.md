@@ -30,6 +30,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cursor working tips** — side chats (3.11) for transport/auth debugging; Automations
   (3.8) for CI / `ip-guard` triage with optional computer-use demos; Inbox
   **multi-PR sessions** (2026-07-29).
+- **Claude Code target bumped to 2.1.231** (from 2.1.228) in `.claude-code-version`.
+  The 2.1.229 + 2.1.231 delta (no 2.1.230 entry was published) needs no server-side
+  change — the entries closest to this server's domain are the two MCP OAuth fixes
+  (2.1.229 uses `127.0.0.1` instead of `localhost` in redirect URIs for strict
+  authorization servers; 2.1.231 fixes a redirect-URI mismatch for servers with
+  pre-registered OAuth clients, such as Slack), and both concern OAuth-flow MCP
+  servers on the client side. This server deliberately has no OAuth surface: auth
+  is a pass-through bearer header, exactly as quick-start documents, so nothing
+  here changes and the fixes simply make Claude Code a better-behaved client for
+  *other* servers registered alongside this one. Also reviewed: 2.1.229's SSE
+  keepalive pings apply to Claude Code's own model-gateway streaming (Vertex and
+  Bedrock upstreams), not to MCP Streamable HTTP transports, and the
+  self-hosted-runner `managed-mcp.json` fix (server-delivered MCP servers are now
+  skipped with a warning instead of exiting at startup) is host-side runner
+  behavior. The rest of the delta (terminal rendering and crash fixes, plugin
+  marketplace `command` sources, `/commit-push-pr` auto-approval tightening) has
+  no MCP transport, registration, or auth surface.
+
 - **Claude Code target bumped to 2.1.228** (from 2.1.226) in `.claude-code-version`.
   The 2.1.227 + 2.1.228 delta needs no server-side change — nothing in it touches
   MCP transport, registration, or the pass-through-auth design this server
