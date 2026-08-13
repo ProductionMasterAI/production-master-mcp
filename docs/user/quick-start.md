@@ -41,7 +41,7 @@ the same entry from Cursor's **Customize** page (3.9+):
 > copying bearer headers by hand. Cursor pin: [`.cursor-version`](../../.cursor-version)
 > (`3.11`, changelog through 2026-08-13).
 >
-> **Working tips:** feature pin **3.11** / **2026-08-13** (desktop CLI observed **3.15.19**). **Cloud Agent Builds (2026-08-13)** warm environment install snapshots — enable on the Cloud Agents dashboard Builds tab so MCP/server validation boots faster; put durable deps in `install`, fresh services in `start`. Optional desktop `workspaceOpen` hook can return `pluginPaths`. Cursor loads [Agent Plugins](https://agent-plugins.org) alongside Cursor Plugins. Use a side chat (`/side` / `/btw`, 3.11) to debug transport shape
+> **Working tips:** feature pin **3.11** / **2026-08-13** (desktop CLI observed **3.15.19**). Cursor CLI **Aug 11** sticky skills (Option+Enter) and installed-plugin hooks execution apply when debugging this server via `agent` / desktop CLI; no MCP-side change required. **Cloud Agent Builds (2026-08-13)** warm environment install snapshots — enable on the Cloud Agents dashboard Builds tab so MCP/server validation boots faster; put durable deps in `install`, fresh services in `start`. Optional desktop `workspaceOpen` hook can return `pluginPaths`. Cursor loads [Agent Plugins](https://agent-plugins.org) alongside Cursor Plugins. Use a side chat (`/side` / `/btw`, 3.11) to debug transport shape
 > or bearer headers without interrupting the main session. Cursor Automations (3.8,
 > `/automate`) can **delete memory files** from the UI (or when prompted) and can triage **Workflow run completed** failures (including `ip-guard`)
 > and open a fix PR; computer use is available when you want a demo artifact.
