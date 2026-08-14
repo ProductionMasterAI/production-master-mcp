@@ -30,6 +30,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cursor working tips** — side chats (3.11) for transport/auth debugging; Automations
   (3.8) for CI / `ip-guard` triage with optional computer-use demos; Inbox
   **multi-PR sessions** (2026-07-29).
+- **Claude Code target bumped to 2.1.232** (from 2.1.231) in `.claude-code-version`.
+  The 2.1.232 delta needs no server-side change, but one client-side fix is worth
+  a troubleshooting note, now added: before 2.1.232, an MCP server that failed to
+  answer — or answered with a malformed reply to — Claude Code's protocol-version
+  probe left the client hanging for the full 30-second connect timeout before
+  reporting failure; on 2.1.232+ the failure surfaces immediately with error text
+  in `claude mcp list`. Documented in `docs/user/troubleshooting.md` (Connectivity)
+  so a "registration hangs ~30s then fails" symptom is read as a client-version
+  answer, not a server bug. Rest of the delta reviewed and not applicable: the
+  GitLab token-redaction families and `glab` credential protections concern the
+  host's own shell/credential hygiene, not the pass-through bearer design (this
+  server's tokens are never GitLab-shaped and never logged either way); GitLab
+  plugin-marketplace sources, marketplace settings aliases
+  (`additionalMarketplaces`/`allowedMarketplaces`), and the
+  `/plugin install plugin@marketplace` refresh concern plugin distribution, which
+  this server does not use (it registers via `claude mcp add`, `.cursor/mcp.json`,
+  or `.codex/config.toml`); and the session-naming/`@`-mention, subagent-forking,
+  Remote Control, gateway-overlay, and sandbox `ripgrep`-override changes are all
+  host-side with no MCP transport, registration, or auth surface.
 - **Claude Code target bumped to 2.1.231** (from 2.1.228) in `.claude-code-version`.
   The 2.1.229 + 2.1.231 delta (no 2.1.230 entry was published) needs no server-side
   change — the entries closest to this server's domain are the two MCP OAuth fixes
