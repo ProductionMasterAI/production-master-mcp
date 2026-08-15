@@ -30,6 +30,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cursor working tips** — side chats (3.11) for transport/auth debugging; Automations
   (3.8) for CI / `ip-guard` triage with optional computer-use demos; Inbox
   **multi-PR sessions** (2026-07-29).
+- **Claude Code target bumped to 2.1.233** (from 2.1.232) in `.claude-code-version`.
+  The 2.1.233 delta's one MCP-facing item bears directly on this server's own
+  transport: before 2.1.233, an MCP v2 connection could have its
+  subscriptions/listen stream **endlessly reopened by the client on serverless
+  hosts** instead of settling after a normal reconnect, producing sustained
+  connection churn against a Streamable HTTP endpoint like `<server-url>/mcp`
+  rather than a one-off retry. Anyone running this server (or a fork of it)
+  behind a serverless runtime who sees an unexplained burst of `/mcp`
+  reconnects or elevated invocation counts from a Claude Code client should
+  read that as this client bug, not a server defect — updating to 2.1.233+
+  is the fix, not touching the server. Documented in
+  `docs/user/troubleshooting.md` (Connectivity). The rest of the delta is
+  host-side with no MCP transport, registration, or auth surface: GitLab
+  merge-request URL support for `--worktree` / `claude agents` is dev-tooling
+  UI; the opt-in `forward_user_identity` apps-gateway setting is model-gateway
+  spend attribution; the opt-in Bash memory-cgroup support and
+  `CLAUDE_CODE_WEBFETCH_CACHE_TTL_MS` are sandbox/tool-execution knobs
+  unrelated to MCP; and the Notification-hook fix concerns permission-prompt
+  hooks in Claude Desktop/VS Code, not tool calls to this server.
 - **Claude Code target bumped to 2.1.232** (from 2.1.231) in `.claude-code-version`.
   The 2.1.232 delta needs no server-side change, but one client-side fix is worth
   a troubleshooting note, now added: before 2.1.232, an MCP server that failed to
