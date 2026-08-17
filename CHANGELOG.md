@@ -30,6 +30,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cursor working tips** — side chats (3.11) for transport/auth debugging; Automations
   (3.8) for CI / `ip-guard` triage with optional computer-use demos; Inbox
   **multi-PR sessions** (2026-07-29).
+- **Claude Code target bumped to 2.1.233** (from 2.1.232) in `.claude-code-version`.
+  The 2.1.233 delta's one MCP-facing item bears directly on this server's own
+  transport: before 2.1.233, an MCP v2 connection could have its
+  subscriptions/listen stream **endlessly reopened by the client on serverless
+  hosts** instead of settling after a normal reconnect, producing sustained
+  connection churn against a Streamable HTTP endpoint like `<server-url>/mcp`
+  rather than a one-off retry. Anyone running this server (or a fork of it)
+  behind a serverless runtime who sees an unexplained burst of `/mcp`
+  reconnects or elevated invocation counts from a Claude Code client should
+  read that as this client bug, not a server defect — updating to 2.1.233+
+  is the fix, not touching the server. Documented in
+  `docs/user/troubleshooting.md` (Connectivity). The rest of the delta is
+  host-side with no MCP transport, registration, or auth surface: GitLab
+  merge-request URL support for `--worktree` / `claude agents` is dev-tooling
+  UI; the opt-in `forward_user_identity` apps-gateway setting is model-gateway
+  spend attribution; the opt-in Bash memory-cgroup support and
+  `CLAUDE_CODE_WEBFETCH_CACHE_TTL_MS` are sandbox/tool-execution knobs
+  unrelated to MCP; and the Notification-hook fix concerns permission-prompt
+  hooks in Claude Desktop/VS Code, not tool calls to this server.
+- **Claude Code target bumped to 2.1.232** (from 2.1.231) in `.claude-code-version`.
+  The 2.1.232 delta needs no server-side change, but one client-side fix is worth
+  a troubleshooting note, now added: before 2.1.232, an MCP server that failed to
+  answer — or answered with a malformed reply to — Claude Code's protocol-version
+  probe left the client hanging for the full 30-second connect timeout before
+  reporting failure; on 2.1.232+ the failure surfaces immediately with error text
+  in `claude mcp list`. Documented in `docs/user/troubleshooting.md` (Connectivity)
+  so a "registration hangs ~30s then fails" symptom is read as a client-version
+  answer, not a server bug. Rest of the delta reviewed and not applicable: the
+  GitLab token-redaction families and `glab` credential protections concern the
+  host's own shell/credential hygiene, not the pass-through bearer design (this
+  server's tokens are never GitLab-shaped and never logged either way); GitLab
+  plugin-marketplace sources, marketplace settings aliases
+  (`additionalMarketplaces`/`allowedMarketplaces`), and the
+  `/plugin install plugin@marketplace` refresh concern plugin distribution, which
+  this server does not use (it registers via `claude mcp add`, `.cursor/mcp.json`,
+  or `.codex/config.toml`); and the session-naming/`@`-mention, subagent-forking,
+  Remote Control, gateway-overlay, and sandbox `ripgrep`-override changes are all
+  host-side with no MCP transport, registration, or auth surface.
+- **Claude Code target bumped to 2.1.231** (from 2.1.228) in `.claude-code-version`.
+  The 2.1.229 + 2.1.231 delta (no 2.1.230 entry was published) needs no server-side
+  change — the entries closest to this server's domain are the two MCP OAuth fixes
+  (2.1.229 uses `127.0.0.1` instead of `localhost` in redirect URIs for strict
+  authorization servers; 2.1.231 fixes a redirect-URI mismatch for servers with
+  pre-registered OAuth clients, such as Slack), and both concern OAuth-flow MCP
+  servers on the client side. This server deliberately has no OAuth surface: auth
+  is a pass-through bearer header, exactly as quick-start documents, so nothing
+  here changes and the fixes simply make Claude Code a better-behaved client for
+  *other* servers registered alongside this one. Also reviewed: 2.1.229's SSE
+  keepalive pings apply to Claude Code's own model-gateway streaming (Vertex and
+  Bedrock upstreams), not to MCP Streamable HTTP transports, and the
+  self-hosted-runner `managed-mcp.json` fix (server-delivered MCP servers are now
+  skipped with a warning instead of exiting at startup) is host-side runner
+  behavior. The rest of the delta (terminal rendering and crash fixes, plugin
+  marketplace `command` sources, `/commit-push-pr` auto-approval tightening) has
+  no MCP transport, registration, or auth surface.
+
+- **Claude Code target bumped to 2.1.228** (from 2.1.226) in `.claude-code-version`.
+  The 2.1.227 + 2.1.228 delta needs no server-side change — nothing in it touches
+  MCP transport, registration, or the pass-through-auth design this server
+  documents. Reviewed against this repo's surfaces: the 2.1.227
+  `claude-code-action` fix (Bash commands failing when `allowed_non_write_users` is
+  set on GitHub-hosted runners) does not affect `.github/workflows/claude.yml`,
+  which gates by author association and never sets that input; 2.1.228's
+  duplicate deferred-tools reminder fix is host-side and this server's tools were
+  never affected differently either way; and 2.1.228's Vertex AI credential
+  fail-fast concerns the host's own model credentials, not MCP bearer tokens —
+  a Production Master tool-call 401 still means the service token, as
+  troubleshooting already states. The rest of the delta (self-hosted-runner,
+  Remote Control, and cross-session-messaging fixes, a Write-tool rule change for
+  newer models, UI polish) is host-side with no server surface.
+
 - **Claude Code target bumped to 2.1.226** (from 2.1.224) in `.claude-code-version`.
   The 2.1.225 + 2.1.226 delta needs no server-side change: 2.1.226 is fix-only
   ("bug fixes and reliability improvements"), and 2.1.225's two auth fixes are
