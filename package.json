@@ -15,11 +15,16 @@
   "scripts": {
     "build": "bash scripts/run-workspaces.sh build",
     "lint": "bash scripts/run-workspaces.sh lint",
+    "typecheck": "bash scripts/run-workspaces.sh typecheck",
     "test": "vitest run",
     "test:workspaces": "bash scripts/run-workspaces.sh test",
-    "clean": "rm -rf coverage dist"
+    "clean": "rm -rf coverage dist packages/*/dist"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^22.19.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4",
     "vitest": "^3.2.4"
   }
 }
