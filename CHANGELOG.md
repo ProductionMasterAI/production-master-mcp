@@ -7,7 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Troubleshooting: diagnostic-sharing note is version-scoped (Claude Code 2.1.234).**
+  "Still stuck?" now notes that Claude Code 2.1.234 fixes MCP diagnostic output
+  (`claude mcp list` output, session transcripts) that could previously leak
+  secrets from a session on the client side. The server's own never-log rule for
+  the forwarded bearer token is unaffected either way; redacting before sharing
+  stays the rule, not a version-gated exception.
+
 ### Changed
+- **Claude Code target bumped to 2.1.234** (from 2.1.233) in `.claude-code-version`.
+  The 2.1.234 delta's one MCP-facing item is a fix for MCP diagnostic output
+  leaking secrets on the client side — directly relevant context for a server
+  whose own hard rule is to never log or persist the forwarded bearer token (see
+  `AGENTS.md` §Hard constraints and `.claude/rules/constraints.md`). The fix
+  is entirely host-side: Claude Code's own diagnostic surfaces no longer risk
+  leaking session secrets, which makes sharing `claude mcp list` output or a
+  transcript when filing a Troubleshooting issue safer on 2.1.234+ than before —
+  this server never had the leak (it never logs the token on any version), but
+  the guidance to redact before sharing is now noted as belt-and-suspenders
+  rather than the only safeguard. Documented in `docs/user/troubleshooting.md`
+  (Still stuck?). Everything else in the delta is host-side with no MCP
+  transport, registration, or auth surface: `CLAUDE_CODE_PROJECT_DIR_NAME`
+  (per-project transcript directories), the `selection:clear` keybinding, the
+  GitLab MR footer/statusline badge, auto-continue on usage-limit reset,
+  account-email-only session identification, Windows NT-namespace path-read
+  hardening, Remote Control cross-session/org fixes and permission/model/effort
+  sync, `SendMessage`/`ListAgents` session-list fixes, transcript-markdown and
+  error-message polish, the claude-api skill's context-size reduction,
+  `/permissions` and `/add-dir` usable while Claude is working, `/goal`
+  (`GOAL_CHECKIN_MINUTES`), removal of the "Default teammate model" setting,
+  and background-task notifications moving to system-reminders — none touch the
+  documented `claude mcp add` registration flows or the pass-through-auth
+  design.
 - **Cursor Grok 4.6 + Builds T-1 readiness (2026-08-16).** Quick Start notes Grok 4.6 for long-running MCP debugging and T-1 Builds checklist before **2026-08-17** default. Pins stay **3.11** / **2026-08-13** / desktop **3.16.17**.
 - **Cursor desktop 3.16.17 + Builds skipped/staleness docs.** Desktop pin **3.15.19 → 3.16.17**; Quick Start notes Builds Skipped checks, 24h staleness default, and install/start/terminals. Feature/date pins stay **3.11** / **2026-08-13**.
 - **Cursor Builds Aug-17 readiness + CLI steer/`/goal`.** Quick Start notes enable-Builds-now (default **2026-08-17**), team/environment secrets for install, and CLI steer + durable `/goal` for local `agent` debugging (no server change). Pins stay **3.11** / **2026-08-13** / desktop **3.16.17**.
@@ -157,7 +189,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Troubleshooting: "connected but no tools" mid-turn case is version-scoped (Claude Code 2.1.224).**
   The transport-mismatch section now separates the config-shape cause from the
   Claude Code pre-2.1.224 bug where a server connecting mid-turn had its tools
-  deferred for tool search without their names announced to the model — a
+  deferred for tool search without their names ever announced to the model — a
   symptom that reads like a server-side tool-listing failure and is fixed by
   updating the client. Connectivity guidance also notes that since 2.1.224
   sandbox violation details appear in Bash tool results, so a sandboxed `curl`

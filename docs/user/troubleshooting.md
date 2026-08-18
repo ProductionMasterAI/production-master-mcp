@@ -56,4 +56,6 @@ If your client "connects but sees no tools" or "fails to start," the usual cause
 
 Open a GitHub issue with your MCP client and version, the transport you used (HTTP or stdio), the server version, and the redacted output or log excerpt. Never include tokens or service credentials.
 
+**Claude Code:** before 2.1.234, Claude Code's own MCP diagnostic output could leak secrets from a session. That was a host-side bug in Claude Code's diagnostics, not this server logging anything — the pass-through design already never logs the forwarded bearer token, on any version — but if you're on Claude Code 2.1.234+, pasting `claude mcp list` output or a session transcript into an issue is safer than it used to be. Redacting before you share is still the rule above, not a version-gated exception.
+
 **Cursor:** if the server shows as connected in Customize / MCP but the model never calls Production Master tools, confirm the entry is the HTTP shape (`url` + `Authorization` header) rather than a stdio `command`, and that the bearer token is current. Team-distributed Team MCPs (Cursor 3.10+) use the same pass-through auth — a stale team-installed token fails the same way as a hand-edited `mcp.json`.
