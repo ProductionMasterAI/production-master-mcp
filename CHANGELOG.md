@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Cursor 3.11 (+2026-08-19):** advance `changelog_date` **2026-08-17 → 2026-08-19** (desktop **3.16.29** unchanged). Document cloud-agent **Subscriptions**, **Custom Modes**, **isolated-VM subagents**, Agent Window **`/goal`**, and **non-interruptive steering** in Quick Start. No server-side change (protocol boundary only). Cursor-only; other platform nightlies untouched.
+
 ### Added
 - **Upstream relay hardening: one relay path, a real failure taxonomy, and a
   proven-non-leaking bearer (dev#644, AD-23).** Every `/v1/*` call now goes
