@@ -1,7 +1,7 @@
 {
   "name": "@production-master/mcp-tool-router",
   "version": "0.1.0",
-  "description": "Maps investigation.* MCP tool calls onto the Production Master public /v1/* REST API. Zero IP: validates arguments against the shared tool contract and forwards the caller's bearer opaquely; performs no scope decisions of its own (AD-23 \u00a75) \u2014 those are enforced server-side by the hosted service.",
+  "description": "Maps investigation.* MCP tool calls onto the Production Master public /v1/* REST API. Zero IP: validates arguments against the shared tool contract and forwards the caller's bearer opaquely; performs no scope decisions of its own \u2014 those are enforced server-side by the hosted service.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
