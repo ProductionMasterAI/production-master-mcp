@@ -1,8 +1,7 @@
 {
   "name": "@production-master/mcp",
   "version": "0.1.0",
-  "private": true,
-  "description": "Standard MCP server (Streamable HTTP + stdio) for the Production Master hosted incident-investigation service. Protocol boundary only — no investigation logic.",
+  "description": "Standard MCP server (Streamable HTTP + stdio) for the Production Master hosted incident-investigation service. Protocol boundary only \u2014 no investigation logic.",
   "type": "module",
   "bin": {
     "production-master-mcp": "./dist/bin.js"
@@ -17,19 +16,43 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "registry.npmjs.org"
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --config vitest.config.ts",
     "lint": "eslint src",
-    "dev": "npm run build && node dist/bin.js"
+    "dev": "npm run build && node dist/bin.js",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
     "@production-master/mcp-tool-contract": "^0.1.0",
-    "@production-master/mcp-tool-router": "0.1.0",
+    "@production-master/mcp-tool-router": "^0.1.0",
     "zod": "^3.24.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ProductionMasterAI/production-master-mcp.git",
+    "directory": "packages/mcp-server"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "incident-response",
+    "production-master"
+  ],
+  "license": "MIT",
+  "author": "Tamir Cohen <tamircohen2468@gmail.com>",
+  "homepage": "https://github.com/ProductionMasterAI/production-master-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/ProductionMasterAI/production-master-mcp/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "dist"
+  ]
 }

@@ -1,7 +1,7 @@
 import { createServer, type Server } from 'node:http';
 import { AddressInfo } from 'node:net';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { routeInvestigationTool } from './index.js';
+import { requestUpstream, routeInvestigationTool } from './index.js';
 
 /**
  * Seam test, not a mock-your-own-shape test: a real Node HTTP server stands
@@ -54,6 +54,14 @@ describe('routeInvestigationTool (seam: real HTTP against a stand-in /v1/* serve
         if (req.url === '/v1/runs/inv-1/events' && req.method === 'POST') {
           res.writeHead(200, { 'content-type': 'application/json' });
           res.end(JSON.stringify({ id: 'evt-99', accepted: true }));
+          return;
+        }
+        if (req.url === '/v1/runs/echo-auth') {
+          // Stands in for an upstream that reflects the Authorization header
+          // into its own error body — the realistic way a forwarded token
+          // could ride back out to the caller.
+          res.writeHead(500, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ error: 'internal', seen: req.headers.authorization }));
           return;
         }
         res.writeHead(404, { 'content-type': 'application/json' });
@@ -161,10 +169,37 @@ describe('routeInvestigationTool (seam: real HTTP against a stand-in /v1/* serve
     });
   });
 
-  it('surfaces a non-2xx upstream response as upstream_failed, not a silent empty success', async () => {
+  it('surfaces a non-2xx upstream response by status class, not as a silent empty success', async () => {
     const result = await routeInvestigationTool('user-token-abc', 'investigation.get_summary', {
       investigationId: 'inv-does-not-exist',
     });
-    expect(result).toMatchObject({ ok: false, error: 'upstream_failed' });
+    // Classified rather than lumped into one `upstream_failed`: a caller has
+    // to be able to tell "no such investigation" from "the service is down"
+    // without parsing prose. Both are `ok: false` — neither is ever an empty
+    // success.
+    expect(result).toMatchObject({ ok: false, status: 404, error: 'upstream_not_found' });
+  });
+
+  it('forwards the caller bearer even when a caller-supplied header tries to shadow it', async () => {
+    // `requestUpstream` is exported from a published package, so an outside
+    // consumer can pass its own headers. Pass-through must win: the token the
+    // relay was handed is the one that reaches upstream, always.
+    const result = await requestUpstream('user-token-abc', '/v1/runs/inv-1', {
+      headers: { authorization: 'Bearer attacker-substituted' },
+    });
+    expect(result.ok).toBe(true);
+    expect(received[0]?.authorization).toBe('Bearer user-token-abc');
+  });
+
+  it('relays an upstream error body but never the bearer the upstream echoed into it', async () => {
+    const result = await routeInvestigationTool('user-token-abc', 'investigation.get_summary', {
+      investigationId: 'echo-auth',
+    });
+    const serialised = JSON.stringify(result);
+    // The upstream's own detail survives, so the failure stays diagnosable...
+    expect(serialised).toContain('internal');
+    expect(serialised).toContain('[redacted]');
+    // ...but the credential does not.
+    expect(serialised).not.toContain('user-token-abc');
   });
 });

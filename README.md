@@ -21,7 +21,7 @@
 
 `production-master-mcp` speaks the [Model Context Protocol](https://modelcontextprotocol.io). It exposes the Production Master tool set to any MCP-capable client — Claude Code, Cursor, Codex, OpenCode, or anything else that speaks MCP — and relays each tool call to the hosted service. The intelligence runs on the service; this server is the protocol front door in front of it.
 
-Authentication is **pass-through**: the client supplies an `Authorization: Bearer <token>` header, the server forwards it opaquely to the hosted service, and it stores no credentials of its own. Tool input/output schemas come from the shared npm package [`@production-master/mcp-tool-contract`](#architecture) (publication pending), so every client sees the same, versioned tool surface.
+Authentication is **pass-through**: the client supplies an `Authorization: Bearer <token>` header, the server forwards it opaquely to the hosted service, and it stores no credentials of its own. Tool input/output schemas come from the shared npm package [`@production-master/mcp-tool-contract`](#architecture) (published on npm), so every client sees the same, versioned tool surface.
 
 ## Features
 

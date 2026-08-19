@@ -5,13 +5,27 @@ import {
   type InvestigationMcpToolName,
 } from '@production-master/mcp-tool-contract';
 import { getApiBaseUrl } from './config.js';
+import { requestUpstream, scrubToken, type UpstreamFailure } from './upstream.js';
+
+export {
+  requestUpstream,
+  scrubToken,
+  type UpstreamErrorCode,
+  type UpstreamFailure,
+  type UpstreamResult,
+} from './upstream.js';
 
 /**
- * Result of routing one `investigation.*` tool call. Mirrors the shape the
- * hosted service's own inbound MCP route already returns from
- * `routeInvestigationTool` (AD-23 extraction source
- * `production-master-service/serverless/edge-mcp-session/src/tool-router.ts`)
- * so this public router is a drop-in protocol equivalent, not a new design.
+ * Result of routing one `investigation.*` tool call.
+ *
+ * This is a wire-compatible shape, not a new design: the hosted Production
+ * Master service accepts MCP tool calls directly on its own endpoint and
+ * answers with this same discriminated union, so a client can switch between
+ * talking to the service directly and talking to it through this relay
+ * without changing how it reads a result. Treat the union as the contract —
+ * `ok: true` carries `content`; `ok: false` always carries a numeric `status`
+ * and a machine-readable `error`, never an empty success. Changing either arm
+ * is a breaking change for both paths.
  */
 export type ToolCallResult =
   | { ok: true; content: unknown }
@@ -39,26 +53,20 @@ function requireInvestigationId(args: Record<string, unknown>): string | ToolCal
   return id;
 }
 
-async function apiFetch(bearer: string, path: string, init?: RequestInit): Promise<Response> {
-  return fetch(`${getApiBaseUrl()}${path}`, {
-    ...init,
-    headers: {
-      'content-type': 'application/json',
-      // Opaque-bearer forwarding (AD-23 §5): this server never inspects or
-      // verifies the token, it only relays it. The hosted service is the one
-      // party that resolves identity and enforces investigation/mutate
-      // scope — duplicating that check here would need `PM_JWT_SECRET`,
-      // which this public, zero-secret repo must never hold.
-      authorization: `Bearer ${bearer}`,
-      ...(init?.headers ?? {}),
-    },
-  });
+/** An {@link UpstreamFailure} is already the failure half of {@link ToolCallResult}. */
+function relayFailure(failure: UpstreamFailure): ToolCallResult {
+  return failure;
 }
 
 /**
  * Routes one `investigation.*` tool call to the hosted service's public
  * `/v1/*` REST + SSE surface. Performs local argument validation only —
  * no authorization decision is made here (opaque-bearer forwarding, AD-23).
+ *
+ * Every upstream failure — a non-2xx, an unreachable host, a non-JSON body —
+ * comes back as a distinct `ok: false` code. None of them is ever reported as
+ * an empty success: a caller must always be able to tell "there is nothing
+ * here" from "the relay could not find out".
  *
  * @param bearer the caller's own `mcp_session` bearer token, forwarded as-is
  * @param wireName the tool name as sent on the wire, e.g. `investigation.get_summary`
@@ -78,21 +86,37 @@ export async function routeInvestigationTool(
 
   const parsed = investigationMcpToolSchemas[short].safeParse(args);
   if (!parsed.success) {
-    return { ok: false, status: 400, error: 'invalid_arguments', message: parsed.error.message };
+    return {
+      ok: false,
+      status: 400,
+      error: 'invalid_arguments',
+      // Scrubbed like every other outbound string: a caller can put anything
+      // in an argument, including a token, and zod quotes the offending value.
+      message: scrubToken(parsed.error.message, bearer),
+    };
   }
 
   const invCheck = requireInvestigationId(args);
   if (typeof invCheck !== 'string') return invCheck;
   const investigationId = invCheck;
+  const runPath = `/v1/runs/${encodeURIComponent(investigationId)}`;
 
   const headers: Record<string, string> = {};
   if (idempotencyKey) headers['idempotency-key'] = idempotencyKey;
 
+  /** POST an event to the run's event log — the shared shape behind eight tools. */
+  const postEvent = (body: Record<string, unknown>) =>
+    requestUpstream<Record<string, unknown>>(bearer, `${runPath}/events`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+
   switch (short) {
     case 'get_summary': {
-      const res = await apiFetch(bearer, `/v1/runs/${encodeURIComponent(investigationId)}`);
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
-      const run = (await res.json()) as Record<string, unknown>;
+      const res = await requestUpstream<Record<string, unknown>>(bearer, runPath);
+      if (!res.ok) return relayFailure(res);
+      const run = res.data;
       return {
         ok: true,
         content: {
@@ -106,36 +130,35 @@ export async function routeInvestigationTool(
     }
     case 'list_evidence':
     case 'get_event_log': {
-      const res = await apiFetch(
+      const res = await requestUpstream<{ items?: unknown[] }>(
         bearer,
-        `/v1/runs/${encodeURIComponent(investigationId)}/events?limit=200`,
+        `${runPath}/events?limit=200`,
       );
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
-      const body = (await res.json()) as { items?: unknown[] };
-      return { ok: true, content: { items: body.items ?? [] } };
+      if (!res.ok) return relayFailure(res);
+      return { ok: true, content: { items: res.data.items ?? [] } };
     }
     case 'get_evidence': {
       const evidenceId = String((parsed.data as { evidenceId: string }).evidenceId);
-      const res = await apiFetch(
+      const res = await requestUpstream<{ items?: Array<Record<string, unknown>> }>(
         bearer,
-        `/v1/runs/${encodeURIComponent(investigationId)}/events?limit=500`,
+        `${runPath}/events?limit=500`,
       );
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
-      const body = (await res.json()) as { items?: Array<Record<string, unknown>> };
-      const hit = (body.items ?? []).find((e) => {
+      if (!res.ok) return relayFailure(res);
+      const hit = (res.data.items ?? []).find((e) => {
         const rowId = typeof e.id === 'string' ? e.id : '';
         const data = e.data as { evidenceId?: unknown } | undefined;
         const dataId = typeof data?.evidenceId === 'string' ? data.evidenceId : '';
         return rowId === evidenceId || dataId === evidenceId;
       });
+      // A genuine "not in this log" — distinct from `upstream_not_found`,
+      // which would mean the relay never got a log to search.
       if (!hit) return { ok: false, status: 404, error: 'NOT_FOUND' };
       return { ok: true, content: hit };
     }
     case 'list_hypotheses': {
-      const res = await apiFetch(bearer, `/v1/runs/${encodeURIComponent(investigationId)}`);
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
-      const run = (await res.json()) as { hypotheses?: unknown[] };
-      return { ok: true, content: { items: run.hypotheses ?? [] } };
+      const res = await requestUpstream<{ hypotheses?: unknown[] }>(bearer, runPath);
+      if (!res.ok) return relayFailure(res);
+      return { ok: true, content: { items: res.data.hypotheses ?? [] } };
     }
     case 'get_hypothesis':
       // Mirrors the hosted service's own router: there is no dedicated
@@ -147,20 +170,20 @@ export async function routeInvestigationTool(
         content: { hypothesisId: (parsed.data as { hypothesisId: string }).hypothesisId },
       };
     case 'list_actions': {
-      const res = await apiFetch(
+      const res = await requestUpstream(
         bearer,
         `/v1/actions?runId=${encodeURIComponent(investigationId)}`,
       );
-      if (!res.ok) return { ok: true, content: { items: [] } };
-      return { ok: true, content: await res.json() };
+      // Previously a non-2xx here returned `{ ok: true, items: [] }`, which
+      // made a broken or unauthorised upstream indistinguishable from an
+      // investigation that genuinely has no actions. Surface the failure.
+      if (!res.ok) return relayFailure(res);
+      return { ok: true, content: res.data };
     }
     case 'list_snapshots': {
-      const res = await apiFetch(
-        bearer,
-        `/v1/runs/${encodeURIComponent(investigationId)}/snapshots`,
-      );
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
-      return { ok: true, content: await res.json() };
+      const res = await requestUpstream(bearer, `${runPath}/snapshots`);
+      if (!res.ok) return relayFailure(res);
+      return { ok: true, content: res.data };
     }
     case 'add_evidence':
     case 'add_correction':
@@ -171,45 +194,37 @@ export async function routeInvestigationTool(
           : short === 'add_correction'
             ? 'add_correction'
             : 'comment';
-      const res = await apiFetch(
-        bearer,
-        `/v1/runs/${encodeURIComponent(investigationId)}/events`,
-        {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ type, ...(parsed.data as Record<string, unknown>) }),
-        },
-      );
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
-      return { ok: true, content: await res.json() };
+      const res = await postEvent({ type, ...(parsed.data as Record<string, unknown>) });
+      if (!res.ok) return relayFailure(res);
+      return { ok: true, content: res.data };
     }
     case 'create_snapshot': {
-      const res = await apiFetch(
-        bearer,
-        `/v1/runs/${encodeURIComponent(investigationId)}/snapshots`,
-        { method: 'POST', headers, body: JSON.stringify(parsed.data) },
-      );
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
-      return { ok: true, content: await res.json() };
-    }
-    case 'fork': {
-      const res = await apiFetch(bearer, `/v1/runs/${encodeURIComponent(investigationId)}/fork`, {
+      const res = await requestUpstream(bearer, `${runPath}/snapshots`, {
         method: 'POST',
         headers,
         body: JSON.stringify(parsed.data),
       });
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
-      return { ok: true, content: await res.json() };
+      if (!res.ok) return relayFailure(res);
+      return { ok: true, content: res.data };
+    }
+    case 'fork': {
+      const res = await requestUpstream(bearer, `${runPath}/fork`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(parsed.data),
+      });
+      if (!res.ok) return relayFailure(res);
+      return { ok: true, content: res.data };
     }
     case 'rerun_from_phase': {
       const phaseId = (parsed.data as { phaseId: string }).phaseId;
-      const res = await apiFetch(
-        bearer,
-        `/v1/runs/${encodeURIComponent(investigationId)}/rerun`,
-        { method: 'POST', headers, body: JSON.stringify({ fromPhase: phaseId }) },
-      );
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
-      return { ok: true, content: await res.json() };
+      const res = await requestUpstream(bearer, `${runPath}/rerun`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ fromPhase: phaseId }),
+      });
+      if (!res.ok) return relayFailure(res);
+      return { ok: true, content: res.data };
     }
     case 'correct_evidence': {
       // AD-27 rule 3, defense in depth: reject a closed-patch-scope violation
@@ -223,40 +238,22 @@ export async function routeInvestigationTool(
       const { investigationId: _inv, ...eventPayload } = parsed.data as Record<string, unknown> & {
         investigationId?: string;
       };
-      const res = await apiFetch(
-        bearer,
-        `/v1/runs/${encodeURIComponent(investigationId)}/events`,
-        { method: 'POST', headers, body: JSON.stringify({ type: short, ...eventPayload }) },
-      );
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
-      return {
-        ok: true,
-        content: { accepted: true, updated: true, ...((await res.json()) as Record<string, unknown>) },
-      };
+      const res = await postEvent({ type: short, ...eventPayload });
+      if (!res.ok) return relayFailure(res);
+      return { ok: true, content: { accepted: true, updated: true, ...res.data } };
     }
     case 'invalidate_evidence':
     case 'invalidate_hypothesis': {
       const { investigationId: _inv, ...eventPayload } = parsed.data as Record<string, unknown> & {
         investigationId?: string;
       };
-      const res = await apiFetch(
-        bearer,
-        `/v1/runs/${encodeURIComponent(investigationId)}/events`,
-        { method: 'POST', headers, body: JSON.stringify({ type: short, ...eventPayload }) },
-      );
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
-      return {
-        ok: true,
-        content: { accepted: true, updated: true, ...((await res.json()) as Record<string, unknown>) },
-      };
+      const res = await postEvent({ type: short, ...eventPayload });
+      if (!res.ok) return relayFailure(res);
+      return { ok: true, content: { accepted: true, updated: true, ...res.data } };
     }
     case 'resume': {
-      const res = await apiFetch(
-        bearer,
-        `/v1/runs/${encodeURIComponent(investigationId)}/events`,
-        { method: 'POST', headers, body: JSON.stringify({ type: 'resume' }) },
-      );
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
+      const res = await postEvent({ type: 'resume' });
+      if (!res.ok) return relayFailure(res);
       return { ok: true, content: { accepted: true, note: 'resume signal queued', investigationId } };
     }
     case 'get_agent_prompt': {
@@ -266,15 +263,22 @@ export async function routeInvestigationTool(
       const agentId = invocationId.includes(':')
         ? invocationId.slice(invocationId.lastIndexOf(':') + 1)
         : invocationId;
-      const res = await apiFetch(
+      const res = await requestUpstream(
         bearer,
-        `/v1/runs/${encodeURIComponent(investigationId)}/agent-prompt/${encodeURIComponent(agentId)}`,
+        `${runPath}/agent-prompt/${encodeURIComponent(agentId)}`,
       );
-      if (res.status === 404) {
-        return { ok: false, status: 404, error: 'NOT_FOUND', message: `no prompt for agent id "${agentId}"` };
+      if (!res.ok) {
+        if (res.status === 404) {
+          return {
+            ok: false,
+            status: 404,
+            error: 'NOT_FOUND',
+            message: `no prompt for agent id "${agentId}"`,
+          };
+        }
+        return relayFailure(res);
       }
-      if (!res.ok) return { ok: false, status: res.status, error: 'upstream_failed' };
-      return { ok: true, content: await res.json() };
+      return { ok: true, content: res.data };
     }
     case 'subscribe': {
       return {

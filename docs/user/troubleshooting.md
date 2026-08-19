@@ -35,7 +35,20 @@ For the Streamable HTTP transport the client posts to `<server-url>/mcp`. Verify
 
 ### Calls reach the server but fail upstream
 
-If the server is reachable but every tool call errors, the server may not be able to reach the hosted service. The upstream endpoint is configured for the server; those configuration specifics are defined as the packages land. Check the server's logs (never the tokens — those are never logged) for an upstream connection error.
+If the server is reachable but tool calls fail, the failure happened between the server and the hosted service. Every such failure comes back as a tool error with a specific `error` code, so you can tell the causes apart instead of guessing — and none of them is ever reported as an empty-but-successful result:
+
+| `error` | Means | What to do |
+|---|---|---|
+| `upstream_unauthorized` | The hosted service rejected your token (HTTP 401). | Mint a fresh token; check the client is sending the one you think it is. |
+| `upstream_forbidden` | The token is valid but lacks scope for that call (HTTP 403). | Check the token's scope for the investigation you're addressing. |
+| `upstream_not_found` | The hosted service has no such investigation or resource (HTTP 404). | Check the `investigationId`. |
+| `upstream_rate_limited` | You are being throttled (HTTP 429). | Back off and retry. |
+| `upstream_failed` | The hosted service returned some other non-2xx. | The `message` carries the service's own detail. |
+| `upstream_unreachable` | The server could not open a connection at all (DNS, refused, timeout). | Check `PM_API_URL` and network egress from wherever the server runs. |
+| `upstream_invalid_response` | A 2xx whose body was not valid JSON — usually a proxy or captive portal answering instead of the API. | Check `PM_API_URL` points at the API, not a gateway. |
+| `relay_error` | The server itself threw while relaying. | Report it (see below); include the `message`. |
+
+An `upstream_*` error's `message` may quote the hosted service's own error body to keep the failure diagnosable. Your bearer token is stripped out of that text before you ever see it — if the upstream ever echoed your `Authorization` header back into an error, it reaches you as `[redacted]`. The server also never writes the token to its logs; server logs record a failed request's method and path only, never its headers.
 
 ## Node version
 

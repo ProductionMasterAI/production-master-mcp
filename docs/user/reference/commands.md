@@ -19,7 +19,7 @@ The Streamable HTTP transport follows the MCP standard: MCP JSON-RPC messages ar
 
 | Item | Value |
 |------|-------|
-| Source of truth | `@production-master/mcp-tool-contract` (publication pending) |
+| Source of truth | `@production-master/mcp-tool-contract` (published on npm) |
 | Discovery | standard MCP tool-listing call — your client shows the current set on connect |
 | Names & schemas | defined by the contract package; versioned there, not in this repo |
 

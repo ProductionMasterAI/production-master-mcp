@@ -1,6 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { scrubToken } from '@production-master/mcp-tool-router';
 import { registerInvestigationTools } from './register-tools.js';
 import { getHttpPort } from './config.js';
 
@@ -50,8 +51,29 @@ async function handleMcpPost(req: IncomingMessage, res: ServerResponse): Promise
     void transport.close();
     void server.close();
   });
-  await server.connect(transport);
-  await transport.handleRequest(req, res);
+  try {
+    await server.connect(transport);
+    await transport.handleRequest(req, res);
+  } catch (error: unknown) {
+    // Caught here, where the bearer is in scope, rather than in the caller:
+    // this is the only frame that can scrub it out of a message originating
+    // in the transport. Nothing about the request other than its method and
+    // path is logged — never the headers, which is where the token lives.
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(
+      `production-master-mcp: POST /mcp failed: ${scrubToken(message, bearer)}`,
+    );
+    if (!res.headersSent) {
+      res.writeHead(500, { 'content-type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          jsonrpc: '2.0',
+          error: { code: -32603, message: 'Internal server error' },
+          id: null,
+        }),
+      );
+    }
+  }
 }
 
 function methodNotAllowed(res: ServerResponse): void {
@@ -74,7 +96,11 @@ export function createHttpServer(): Server {
     }
     if (req.method === 'POST') {
       handleMcpPost(req, res).catch((error: unknown) => {
-        console.error('production-master-mcp: error handling /mcp request', error);
+        // Only reachable before a bearer has been read (there is no token to
+        // leak yet); everything after that point is handled inside
+        // `handleMcpPost`, where the bearer is in scope to be scrubbed.
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(`production-master-mcp: /mcp request rejected: ${message}`);
         if (!res.headersSent) {
           res.writeHead(500, { 'content-type': 'application/json' });
           res.end(

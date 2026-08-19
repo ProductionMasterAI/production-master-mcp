@@ -8,6 +8,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Upstream relay hardening: one relay path, a real failure taxonomy, and a
+  proven-non-leaking bearer (dev#644, AD-23).** Every `/v1/*` call now goes
+  through a single `requestUpstream` in `packages/mcp-tool-router`, which is
+  where the pass-through-auth contract and the failure taxonomy are stated
+  once instead of being restated by each of the twenty tools. Upstream
+  failures are classified — `upstream_unauthorized`, `upstream_forbidden`,
+  `upstream_not_found`, `upstream_rate_limited`, `upstream_failed`,
+  `upstream_unreachable`, `upstream_invalid_response` — so a caller can tell
+  "no such investigation" from "the service is down" without parsing prose.
+  Documented for users in `docs/user/troubleshooting.md`.
+- **Relay seam tests (`packages/mcp-server/src/relay.test.ts`).** Eight tests
+  drive the real MCP SDK `Client` through the real HTTP transport and router
+  against a stand-in upstream, asserting the three properties neither side
+  can show alone: the caller's credential reaches upstream unmodified, it
+  appears in no log line and no tool result even when the upstream echoes it
+  back, and an upstream failure is distinguishable from a legitimate empty
+  result. Suite is 26 tests (was 16).
+- **Both server packages are publishable.** `@production-master/mcp` and
+  `@production-master/mcp-tool-router` carry `repository`, `license`,
+  `files`, `engines`, and `prepublishOnly`; both had `private: true`, which
+  would have made `npm publish` a no-op, and `@production-master/mcp`
+  depended on a workspace package that could never resolve for an outside
+  installer.
+
+### Fixed
+- **Removed internal identifiers left in this PUBLIC repo (Hard rule 15).** Four
+  references named private-side things an outside reader cannot see and should not
+  need: a private-repo source path in the `ToolCallResult` doc comment, a
+  server-side signing-secret variable name in an `upstream.ts` comment, a private
+  cockpit doc path in `AGENTS.md`, and a dead `CHANGELOG` link to engineering docs
+  that PR #5 had already removed. Each is rewritten to state the contract or the
+  rule in terms a contributor here can act on. `ip-guard` passed on all four: its
+  denylist is a finite list of known spellings, so it reports that nothing on the
+  list is present, not that nothing internal is.
+
+- **`list_actions` no longer reports an upstream failure as an empty action
+  list.** Any non-2xx from `/v1/actions` returned `{ items: [] }` with
+  `ok: true`, making a broken, throttled, or unauthorised upstream
+  indistinguishable from an investigation that genuinely has no actions. It
+  now surfaces the failure. Covered by a regression test that was confirmed
+  to fail against the old behaviour. The mirror-image case is handled too: a
+  legitimate `204 No Content` stays an empty *success* rather than becoming a
+  false alarm.
+- **Transport-level failures no longer escape as raw throws.** A refused or
+  unresolvable upstream rejected out of `fetch` and propagated through the
+  tool handler as an SDK protocol error carrying an arbitrary message from a
+  layer this server does not control. It is now caught and reported as
+  `upstream_unreachable`, and the tool handler has a backstop so nothing
+  escapes unclassified. A 2xx with a non-JSON body — a proxy answering
+  instead of the API — is likewise a failure rather than an empty result.
+- **The forwarded bearer cannot ride out inside an upstream error body.**
+  Relayed upstream detail is scrubbed of the caller's token before it reaches
+  a tool result or a log line, so an upstream that reflects the
+  `Authorization` header into its own error output cannot leak the credential
+  into a client transcript. Server error logs now record a failed request's
+  method and path only, never the error object, which is where request
+  headers could have been reachable.
+- **Pass-through auth can no longer be shadowed by a caller-supplied header.**
+  `requestUpstream` sets `authorization` last, so an `init.headers`
+  `authorization` cannot displace the token the relay was handed. This
+  matters now that `@production-master/mcp-tool-router` is published and has
+  consumers outside this repo.
+
+### Changed
+- **Docs no longer say `@production-master/mcp-tool-contract` is
+  "publication pending".** It is published on npm at `0.1.0` and is consumed
+  from the public registry; the stale claim appeared in `README.md`,
+  `AGENTS.md`, `.claude/rules/constraints.md`, and two user docs.
+
 - **Troubleshooting: diagnostic-sharing note is version-scoped (Claude Code 2.1.234).**
   "Still stuck?" now notes that Claude Code 2.1.234 fixes MCP diagnostic output
   (`claude mcp list` output, session transcripts) that could previously leak
@@ -239,7 +308,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial public scaffold of the MCP server repository: README, documentation tree, contributing guide, and CI.
-- Documented the standard-MCP-server-over-hosted-service architecture ([ADR-001](docs/engineering/decisions/ADR-001-initial-architecture.md)): Streamable HTTP (`POST /mcp`) and stdio transports, opaque bearer pass-through, tool schemas from `@production-master/mcp-tool-contract`.
+- Documented the standard-MCP-server-over-hosted-service architecture: Streamable HTTP (`POST /mcp`) and stdio transports, opaque bearer pass-through, tool schemas from `@production-master/mcp-tool-contract`.
 - Empty npm workspaces layout (`packages/*`) ready to be populated.
 
 [Unreleased]: https://github.com/ProductionMasterAI/production-master-mcp/compare/v0.1.0...HEAD

@@ -32,7 +32,7 @@ tool set to any MCP-capable client. It is a protocol boundary and nothing more.
 | `.github/` | CI workflows, issue/PR templates, Dependabot config |
 
 TypeScript, npm **workspaces** (`packages/*`). Tool input/output schemas are consumed
-from the shared npm package `@production-master/mcp-tool-contract` (publication pending),
+from the shared npm package `@production-master/mcp-tool-contract` (published on npm),
 never redefined here.
 
 ## Build & verify
@@ -129,5 +129,6 @@ dependency.
 
 The repo follows [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html). Record every
 user-facing change in the root [`CHANGELOG.md`](CHANGELOG.md) under `## [Unreleased]`
-as part of the PR that makes the change. The full versioning policy lives in the
-private cockpit repo (`docs/engineering/mcp-server/`), not here.
+as part of the PR that makes the change. The full versioning policy is maintained
+privately and is not part of this repo; SemVer plus the changelog rule above is the
+whole of what a contributor here needs.
