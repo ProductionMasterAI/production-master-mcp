@@ -18,13 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `upstream_unreachable`, `upstream_invalid_response` — so a caller can tell
   "no such investigation" from "the service is down" without parsing prose.
   Documented for users in `docs/user/troubleshooting.md`.
-- **Relay seam tests (`packages/mcp-server/src/relay.test.ts`).** Seven tests
+- **Relay seam tests (`packages/mcp-server/src/relay.test.ts`).** Eight tests
   drive the real MCP SDK `Client` through the real HTTP transport and router
   against a stand-in upstream, asserting the three properties neither side
   can show alone: the caller's credential reaches upstream unmodified, it
   appears in no log line and no tool result even when the upstream echoes it
   back, and an upstream failure is distinguishable from a legitimate empty
-  result. Suite is 24 tests (was 16).
+  result. Suite is 26 tests (was 16).
 - **Both server packages are publishable.** `@production-master/mcp` and
   `@production-master/mcp-tool-router` carry `repository`, `license`,
   `files`, `engines`, and `prepublishOnly`; both had `private: true`, which
@@ -33,6 +33,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   installer.
 
 ### Fixed
+- **Removed internal identifiers left in this PUBLIC repo (Hard rule 15).** Four
+  references named private-side things an outside reader cannot see and should not
+  need: a private-repo source path in the `ToolCallResult` doc comment, a
+  server-side signing-secret variable name in an `upstream.ts` comment, a private
+  cockpit doc path in `AGENTS.md`, and a dead `CHANGELOG` link to engineering docs
+  that PR #5 had already removed. Each is rewritten to state the contract or the
+  rule in terms a contributor here can act on. `ip-guard` passed on all four: its
+  denylist is a finite list of known spellings, so it reports that nothing on the
+  list is present, not that nothing internal is.
+
 - **`list_actions` no longer reports an upstream failure as an empty action
   list.** Any non-2xx from `/v1/actions` returned `{ items: [] }` with
   `ok: true`, making a broken, throttled, or unauthorised upstream
@@ -298,7 +308,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial public scaffold of the MCP server repository: README, documentation tree, contributing guide, and CI.
-- Documented the standard-MCP-server-over-hosted-service architecture ([ADR-001](docs/engineering/decisions/ADR-001-initial-architecture.md)): Streamable HTTP (`POST /mcp`) and stdio transports, opaque bearer pass-through, tool schemas from `@production-master/mcp-tool-contract`.
+- Documented the standard-MCP-server-over-hosted-service architecture: Streamable HTTP (`POST /mcp`) and stdio transports, opaque bearer pass-through, tool schemas from `@production-master/mcp-tool-contract`.
 - Empty npm workspaces layout (`packages/*`) ready to be populated.
 
 [Unreleased]: https://github.com/ProductionMasterAI/production-master-mcp/compare/v0.1.0...HEAD

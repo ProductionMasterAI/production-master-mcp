@@ -127,9 +127,9 @@ export async function requestUpstream<T = unknown>(
         ...(init.headers ?? {}),
         // Opaque-bearer forwarding (AD-23 §5): this server never inspects or
         // verifies the token, it only relays it. The hosted service is the
-        // one party that resolves identity and enforces investigation/mutate
-        // scope — duplicating that check here would need `PM_JWT_SECRET`,
-        // which this public, zero-secret repo must never hold.
+        // one party that resolves identity and enforces investigation and
+        // mutate scope — verifying the token here would require the signing
+        // secret, which this public, zero-secret package must never hold.
         //
         // Set last so it cannot be shadowed by a caller-supplied header.
         // This package is published, so `requestUpstream` has consumers

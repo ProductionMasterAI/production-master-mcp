@@ -16,11 +16,16 @@ export {
 } from './upstream.js';
 
 /**
- * Result of routing one `investigation.*` tool call. Mirrors the shape the
- * hosted service's own inbound MCP route already returns from
- * `routeInvestigationTool` (AD-23 extraction source
- * `production-master-service/serverless/edge-mcp-session/src/tool-router.ts`)
- * so this public router is a drop-in protocol equivalent, not a new design.
+ * Result of routing one `investigation.*` tool call.
+ *
+ * This is a wire-compatible shape, not a new design: the hosted Production
+ * Master service accepts MCP tool calls directly on its own endpoint and
+ * answers with this same discriminated union, so a client can switch between
+ * talking to the service directly and talking to it through this relay
+ * without changing how it reads a result. Treat the union as the contract —
+ * `ok: true` carries `content`; `ok: false` always carries a numeric `status`
+ * and a machine-readable `error`, never an empty success. Changing either arm
+ * is a breaking change for both paths.
  */
 export type ToolCallResult =
   | { ok: true; content: unknown }

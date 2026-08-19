@@ -129,5 +129,6 @@ dependency.
 
 The repo follows [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html). Record every
 user-facing change in the root [`CHANGELOG.md`](CHANGELOG.md) under `## [Unreleased]`
-as part of the PR that makes the change. The full versioning policy lives in the
-private cockpit repo (`docs/engineering/mcp-server/`), not here.
+as part of the PR that makes the change. The full versioning policy is maintained
+privately and is not part of this repo; SemVer plus the changelog rule above is the
+whole of what a contributor here needs.
