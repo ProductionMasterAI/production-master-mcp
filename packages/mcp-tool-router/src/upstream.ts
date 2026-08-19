@@ -155,6 +155,14 @@ export async function requestUpstream<T = unknown>(
     };
   }
 
+  // A 204, or any 2xx with no body, is a legitimate empty *success* — the
+  // one case where "nothing came back" is the honest answer rather than a
+  // masked failure. Classifying it as a broken response would be the same
+  // defect in the other direction: a false alarm on a healthy upstream.
+  if (res.status === 204 || res.headers.get('content-length') === '0') {
+    return { ok: true, data: {} as T };
+  }
+
   try {
     return { ok: true, data: (await res.json()) as T };
   } catch {

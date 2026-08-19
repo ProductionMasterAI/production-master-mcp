@@ -197,6 +197,21 @@ describe('upstream relay (seam: real MCP client -> transport -> router -> stand-
     expect(consoleOutput.join('\n')).not.toContain(CALLER_TOKEN);
   });
 
+  it('accepts a legitimate 204 as an empty success rather than a broken response', async () => {
+    // The mirror image of the silent-empty defect: a genuinely empty answer
+    // must not be raised as a false alarm. 204 is the one case where
+    // "nothing came back" is the honest result.
+    respond = () => ({ status: 204, body: '' });
+
+    const result = await callTool('add_comment', {
+      investigationId: 'inv-1',
+      body: 'looks right',
+    });
+
+    expect(result.isError).not.toBe(true);
+    expect(upstreamCalls[0]?.authorization).toBe(`Bearer ${CALLER_TOKEN}`);
+  });
+
   it('reports a non-JSON 200 from the upstream as a broken response, not an empty one', async () => {
     respond = () => ({ status: 200, body: '<html>gateway</html>' });
 

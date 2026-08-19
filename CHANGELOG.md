@@ -38,7 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ok: true`, making a broken, throttled, or unauthorised upstream
   indistinguishable from an investigation that genuinely has no actions. It
   now surfaces the failure. Covered by a regression test that was confirmed
-  to fail against the old behaviour.
+  to fail against the old behaviour. The mirror-image case is handled too: a
+  legitimate `204 No Content` stays an empty *success* rather than becoming a
+  false alarm.
 - **Transport-level failures no longer escape as raw throws.** A refused or
   unresolvable upstream rejected out of `fetch` and propagated through the
   tool handler as an SDK protocol error carrying an arbitrary message from a
