@@ -56,6 +56,14 @@ describe('routeInvestigationTool (seam: real HTTP against a stand-in /v1/* serve
           res.end(JSON.stringify({ id: 'evt-99', accepted: true }));
           return;
         }
+        if (req.url === '/v1/runs/echo-auth') {
+          // Stands in for an upstream that reflects the Authorization header
+          // into its own error body — the realistic way a forwarded token
+          // could ride back out to the caller.
+          res.writeHead(500, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ error: 'internal', seen: req.headers.authorization }));
+          return;
+        }
         res.writeHead(404, { 'content-type': 'application/json' });
         res.end(JSON.stringify({ error: 'not_found_in_stub' }));
       });
@@ -161,10 +169,26 @@ describe('routeInvestigationTool (seam: real HTTP against a stand-in /v1/* serve
     });
   });
 
-  it('surfaces a non-2xx upstream response as upstream_failed, not a silent empty success', async () => {
+  it('surfaces a non-2xx upstream response by status class, not as a silent empty success', async () => {
     const result = await routeInvestigationTool('user-token-abc', 'investigation.get_summary', {
       investigationId: 'inv-does-not-exist',
     });
-    expect(result).toMatchObject({ ok: false, error: 'upstream_failed' });
+    // Classified rather than lumped into one `upstream_failed`: a caller has
+    // to be able to tell "no such investigation" from "the service is down"
+    // without parsing prose. Both are `ok: false` — neither is ever an empty
+    // success.
+    expect(result).toMatchObject({ ok: false, status: 404, error: 'upstream_not_found' });
+  });
+
+  it('relays an upstream error body but never the bearer the upstream echoed into it', async () => {
+    const result = await routeInvestigationTool('user-token-abc', 'investigation.get_summary', {
+      investigationId: 'echo-auth',
+    });
+    const serialised = JSON.stringify(result);
+    // The upstream's own detail survives, so the failure stays diagnosable...
+    expect(serialised).toContain('internal');
+    expect(serialised).toContain('[redacted]');
+    // ...but the credential does not.
+    expect(serialised).not.toContain('user-token-abc');
   });
 });

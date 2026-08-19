@@ -51,5 +51,5 @@ would let a fork's PR execute untrusted code on private infrastructure.
 ## 7. Tool schemas come from the shared contract
 
 Tool input/output schemas are consumed from `@production-master/mcp-tool-contract`
-(publication pending) — never hand-redefined or forked into this repo. The server routes
+(published on npm) — never hand-redefined or forked into this repo. The server routes
 against the contract; it does not own the tool surface.

@@ -37,7 +37,7 @@ Because the server holds no credentials, rotating or revoking a token is entirel
 
 ## Which tools exist
 
-The tool surface is defined by `@production-master/mcp-tool-contract` (publication pending) and is discovered through the standard MCP tool-listing call — your client shows the current set once connected. Tool names, inputs, and outputs are versioned by that package, so every client sees the same surface; this repo does not define or fork it.
+The tool surface is defined by `@production-master/mcp-tool-contract` (published on npm) and is discovered through the standard MCP tool-listing call — your client shows the current set once connected. Tool names, inputs, and outputs are versioned by that package, so every client sees the same surface; this repo does not define or fork it.
 
 ## Typical end-to-end flow
 

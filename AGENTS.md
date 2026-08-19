@@ -32,7 +32,7 @@ tool set to any MCP-capable client. It is a protocol boundary and nothing more.
 | `.github/` | CI workflows, issue/PR templates, Dependabot config |
 
 TypeScript, npm **workspaces** (`packages/*`). Tool input/output schemas are consumed
-from the shared npm package `@production-master/mcp-tool-contract` (publication pending),
+from the shared npm package `@production-master/mcp-tool-contract` (published on npm),
 never redefined here.
 
 ## Build & verify
