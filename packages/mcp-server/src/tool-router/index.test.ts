@@ -181,9 +181,9 @@ describe('routeInvestigationTool (seam: real HTTP against a stand-in /v1/* serve
   });
 
   it('forwards the caller bearer even when a caller-supplied header tries to shadow it', async () => {
-    // `requestUpstream` is exported from a published package, so an outside
-    // consumer can pass its own headers. Pass-through must win: the token the
-    // relay was handed is the one that reaches upstream, always.
+    // Callers of `requestUpstream` supply their own `init.headers`, so a
+    // header can collide with the one the relay sets. Pass-through must win:
+    // the token the relay was handed is the one that reaches upstream, always.
     const result = await requestUpstream('user-token-abc', '/v1/runs/inv-1', {
       headers: { authorization: 'Bearer attacker-substituted' },
     });
