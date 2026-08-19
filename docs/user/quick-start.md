@@ -4,15 +4,13 @@ Connect an MCP client to `production-master-mcp` and drive the Production Master
 
 > **Prerequisites:** Node.js 22, an MCP-capable client, and a Production Master token (your client sends it; the server forwards it opaquely upstream).
 
-> **Status:** server packages are being populated via PRs. The concrete package name and endpoint land with those PRs; the connection patterns below are stable.
+> **Status:** the server package (`@production-master/mcp`, launched as `production-master-mcp`) is implemented but not yet published to npm, and no hosted HTTP endpoint is deployed yet — so `npx -y @production-master/mcp` and `<server-url>` below are not runnable today. The package name, CLI name, and connection patterns are final.
 
 ## Option A — connect over HTTP (`POST /mcp`)
 
 Point your MCP client at the server's HTTP endpoint and pass your token as a bearer header. The server forwards that token to the hosted service and stores nothing.
 
 ### Claude Code
-
-Available once the first packages land:
 
 ```
 claude mcp add --transport http production-master <server-url>/mcp \
@@ -58,10 +56,8 @@ Run the server as a local subprocess of your client instead of hosting it.
 
 ### Claude Code
 
-Available once the first packages land:
-
 ```
-claude mcp add production-master -- npx -y @production-master/mcp
+claude mcp add production-master --env PM_SESSION_JWT=<your-token> -- npx -y @production-master/mcp
 ```
 
 ### Codex
@@ -72,6 +68,7 @@ Add to `.codex/config.toml`:
 [mcp_servers.production-master]
 command = "npx"
 args = ["-y", "@production-master/mcp"]
+env = { PM_SESSION_JWT = "<your-token>" }
 ```
 
 ### OpenCode
@@ -82,7 +79,8 @@ Add to `opencode.json`:
 {
   "mcp": {
     "production-master": {
-      "command": ["npx", "-y", "@production-master/mcp"]
+      "command": ["npx", "-y", "@production-master/mcp"],
+      "environment": { "PM_SESSION_JWT": "<your-token>" }
     }
   }
 }

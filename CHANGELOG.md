@@ -18,6 +18,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cursor currency (desktop 3.16.17; Automations memory-file delete noted).** `.cursor-version` keeps feature **3.11** / **2026-08-03** and records `desktop_cli: 3.16.17`. Docs note Agent Plugins + desktop `workspaceOpen`.
 
 ### Added
+- **MCP tool contract wiring and both transports implemented (dev#643, AD-23).**
+  `packages/mcp-tool-router` maps all 20 `investigation.*` tools from the shared
+  `@production-master/mcp-tool-contract` package onto the hosted `/v1/*` REST API,
+  forwarding the caller's bearer opaquely and making no scope decisions of its own
+  (AD-23 §5). `packages/mcp-server` (published as `@production-master/mcp`, CLI
+  `production-master-mcp`) registers those tools on a real `McpServer` and serves
+  them over both the Streamable HTTP transport (`POST /mcp`, stateless, one bearer
+  per request from `Authorization`) and stdio (one bearer for the process's whole
+  run, from `PM_SESSION_JWT`) — the two transports share one tool-registration
+  function so they cannot drift. Seam-tested with the real MCP SDK `Client` against
+  both transports (HTTP over a real socket; stdio spawning the real built binary),
+  round-tripping through a stand-in `/v1/*` server — not a mock of the router's own
+  schema. `@production-master/mcp-tool-contract` is published to public npm as
+  `0.1.0` (owner-gated first publish, service#941); this PR depends on it as a
+  normal npm dependency and does not redefine its schemas locally, per this repo's
+  `AGENTS.md`.
 - **`.codex-version` — tracked Codex target release (0.147.0).** New root marker
   recording the latest Codex release this server targets, mirroring
   `.claude-code-version`, so supported-client updates are diffable and automatable.

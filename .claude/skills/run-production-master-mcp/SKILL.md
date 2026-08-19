@@ -36,21 +36,33 @@ npm scripts).
    make lint           # npm run lint
    ```
 
+5. **Typecheck** — a stricter pass than build (also part of CI):
+
+   ```bash
+   npm run typecheck
+   ```
+
 ## Run the server locally
 
-> **Status:** the server packages under `packages/*` are being populated via PRs. A local
-> run target becomes available once the first package lands.
-
-Once packages land, start the server in development mode:
+Set `PM_API_URL` to the Production Master REST API base and (for stdio) `PM_SESSION_JWT`
+to your session token, then:
 
 ```bash
-make dev             # npm run dev --workspaces --if-present
+# stdio transport (default)
+PM_API_URL=<api-base-url> PM_SESSION_JWT=<your-token> \
+  npm run dev --workspace=@production-master/mcp
+
+# Streamable HTTP transport — POST /mcp on PM_MCP_HTTP_PORT (default 3000);
+# bearer is per-request, so no PM_SESSION_JWT here
+PM_API_URL=<api-base-url> \
+  npm run dev --workspace=@production-master/mcp -- --http
 ```
 
-This runs the MCP server locally over the stdio transport (and the HTTP transport on its
-configured port). Connect an MCP client to it as described in
-[`docs/user/quick-start.md`](../../../docs/user/quick-start.md). Configuration specifics
-(including the upstream service endpoint) are defined as the packages land.
+`make dev` (`npm run dev --workspaces --if-present`) runs the same script across every
+workspace that defines one — today that is just `@production-master/mcp`. Connect an MCP
+client to it as described in
+[`docs/user/quick-start.md`](../../../docs/user/quick-start.md); the full config reference
+is [`docs/user/reference/commands.md`](../../../docs/user/reference/commands.md).
 
 ## Reporting
 
