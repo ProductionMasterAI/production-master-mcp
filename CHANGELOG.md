@@ -30,9 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   function so they cannot drift. Seam-tested with the real MCP SDK `Client` against
   both transports (HTTP over a real socket; stdio spawning the real built binary),
   round-tripping through a stand-in `/v1/*` server — not a mock of the router's own
-  schema. `@production-master/mcp-tool-contract` itself remains unpublished to npm
-  (owner-gated, tracked separately); this PR depends on it as a normal npm
-  dependency and does not redefine its schemas locally, per this repo's
+  schema. `@production-master/mcp-tool-contract` is published to public npm as
+  `0.1.0` (owner-gated first publish, service#941); this PR depends on it as a
+  normal npm dependency and does not redefine its schemas locally, per this repo's
   `AGENTS.md`.
 - **`.codex-version` — tracked Codex target release (0.147.0).** New root marker
   recording the latest Codex release this server targets, mirroring
