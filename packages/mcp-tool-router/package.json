@@ -1,0 +1,24 @@
+{
+  "name": "@production-master/mcp-tool-router",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Maps investigation.* MCP tool calls onto the Production Master public /v1/* REST API. Zero IP: validates arguments against the shared tool contract and forwards the caller's bearer opaquely; performs no scope decisions of its own (AD-23 §5) — those are enforced server-side by the hosted service.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@production-master/mcp-tool-contract": "^0.1.0"
+  }
+}

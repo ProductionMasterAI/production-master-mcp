@@ -1,0 +1,35 @@
+{
+  "name": "@production-master/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standard MCP server (Streamable HTTP + stdio) for the Production Master hosted incident-investigation service. Protocol boundary only — no investigation logic.",
+  "type": "module",
+  "bin": {
+    "production-master-mcp": "./dist/bin.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "registry.npmjs.org"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "lint": "eslint src",
+    "dev": "npm run build && node dist/bin.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@production-master/mcp-tool-contract": "^0.1.0",
+    "@production-master/mcp-tool-router": "0.1.0",
+    "zod": "^3.24.2"
+  }
+}

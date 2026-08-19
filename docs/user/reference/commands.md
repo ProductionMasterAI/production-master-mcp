@@ -27,13 +27,17 @@ The tool set covers driving Production Master investigations end to end; the exa
 
 ## Configuration
 
-| Setting | Status |
-|---------|--------|
-| Upstream service endpoint | configured for the server; specifics defined as packages land |
-| Transport / port | defined as packages land |
-| Auth | none stored — the caller's bearer token is forwarded opaquely upstream |
+The server reads all configuration from the environment at runtime — it ships no baked-in credentials or endpoints.
 
-Concrete environment variables and flags are documented here as the server packages land. The server ships no baked-in credentials or endpoints; all configuration is read from the environment at runtime.
+| Variable | Applies to | Required | Meaning |
+|----------|-----------|----------|---------|
+| `PM_API_URL` | both transports | yes | Base URL of the Production Master hosted `/v1/*` REST API the server forwards tool calls to. There is no built-in default — the server refuses to start a request without it rather than silently pointing at the wrong host. |
+| `PM_SESSION_JWT` | stdio only | yes | Your Production Master session token, fixed for the process's whole run (stdio has no per-request header, unlike HTTP). Missing → the server exits immediately with an error, not a confusing failure on the first tool call. |
+| `PM_MCP_HTTP_PORT` | HTTP only | no (default `3000`) | Port the Streamable HTTP transport listens on for `POST /mcp`. |
+
+Over HTTP, auth is per-request instead: the caller's `Authorization: Bearer <token>` header is forwarded opaquely to `PM_API_URL` on every call — nothing is read from the environment for it.
+
+Launch: `production-master-mcp` for stdio (default), `production-master-mcp --http` for the Streamable HTTP transport.
 
 ## Scope
 

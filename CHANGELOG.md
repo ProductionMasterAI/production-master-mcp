@@ -40,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and background-task notifications moving to system-reminders — none touch the
   documented `claude mcp add` registration flows or the pass-through-auth
   design.
+- **Cursor desktop 3.16.29 + Origin CLI/integrations:** re-pin desktop/`validated_against` **3.16.17 → 3.16.29** (stable download line 2026-08-18; no separate feature write-up). Document Origin CLI, agent-created Origin repos, and Origin↔Automations/Cloud Agents / apps integrations. Feature/date pins stay **3.11** / **2026-08-17**.
+- **Cursor Origin + Builds default (2026-08-17).** Documented [Origin](https://cursor.com/docs/origin) (early-beta Cursor git forge; GitHub remains canonical for this public MCP server) and flipped Cloud Agent Builds language to **now default**. Pin bump: `changelog_date` **2026-08-13 → 2026-08-17**; feature **3.11** / desktop **3.16.17** unchanged.
 - **Cursor Grok 4.6 + Builds T-1 readiness (2026-08-16).** Quick Start notes Grok 4.6 for long-running MCP debugging and T-1 Builds checklist before **2026-08-17** default. Pins stay **3.11** / **2026-08-13** / desktop **3.16.17**.
 - **Cursor desktop 3.16.17 + Builds skipped/staleness docs.** Desktop pin **3.15.19 → 3.16.17**; Quick Start notes Builds Skipped checks, 24h staleness default, and install/start/terminals. Feature/date pins stay **3.11** / **2026-08-13**.
 - **Cursor Builds Aug-17 readiness + CLI steer/`/goal`.** Quick Start notes enable-Builds-now (default **2026-08-17**), team/environment secrets for install, and CLI steer + durable `/goal` for local `agent` debugging (no server change). Pins stay **3.11** / **2026-08-13** / desktop **3.16.17**.
@@ -48,6 +50,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cursor currency (desktop 3.16.17; Automations memory-file delete noted).** `.cursor-version` keeps feature **3.11** / **2026-08-03** and records `desktop_cli: 3.16.17`. Docs note Agent Plugins + desktop `workspaceOpen`.
 
 ### Added
+- **MCP tool contract wiring and both transports implemented (dev#643, AD-23).**
+  `packages/mcp-tool-router` maps all 20 `investigation.*` tools from the shared
+  `@production-master/mcp-tool-contract` package onto the hosted `/v1/*` REST API,
+  forwarding the caller's bearer opaquely and making no scope decisions of its own
+  (AD-23 §5). `packages/mcp-server` (published as `@production-master/mcp`, CLI
+  `production-master-mcp`) registers those tools on a real `McpServer` and serves
+  them over both the Streamable HTTP transport (`POST /mcp`, stateless, one bearer
+  per request from `Authorization`) and stdio (one bearer for the process's whole
+  run, from `PM_SESSION_JWT`) — the two transports share one tool-registration
+  function so they cannot drift. Seam-tested with the real MCP SDK `Client` against
+  both transports (HTTP over a real socket; stdio spawning the real built binary),
+  round-tripping through a stand-in `/v1/*` server — not a mock of the router's own
+  schema. `@production-master/mcp-tool-contract` is published to public npm as
+  `0.1.0` (owner-gated first publish, service#941); this PR depends on it as a
+  normal npm dependency and does not redefine its schemas locally, per this repo's
+  `AGENTS.md`.
 - **`.codex-version` — tracked Codex target release (0.147.0).** New root marker
   recording the latest Codex release this server targets, mirroring
   `.claude-code-version`, so supported-client updates are diffable and automatable.
