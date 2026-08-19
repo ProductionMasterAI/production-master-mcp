@@ -1,7 +1,7 @@
 import { createServer, type Server } from 'node:http';
 import { AddressInfo } from 'node:net';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { routeInvestigationTool } from './index.js';
+import { requestUpstream, routeInvestigationTool } from './index.js';
 
 /**
  * Seam test, not a mock-your-own-shape test: a real Node HTTP server stands
@@ -178,6 +178,17 @@ describe('routeInvestigationTool (seam: real HTTP against a stand-in /v1/* serve
     // without parsing prose. Both are `ok: false` — neither is ever an empty
     // success.
     expect(result).toMatchObject({ ok: false, status: 404, error: 'upstream_not_found' });
+  });
+
+  it('forwards the caller bearer even when a caller-supplied header tries to shadow it', async () => {
+    // `requestUpstream` is exported from a published package, so an outside
+    // consumer can pass its own headers. Pass-through must win: the token the
+    // relay was handed is the one that reaches upstream, always.
+    const result = await requestUpstream('user-token-abc', '/v1/runs/inv-1', {
+      headers: { authorization: 'Bearer attacker-substituted' },
+    });
+    expect(result.ok).toBe(true);
+    expect(received[0]?.authorization).toBe('Bearer user-token-abc');
   });
 
   it('relays an upstream error body but never the bearer the upstream echoed into it', async () => {

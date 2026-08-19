@@ -124,13 +124,19 @@ export async function requestUpstream<T = unknown>(
       ...init,
       headers: {
         'content-type': 'application/json',
+        ...(init.headers ?? {}),
         // Opaque-bearer forwarding (AD-23 §5): this server never inspects or
         // verifies the token, it only relays it. The hosted service is the
         // one party that resolves identity and enforces investigation/mutate
         // scope — duplicating that check here would need `PM_JWT_SECRET`,
         // which this public, zero-secret repo must never hold.
+        //
+        // Set last so it cannot be shadowed by a caller-supplied header.
+        // This package is published, so `requestUpstream` has consumers
+        // outside this repo; letting an `init.headers.authorization` win
+        // would silently defeat pass-through for the caller whose token this
+        // is, which is exactly the property the relay exists to guarantee.
         authorization: `Bearer ${bearer}`,
-        ...(init.headers ?? {}),
       },
     });
   } catch (error: unknown) {

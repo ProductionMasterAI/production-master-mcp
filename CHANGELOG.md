@@ -55,6 +55,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   into a client transcript. Server error logs now record a failed request's
   method and path only, never the error object, which is where request
   headers could have been reachable.
+- **Pass-through auth can no longer be shadowed by a caller-supplied header.**
+  `requestUpstream` sets `authorization` last, so an `init.headers`
+  `authorization` cannot displace the token the relay was handed. This
+  matters now that `@production-master/mcp-tool-router` is published and has
+  consumers outside this repo.
 
 ### Changed
 - **Docs no longer say `@production-master/mcp-tool-contract` is
