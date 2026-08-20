@@ -99,6 +99,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stays the rule, not a version-gated exception.
 
 ### Changed
+- **Claude Code target bumped to 2.1.235** (from 2.1.234) in `.claude-code-version`.
+  The 2.1.235 delta contains nothing MCP-facing: it's editor/host-side polish —
+  an optional `spellcheck` setting (`aspell`/`hunspell`/`ispell`), lower
+  memory/CPU for background cloud sessions, reworded permission dialogs with a
+  "don't ask again" option, faster-failing embedded `grep` on pathological
+  patterns, `SendMessage` rejecting oversized messages upfront instead of
+  silently dropping them, and a `/config` context-limit indicator when
+  auto-compact is off — plus fixes for prompt-cache invalidation on language
+  server disconnect, `Shift+Tab` in permission prompts over-granting
+  session-wide permissions, the `Agent` tool's `subagent_type` error
+  reporting, and assorted rendering glitches (nested markdown lists, notebook
+  cell dialogs, slash commands mid-stream). None of it touches the documented
+  `claude mcp add` registration flows, the MCP v2 transport, or the
+  pass-through-auth design, so no server-side or docs change is required.
 - **Claude Code target bumped to 2.1.234** (from 2.1.233) in `.claude-code-version`.
   The 2.1.234 delta's one MCP-facing item is a fix for MCP diagnostic output
   leaking secrets on the client side — directly relevant context for a server
