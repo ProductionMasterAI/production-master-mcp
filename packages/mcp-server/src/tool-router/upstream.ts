@@ -132,8 +132,8 @@ export async function requestUpstream<T = unknown>(
         // secret, which this public, zero-secret package must never hold.
         //
         // Set last so it cannot be shadowed by a caller-supplied header.
-        // This package is published, so `requestUpstream` has consumers
-        // outside this repo; letting an `init.headers.authorization` win
+        // Every tool in this server reaches upstream through here and may
+        // pass its own headers; letting an `init.headers.authorization` win
         // would silently defeat pass-through for the caller whose token this
         // is, which is exactly the property the relay exists to guarantee.
         authorization: `Bearer ${bearer}`,

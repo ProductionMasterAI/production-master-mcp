@@ -10,9 +10,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cursor 3.11 (+2026-08-19):** advance `changelog_date` **2026-08-17 → 2026-08-19** (desktop **3.16.29** unchanged). Document cloud-agent **Subscriptions**, **Custom Modes**, **isolated-VM subagents**, Agent Window **`/goal`**, and **non-interruptive steering** in Quick Start. No server-side change (protocol boundary only). Cursor-only; other platform nightlies untouched.
 
 ### Added
+- **One published package, not two (dev#701).** `@production-master/mcp-tool-router`
+  is folded into `@production-master/mcp` and is no longer published. It existed
+  only so that `@production-master/mcp` would resolve for an outside installer — a
+  package serving a dependency graph rather than a user — which bought a second
+  version cadence to keep in agreement for an audience that does not exist yet, and
+  a way for someone to install a router version that does not match their server.
+  Settled before the first registry write, because the asymmetry decides it:
+  extracting a package later is routine, deprecating a published name is not.
+  The relay keeps its module boundary as `packages/mcp-server/src/tool-router/` —
+  one entry point (`index.ts`), nothing outside it importing `upstream.ts` or
+  `config.ts` — so a later extraction stays cheap. It is deliberately **not**
+  re-exported from the package's public `index.ts`: committing `requestUpstream` to
+  the published API at first publish would recreate the compatibility obligation
+  this removes. No behaviour change; the 26-test suite is unchanged and green.
 - **Upstream relay hardening: one relay path, a real failure taxonomy, and a
   proven-non-leaking bearer (dev#644, AD-23).** Every `/v1/*` call now goes
-  through a single `requestUpstream` in `packages/mcp-tool-router`, which is
+  through a single `requestUpstream` in the relay module, which is
   where the pass-through-auth contract and the failure taxonomy are stated
   once instead of being restated by each of the twenty tools. Upstream
   failures are classified — `upstream_unauthorized`, `upstream_forbidden`,
@@ -27,12 +41,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   appears in no log line and no tool result even when the upstream echoes it
   back, and an upstream failure is distinguishable from a legitimate empty
   result. Suite is 26 tests (was 16).
-- **Both server packages are publishable.** `@production-master/mcp` and
-  `@production-master/mcp-tool-router` carry `repository`, `license`,
-  `files`, `engines`, and `prepublishOnly`; both had `private: true`, which
-  would have made `npm publish` a no-op, and `@production-master/mcp`
-  depended on a workspace package that could never resolve for an outside
-  installer.
+- **`@production-master/mcp` is publishable.** It carries `repository`,
+  `license`, `files`, `engines`, and `prepublishOnly`; it had `private: true`,
+  which would have made `npm publish` a no-op. Its one-time dependency on a
+  sibling workspace package — which could never have resolved for an outside
+  installer — is gone with the consolidation above, so the published tarball
+  is self-contained apart from real registry dependencies.
 
 ### Fixed
 - **Removed internal identifiers left in this PUBLIC repo (Hard rule 15).** Four
@@ -69,9 +83,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   headers could have been reachable.
 - **Pass-through auth can no longer be shadowed by a caller-supplied header.**
   `requestUpstream` sets `authorization` last, so an `init.headers`
-  `authorization` cannot displace the token the relay was handed. This
-  matters now that `@production-master/mcp-tool-router` is published and has
-  consumers outside this repo.
+  `authorization` cannot displace the token the relay was handed — every one
+  of the twenty tools reaches upstream through this one function and may pass
+  headers of its own.
 
 ### Changed
 - **Docs no longer say `@production-master/mcp-tool-contract` is
@@ -122,7 +136,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **MCP tool contract wiring and both transports implemented (dev#643, AD-23).**
-  `packages/mcp-tool-router` maps all 20 `investigation.*` tools from the shared
+  The relay module (`packages/mcp-server/src/tool-router/`) maps all 20
+  `investigation.*` tools from the shared
   `@production-master/mcp-tool-contract` package onto the hosted `/v1/*` REST API,
   forwarding the caller's bearer opaquely and making no scope decisions of its own
   (AD-23 §5). `packages/mcp-server` (published as `@production-master/mcp`, CLI

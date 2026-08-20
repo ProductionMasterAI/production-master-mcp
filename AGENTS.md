@@ -27,13 +27,16 @@ tool set to any MCP-capable client. It is a protocol boundary and nothing more.
 
 | Path | Role |
 |---|---|
-| `packages/*` | Server packages: transport (HTTP + stdio), auth pass-through, tool routing |
+| `packages/mcp-server` | The one published package, `@production-master/mcp`: transport (HTTP + stdio), auth pass-through, and the `src/tool-router/` relay module |
 | `docs/` | User-facing docs only (install/operate) plus CONTRIBUTING/CHANGELOG — this repo is PUBLIC |
 | `.github/` | CI workflows, issue/PR templates, Dependabot config |
 
-TypeScript, npm **workspaces** (`packages/*`). Tool input/output schemas are consumed
-from the shared npm package `@production-master/mcp-tool-contract` (published on npm),
-never redefined here.
+TypeScript, npm **workspaces** (`packages/*`) — currently one workspace, and the repo
+publishes exactly one package. The relay is an internal module directory rather
+than a second package: keep its boundary intact (single entry point, no reaching past
+`tool-router/index.ts`) so extracting it later stays cheap. Tool input/output schemas are
+consumed from the shared npm package `@production-master/mcp-tool-contract` (published on
+npm), never redefined here.
 
 ## Build & verify
 

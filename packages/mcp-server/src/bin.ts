@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { scrubToken } from '@production-master/mcp-tool-router';
+import { scrubToken } from './tool-router/index.js';
 import { startHttpServer } from './http.js';
 import { startStdioServer } from './stdio.js';
 

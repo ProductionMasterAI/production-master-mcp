@@ -25,10 +25,6 @@ describe('stdio transport (seam)', () => {
   let upstreamPort: number;
 
   beforeAll(() => {
-    execFileSync('npm', ['run', 'build', '--workspace=@production-master/mcp-tool-router'], {
-      cwd: repoRoot,
-      stdio: 'inherit',
-    });
     execFileSync('npm', ['run', 'build', '--workspace=@production-master/mcp'], {
       cwd: repoRoot,
       stdio: 'inherit',
