@@ -5,7 +5,7 @@ import {
   investigationMcpToolSchemas,
   wireToolName,
 } from '@production-master/mcp-tool-contract';
-import { routeInvestigationTool, scrubToken } from '@production-master/mcp-tool-router';
+import { routeInvestigationTool, scrubToken } from './tool-router/index.js';
 
 export interface ToolCallContext {
   /** The caller's own `mcp_session` bearer, forwarded opaquely (AD-23). */

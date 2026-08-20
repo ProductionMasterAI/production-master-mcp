@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { scrubToken } from '@production-master/mcp-tool-router';
+import { scrubToken } from './tool-router/index.js';
 import { registerInvestigationTools } from './register-tools.js';
 import { getHttpPort } from './config.js';
 
