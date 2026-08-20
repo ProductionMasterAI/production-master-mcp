@@ -7,9 +7,15 @@ on:
 
 permissions:
   contents: write
+  # OIDC trusted publishing to npm (dev#644) — npm exchanges this token for a
+  # short-lived publish credential, no long-lived secret required on npm's side.
+  id-token: write
 
 jobs:
   release:
+    # ubuntu-latest, never the self-hosted fleet: this repo is public and
+    # accepts third-party pull requests, so a self-hosted runner here would
+    # let a fork execute arbitrary code on the owner's hardware.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -17,8 +23,72 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs npm >= 11.5.1; .nvmrc's Node 22.15.0 ships an
+      # older npm, so the floor is upgraded in-job rather than by bumping Node.
+      # The floor is ASSERTED, not just printed: if the upgrade silently no-ops
+      # or resolves an older npm, OIDC would not engage and — with no token
+      # wired below — the publish would fail with a confusing auth error
+      # instead of naming the real cause.
+      #
+      # Pinned to the 11.x major, NOT `@latest` (mirrors production-master's
+      # release.yml, dev#725): `@latest` is unbounded across majors and the
+      # pinned Node is not — npm 12.0.2 requires a newer Node than 22.15.0
+      # ships, so `@latest` can die on an upstream npm release with no change
+      # on our side. `^11.5.1` clears the OIDC floor and stays inside the
+      # major whose engine range the pinned Node satisfies.
+      - name: Upgrade npm for OIDC trusted publishing (dev#644)
+        run: |
+          set -euo pipefail
+          npm i -g 'npm@^11.5.1'
+          ver="$(npm --version)"
+          echo "npm ${ver}"
+          node -e '
+            const [have, need] = [process.argv[1], "11.5.1"];
+            const cmp = (a, b) => {
+              const pa = a.split(".").map(Number), pb = b.split(".").map(Number);
+              for (let i = 0; i < 3; i++) if (pa[i] !== pb[i]) return pa[i] - pb[i];
+              return 0;
+            };
+            if (cmp(have, need) < 0) {
+              console.log(`::error::npm ${have} is below the ${need} floor required for OIDC trusted publishing`);
+              process.exit(1);
+            }
+            console.log(`npm ${have} meets the ${need} floor for OIDC trusted publishing`);
+          ' "$ver"
+
       - run: npm ci
       - run: npm run build --if-present
+
+      - name: Tag must match the published package's version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          want="${TAG#v}"
+          got="$(node -p "require('./packages/mcp-server/package.json').version")"
+          if [ "$got" != "$want" ]; then
+            echo "::error::tag ${TAG} implies version ${want} but packages/mcp-server/package.json declares ${got}"
+            exit 1
+          fi
+          echo "version ${want} matches tag ${TAG}"
+
+      - run: npm test --if-present
+
+      # NOTE (dev#644): publishes with OIDC trusted publishing — `id-token:
+      # write` above plus npm >= 11.5.1, against the trusted publisher
+      # configured on npmjs.com for this package (owner-side npmjs.com setup;
+      # not something this workflow can do). There is deliberately NO
+      # NODE_AUTH_TOKEN here. npm "uses OIDC before falling back to
+      # traditional tokens", and that fallback is SILENT: with a token also
+      # wired, a green publish would not distinguish OIDC working from the
+      # token quietly carrying it, so the migration could never actually be
+      # verified. Without a token, OIDC either works or the release fails
+      # loudly — which is the recoverable direction.
+      - name: Publish @production-master/mcp to npm
+        run: npm publish --workspace packages/mcp-server --access public
+
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

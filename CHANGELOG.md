@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **OIDC trusted-publishing wiring for `@production-master/mcp` (dev#644).**
+  `release.yml` now publishes the package on a `v*` tag via npm OIDC trusted
+  publishing — `id-token: write` plus an in-job npm upgrade pinned to
+  `^11.5.1` (mirrors `production-master`'s release train, dev#725; `@latest`
+  is unbounded across majors and has broken this exact train before).
+  Deliberately no `NODE_AUTH_TOKEN`: with a token also wired, a green publish
+  would not distinguish OIDC actually working from the token quietly
+  carrying it, so the migration could never be verified. A tag whose version
+  doesn't match `packages/mcp-server/package.json` fails the release before
+  any publish is attempted. This wires the release train only — it does not
+  cut a release or perform a publish; that still needs the trusted publisher
+  configured on npmjs.com for this package (owner-side) and an explicit tag
+  push.
+
 - **Cursor 3.11 (+2026-08-19):** advance `changelog_date` **2026-08-17 → 2026-08-19** (desktop **3.16.29** unchanged). Document cloud-agent **Subscriptions**, **Custom Modes**, **isolated-VM subagents**, Agent Window **`/goal`**, and **non-interruptive steering** in Quick Start. No server-side change (protocol boundary only). Cursor-only; other platform nightlies untouched.
 
 ### Added
