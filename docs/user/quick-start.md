@@ -17,6 +17,16 @@ claude mcp add --transport http production-master <server-url>/mcp \
   --header "Authorization: Bearer <your-token>"
 ```
 
+> **Avoiding a long-lived token in your config:** `--header` above stores the raw bearer
+> in your MCP client config. Claude Code's `headersHelper` mints the `Authorization`
+> header at connect time instead by running a command you supply — useful if you'd
+> rather mint a short-lived Production Master token than paste a static one. Since
+> Claude Code 2.1.238, a `headersHelper` configured in a project `.mcp.json` requires
+> that project's trust dialog to have been accepted first (including under `claude -p`),
+> and it runs without your shell's inherited credential env vars — user-, managed-, and
+> claude.ai-scope helpers run from the Claude config dir instead. See Claude Code's MCP
+> docs for `headersHelper` syntax.
+
 ### Cursor
 
 Add to `.cursor/mcp.json` in your project (or your global Cursor config), or manage

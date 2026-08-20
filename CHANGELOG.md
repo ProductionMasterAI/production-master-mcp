@@ -101,6 +101,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stays the rule, not a version-gated exception.
 
 ### Changed
+- **Claude Code target bumped to 2.1.238** (from 2.1.235) in `.claude-code-version`.
+  Reviewed the 2.1.236–2.1.238 delta for MCP-facing changes. Two items concern this
+  server's own surfaces and needed no server-side change after review: 2.1.238 fixes
+  stdio MCP servers receiving a `server/discover` request before `initialize`, which
+  used to force a "lazy" server to start its backend on every session open — this
+  server has no eager backend connection on either transport (each tool call reaches
+  the hosted service independently, lazily, per call), so the bug never had a
+  symptom here, on any version. 2.1.238 also fixes MCP elicitation dialogs going
+  blank for URLs over 4,096 characters; this server registers no elicitation, so it
+  is not applicable. One item is genuinely useful to document: 2.1.238 tightens
+  `headersHelper` — a project `.mcp.json` `headersHelper` now requires that folder's
+  trust dialog to have been accepted (including under `claude -p`), and it runs
+  without inherited shell credential env vars (user/managed/claude.ai-scope helpers
+  now run from the Claude config dir instead). `headersHelper` mints the
+  `Authorization` header via a command instead of a static value, which is a better
+  fit for this server's bearer-token model than pasting a long-lived token into
+  `--header`; noted as an option in `docs/user/quick-start.md` alongside the existing
+  `--header` flow, with the 2.1.238 trust-dialog and env-var-scoping behavior stated
+  so it matches what a reader hits in practice. The remaining 2.1.236–2.1.238 items
+  (a `keybindingFlavor` setting, `ANTHROPIC_DEFAULT_MODEL`, `notify_when_idle` for
+  cross-session `SendMessage`, the built-in "Concise" output style, self-hosted-runner
+  and plugin-marketplace flags, prompt-cache/rendering/sandbox fixes) are host- or
+  editor-side with no MCP transport, registration, or pass-through-auth surface, so
+  they need no change here.
 - **Claude Code target bumped to 2.1.235** (from 2.1.234) in `.claude-code-version`.
   The 2.1.235 delta contains nothing MCP-facing: it's editor/host-side polish —
   an optional `spellcheck` setting (`aspell`/`hunspell`/`ispell`), lower
