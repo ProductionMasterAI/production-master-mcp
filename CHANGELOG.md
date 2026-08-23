@@ -116,6 +116,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stays the rule, not a version-gated exception.
 
 ### Changed
+- **Claude Code target bumped to 2.1.241** (from 2.1.238) in `.claude-code-version`.
+  Reviewed the 2.1.239–2.1.241 delta for MCP-facing changes; none touch this
+  server's transport, registration, or pass-through-auth surfaces, so no
+  server-side or docs change was needed. 2.1.239's items are all host- or
+  billing-side: the 1.1x US-only-inference cost premium for data-residency
+  workspaces (`/cost`, status line, `--max-budget-usd`), a one-time
+  fullscreen-renderer offer on Bedrock/Vertex/Foundry, a `/claude-api upgrade`
+  helper that migrates *Python* projects off the `anthropic` 0.x SDK (this repo
+  ships a TypeScript server and no Python client, so it's not applicable),
+  `name@synced` labeling for plugins synced from claude.ai, a WebFetch
+  cache-duration fix (15 minutes, was session-lifetime), a cloud-session
+  idle-worker-restart/plan-mode fix, and Windows cross-session
+  `SendMessage`/`ListAgents` parity — none of which is an MCP transport,
+  registration, or auth surface. 2.1.240 and 2.1.241 each ship only as "Bug
+  fixes and reliability improvements," with no itemized detail in the public
+  changelog; neither release note names an MCP-protocol, transport, or
+  pass-through-auth change, so there is nothing to act on beyond the version
+  bump itself. Unlike the 2.1.236–2.1.238 bump below, this delta produced no
+  docs change either — 2.1.238's `headersHelper` note in
+  `docs/user/quick-start.md` remains current, since nothing in 2.1.239–2.1.241
+  alters `headersHelper` or any other documented connection flow.
 - **Claude Code target bumped to 2.1.238** (from 2.1.235) in `.claude-code-version`.
   Reviewed the 2.1.236–2.1.238 delta for MCP-facing changes. Two items concern this
   server's own surfaces and needed no server-side change after review: 2.1.238 fixes
