@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Cursor 3.11 (+2026-08-19):** document native **CreateGoal** / **UpdateGoal** beside Agent Window `/goal` in Quick Start (no server change). Cursor-only.
+
 ### Added
 - **OIDC trusted-publishing wiring for `@production-master/mcp` (dev#644).**
   `release.yml` now publishes the package on a `v*` tag via npm OIDC trusted
