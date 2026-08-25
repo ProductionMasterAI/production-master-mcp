@@ -116,6 +116,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stays the rule, not a version-gated exception.
 
 ### Changed
+- **Claude Code target bumped to 2.1.245** (from 2.1.241) in `.claude-code-version`.
+  Reviewed the 2.1.242–2.1.245 delta for MCP-facing changes. One item concerns
+  this server's own surface and needed a docs-only update: 2.1.243 fixes remote
+  MCP servers in non-interactive (`claude -p`) and SDK sessions never
+  recovering after a dropped connection — they now reconnect automatically or
+  report as failed instead of hanging silent. This server's Streamable HTTP
+  transport is exactly the kind of remote MCP connection that regression
+  affected, so Troubleshooting now names the fix so a stale-looking headless
+  or SDK integration on an older Claude Code reads as a host-version answer,
+  not a server bug. Also reviewed from 2.1.243: the `managed` marker `/mcp`
+  and `/plugins` now show for claude.ai connectors whose auth is managed by
+  an organization — noted in passing in Usage's bearer-token section, since
+  it's a client-side display detail with no effect on this server's own
+  pass-through behavior; and the fix for MCP sign-in from the desktop app
+  failing with "Invalid redirect URI" on servers supporting client ID
+  metadata documents (e.g. Linear) — not applicable, since this server uses
+  pass-through bearer auth, never MCP OAuth or dynamic client registration
+  (same distinction already on record in Troubleshooting's 401 section).
+  2.1.242 and 2.1.244 shipped no separately documented changes, and 2.1.245
+  shipped only a Linux-glibc-2.44 Claude Code startup crash fix — a host
+  binary issue with no MCP-facing surface. Everything else in 2.1.242–2.1.245
+  (auto mode, `/resume`, Remote Control, cross-session messaging, VS Code,
+  billing/settings surfaces) is host- or client-side and touches none of this
+  server's transport, registration, or auth surfaces.
 - **Claude Code target bumped to 2.1.241** (from 2.1.238) in `.claude-code-version`.
   Reviewed the 2.1.239–2.1.241 delta for MCP-facing changes; none touch this
   server's transport, registration, or pass-through-auth surfaces, so no
