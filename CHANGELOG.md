@@ -116,6 +116,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stays the rule, not a version-gated exception.
 
 ### Changed
+- **Claude Code target bumped to 2.1.246** (from 2.1.245) in `.claude-code-version`.
+  Reviewed the single-version 2.1.246 delta for MCP-facing changes. One item
+  bears directly on this server's own failure taxonomy: before 2.1.246, an MCP
+  tool call interrupted mid-flight by an incoming message in a headless or
+  remote session could be reported to the client as "completed with no
+  output" — indistinguishable from a legitimate empty success — instead of an
+  explicit interrupted error. That is exactly the ambiguity this server's own
+  relay design refuses to allow (an upstream failure is never reported as an
+  empty-but-successful result; see `upstream.ts`), so Troubleshooting now
+  names the fix: a `production-master` tool call that "succeeded with
+  nothing" in a headless/CI run on a pre-2.1.246 client may have actually been
+  interrupted, not genuinely empty. Also documented: 2.1.246 further hardens
+  non-interactive (`-p`/SDK/cloud) sessions by auto-continuing a response cut
+  off mid-stream by a server error, connection loss, or stall, complementing
+  the 2.1.243 dropped-connection reconnect fix already on record. Reviewed and
+  not applicable: the fix for MCP tool arguments sent as JSON strings when a
+  parameter's schema is empty (`{}`) — every tool here takes its schema from
+  `@production-master/mcp-tool-contract`'s Zod definitions, none of which
+  serialize to a bare `{}`; the fix for `requiresUserInteraction` tools
+  offering an ignored "don't ask again" option — this server declares no tool
+  with that flag, all twenty are plain relay calls; and the fix scoping
+  telemetry/metrics credentials to their own gateway host — this server sends
+  no telemetry to Anthropic. Everything else in 2.1.246 (Bash wildcard
+  warnings, `/permissions` Auto mode tab, `/cd` live-reload, plugin/keybinding
+  fixes, `/code-review` and `/goal` scheduling changes) is host- or
+  editor-side and touches none of this server's transport, registration, or
+  auth surfaces.
 - **Claude Code target bumped to 2.1.245** (from 2.1.241) in `.claude-code-version`.
   Reviewed the 2.1.242–2.1.245 delta for MCP-facing changes. One item concerns
   this server's own surface and needed a docs-only update: 2.1.243 fixes remote
