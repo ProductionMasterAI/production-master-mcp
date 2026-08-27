@@ -116,6 +116,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stays the rule, not a version-gated exception.
 
 ### Changed
+- **Claude Code target bumped to 2.1.247** (from 2.1.246) in `.claude-code-version`.
+  Reviewed the single-version 2.1.247 delta for MCP-facing changes. One item
+  concerns this server's own surface and got a docs-only update: Bedrock-,
+  Vertex-, and Foundry-backed Claude Code sessions are now told by the host
+  when an MCP server connection fails, matching what direct-Anthropic-API
+  sessions already did — previously that failure was visible only in
+  `claude mcp list`/`/mcp`, not to Claude itself mid-turn. Troubleshooting's
+  Connectivity section now names the fix, since a failed `production-master`
+  registration on one of those gateways read as Claude silently proceeding
+  without the tools rather than acknowledging the gap. Reviewed and not
+  applicable, all host- or client-side with no MCP transport, registration,
+  or auth surface here: `SendFeedback` and its `feedbackDrafts` setting
+  (feedback-report drafting, no server hook); `spinnerTipsOverride`'s
+  `{id, text, cooldownSessions, priority}`/`tipsFile`/`label` additions and
+  the new Bash-permission-prompt tip (terminal UI); `/claude-api cost-optimize`
+  and the `/claude-api` skill's new Admin API coverage (Claude API spend and
+  org administration, no relation to this server's own MCP surface or its
+  npm-published tool contract); the arrow-key/Enter, Ctrl-shortcut, and mouse-
+  report input fixes, `/terminal-setup`'s Zed keymap merge fix, and the
+  terminal-hyperlink/PR-badge/peer-message-collapse UI changes (all terminal
+  rendering); the sub-agent first-call-404 fallback and the hook/background-
+  agent output-overflow and memory-growth fixes — this repo defines no
+  `.claude/agents/` sub-agents and no hooks in `.claude/settings.json`, only
+  the one build/test/lint skill; the plugin-marketplace character-hardening
+  and version-less marketplace-cache-directory fixes — this repo ships no
+  `.claude-plugin/` manifest, it is not a plugin; the self-hosted-runner
+  session-status fix — `.github/workflows/claude.yml` runs on GitHub-hosted
+  `ubuntu-latest` only, per this repo's own no-self-hosted-runner rule
+  (`.claude/rules/constraints.md` §6); `/rename`, `/compact`, `/install-github-app`,
+  background-session and Remote-Control fixes, the Sonnet 5 auto-compact
+  window change, and the analytics/sign-in/gateway changes (host account,
+  session-management, and CLI-UX surfaces with no MCP-facing effect).
 - **Claude Code target bumped to 2.1.246** (from 2.1.245) in `.claude-code-version`.
   Reviewed the single-version 2.1.246 delta for MCP-facing changes. One item
   bears directly on this server's own failure taxonomy: before 2.1.246, an MCP
