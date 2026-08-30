@@ -116,6 +116,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stays the rule, not a version-gated exception.
 
 ### Changed
+- **Claude Code target bumped to 2.1.251** (from 2.1.247) in `.claude-code-version`.
+  Reviewed the 2.1.248–2.1.251 delta for MCP-facing changes. One item bears
+  directly on this server's documented connection flow and got a docs update:
+  2.1.248 fixes MCP servers whose `headersHelper` supplies the `Authorization`
+  header falling into OAuth discovery on a `401` instead of re-running the
+  helper and retrying the call, as documented. This server's own auth is
+  pass-through bearer, never OAuth — but `headersHelper` is the option this
+  repo's own Quick Start recommends over a static `--header` bearer for
+  minting short-lived tokens, and on a pre-2.1.248 client a `headersHelper`
+  entry that legitimately needed a fresh token on a `401` could misfire into
+  an OAuth flow this server never supports, instead of the helper simply
+  running again. Quick Start and Troubleshooting now name the fix, so a
+  `headersHelper` setup that seemed to dead-end into an OAuth prompt reads as
+  a host-version answer, not a reason to fall back to a static bearer.
+  Reviewed and not applicable: 2.1.248 also fixes a project `.mcp.json` entry
+  that declares the claude.ai connector type being mis-filed under the
+  trusted "claude.ai" heading in `/mcp` — this server's entries are plain
+  `--transport http`/stdio registrations, never that connector type. From
+  2.1.251: the `/mcp reconnect` error-message fix and the SDK MCP server
+  handshake-timeout fix are both Remote Control- and Agent-SDK-embedded-server
+  surfaces this repo doesn't have (it registers as an ordinary external
+  server, not an SDK-hosted in-process one); the MCP-server-name sanitization
+  improvement and the `/schedule` MCP-servers-can't-attach-to-cloud-routines
+  message are host-side polish with nothing for this server to change; and
+  the `claude mcp add --header`/`add-json` help-text fix is a CLI wording
+  correction only. 2.1.249 and 2.1.250 shipped no itemized MCP-facing changes
+  ("Bug fixes and reliability improvements" only for 2.1.250; 2.1.249 does not
+  appear in the public changelog). Everything else in 2.1.248–2.1.251
+  (`--restricted`, agent `cacheTtl`, self-hosted-runner flags, spend-limit and
+  prompt-cache status-line fields, `claude --help` subcommands, model-switch
+  hooks, Remote Control subagent streaming, and the large body of session-
+  management/CLI/security fixes) is host- or client-side with no MCP
+  transport, registration, or pass-through-auth surface here.
 - **Claude Code target bumped to 2.1.247** (from 2.1.246) in `.claude-code-version`.
   Reviewed the single-version 2.1.247 delta for MCP-facing changes. One item
   concerns this server's own surface and got a docs-only update: Bedrock-,

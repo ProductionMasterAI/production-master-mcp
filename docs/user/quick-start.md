@@ -24,8 +24,13 @@ claude mcp add --transport http production-master <server-url>/mcp \
 > Claude Code 2.1.238, a `headersHelper` configured in a project `.mcp.json` requires
 > that project's trust dialog to have been accepted first (including under `claude -p`),
 > and it runs without your shell's inherited credential env vars — user-, managed-, and
-> claude.ai-scope helpers run from the Claude config dir instead. See Claude Code's MCP
-> docs for `headersHelper` syntax.
+> claude.ai-scope helpers run from the Claude config dir instead. Before Claude Code
+> 2.1.248, a `headersHelper`-minted `Authorization` header that drew a `401` from this
+> server (for example because the minted token had expired) could send the client into
+> OAuth discovery instead of simply re-running your helper for a fresh token — a flow
+> this server, being pass-through-bearer only, never supports. On 2.1.248+ a `401`
+> re-runs the helper and retries the call, as documented. See Claude Code's MCP docs
+> for `headersHelper` syntax.
 
 ### Cursor
 
