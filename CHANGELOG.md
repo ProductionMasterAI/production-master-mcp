@@ -120,6 +120,143 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stays the rule, not a version-gated exception.
 
 ### Changed
+- **Claude Code target bumped to 2.1.251** (from 2.1.247) in `.claude-code-version`.
+  Reviewed the 2.1.248–2.1.251 delta for MCP-facing changes. One item bears
+  directly on this server's documented connection flow and got a docs update:
+  2.1.248 fixes MCP servers whose `headersHelper` supplies the `Authorization`
+  header falling into OAuth discovery on a `401` instead of re-running the
+  helper and retrying the call, as documented. This server's own auth is
+  pass-through bearer, never OAuth — but `headersHelper` is the option this
+  repo's own Quick Start recommends over a static `--header` bearer for
+  minting short-lived tokens, and on a pre-2.1.248 client a `headersHelper`
+  entry that legitimately needed a fresh token on a `401` could misfire into
+  an OAuth flow this server never supports, instead of the helper simply
+  running again. Quick Start and Troubleshooting now name the fix, so a
+  `headersHelper` setup that seemed to dead-end into an OAuth prompt reads as
+  a host-version answer, not a reason to fall back to a static bearer.
+  Reviewed and not applicable: 2.1.248 also fixes a project `.mcp.json` entry
+  that declares the claude.ai connector type being mis-filed under the
+  trusted "claude.ai" heading in `/mcp` — this server's entries are plain
+  `--transport http`/stdio registrations, never that connector type. From
+  2.1.251: the `/mcp reconnect` error-message fix and the SDK MCP server
+  handshake-timeout fix are both Remote Control- and Agent-SDK-embedded-server
+  surfaces this repo doesn't have (it registers as an ordinary external
+  server, not an SDK-hosted in-process one); the MCP-server-name sanitization
+  improvement and the `/schedule` MCP-servers-can't-attach-to-cloud-routines
+  message are host-side polish with nothing for this server to change; and
+  the `claude mcp add --header`/`add-json` help-text fix is a CLI wording
+  correction only. 2.1.249 and 2.1.250 shipped no itemized MCP-facing changes
+  ("Bug fixes and reliability improvements" only for 2.1.250; 2.1.249 does not
+  appear in the public changelog). Everything else in 2.1.248–2.1.251
+  (`--restricted`, agent `cacheTtl`, self-hosted-runner flags, spend-limit and
+  prompt-cache status-line fields, `claude --help` subcommands, model-switch
+  hooks, Remote Control subagent streaming, and the large body of session-
+  management/CLI/security fixes) is host- or client-side with no MCP
+  transport, registration, or pass-through-auth surface here.
+- **Claude Code target bumped to 2.1.247** (from 2.1.246) in `.claude-code-version`.
+  Reviewed the single-version 2.1.247 delta for MCP-facing changes. One item
+  concerns this server's own surface and got a docs-only update: Bedrock-,
+  Vertex-, and Foundry-backed Claude Code sessions are now told by the host
+  when an MCP server connection fails, matching what direct-Anthropic-API
+  sessions already did — previously that failure was visible only in
+  `claude mcp list`/`/mcp`, not to Claude itself mid-turn. Troubleshooting's
+  Connectivity section now names the fix, since a failed `production-master`
+  registration on one of those gateways read as Claude silently proceeding
+  without the tools rather than acknowledging the gap. Reviewed and not
+  applicable, all host- or client-side with no MCP transport, registration,
+  or auth surface here: `SendFeedback` and its `feedbackDrafts` setting
+  (feedback-report drafting, no server hook); `spinnerTipsOverride`'s
+  `{id, text, cooldownSessions, priority}`/`tipsFile`/`label` additions and
+  the new Bash-permission-prompt tip (terminal UI); `/claude-api cost-optimize`
+  and the `/claude-api` skill's new Admin API coverage (Claude API spend and
+  org administration, no relation to this server's own MCP surface or its
+  npm-published tool contract); the arrow-key/Enter, Ctrl-shortcut, and mouse-
+  report input fixes, `/terminal-setup`'s Zed keymap merge fix, and the
+  terminal-hyperlink/PR-badge/peer-message-collapse UI changes (all terminal
+  rendering); the sub-agent first-call-404 fallback and the hook/background-
+  agent output-overflow and memory-growth fixes — this repo defines no
+  `.claude/agents/` sub-agents and no hooks in `.claude/settings.json`, only
+  the one build/test/lint skill; the plugin-marketplace character-hardening
+  and version-less marketplace-cache-directory fixes — this repo ships no
+  `.claude-plugin/` manifest, it is not a plugin; the self-hosted-runner
+  session-status fix — `.github/workflows/claude.yml` runs on GitHub-hosted
+  `ubuntu-latest` only, per this repo's own no-self-hosted-runner rule
+  (`.claude/rules/constraints.md` §6); `/rename`, `/compact`, `/install-github-app`,
+  background-session and Remote-Control fixes, the Sonnet 5 auto-compact
+  window change, and the analytics/sign-in/gateway changes (host account,
+  session-management, and CLI-UX surfaces with no MCP-facing effect).
+- **Claude Code target bumped to 2.1.246** (from 2.1.245) in `.claude-code-version`.
+  Reviewed the single-version 2.1.246 delta for MCP-facing changes. One item
+  bears directly on this server's own failure taxonomy: before 2.1.246, an MCP
+  tool call interrupted mid-flight by an incoming message in a headless or
+  remote session could be reported to the client as "completed with no
+  output" — indistinguishable from a legitimate empty success — instead of an
+  explicit interrupted error. That is exactly the ambiguity this server's own
+  relay design refuses to allow (an upstream failure is never reported as an
+  empty-but-successful result; see `upstream.ts`), so Troubleshooting now
+  names the fix: a `production-master` tool call that "succeeded with
+  nothing" in a headless/CI run on a pre-2.1.246 client may have actually been
+  interrupted, not genuinely empty. Also documented: 2.1.246 further hardens
+  non-interactive (`-p`/SDK/cloud) sessions by auto-continuing a response cut
+  off mid-stream by a server error, connection loss, or stall, complementing
+  the 2.1.243 dropped-connection reconnect fix already on record. Reviewed and
+  not applicable: the fix for MCP tool arguments sent as JSON strings when a
+  parameter's schema is empty (`{}`) — every tool here takes its schema from
+  `@production-master/mcp-tool-contract`'s Zod definitions, none of which
+  serialize to a bare `{}`; the fix for `requiresUserInteraction` tools
+  offering an ignored "don't ask again" option — this server declares no tool
+  with that flag, all twenty are plain relay calls; and the fix scoping
+  telemetry/metrics credentials to their own gateway host — this server sends
+  no telemetry to Anthropic. Everything else in 2.1.246 (Bash wildcard
+  warnings, `/permissions` Auto mode tab, `/cd` live-reload, plugin/keybinding
+  fixes, `/code-review` and `/goal` scheduling changes) is host- or
+  editor-side and touches none of this server's transport, registration, or
+  auth surfaces.
+- **Claude Code target bumped to 2.1.245** (from 2.1.241) in `.claude-code-version`.
+  Reviewed the 2.1.242–2.1.245 delta for MCP-facing changes. One item concerns
+  this server's own surface and needed a docs-only update: 2.1.243 fixes remote
+  MCP servers in non-interactive (`claude -p`) and SDK sessions never
+  recovering after a dropped connection — they now reconnect automatically or
+  report as failed instead of hanging silent. This server's Streamable HTTP
+  transport is exactly the kind of remote MCP connection that regression
+  affected, so Troubleshooting now names the fix so a stale-looking headless
+  or SDK integration on an older Claude Code reads as a host-version answer,
+  not a server bug. Also reviewed from 2.1.243: the `managed` marker `/mcp`
+  and `/plugins` now show for claude.ai connectors whose auth is managed by
+  an organization — noted in passing in Usage's bearer-token section, since
+  it's a client-side display detail with no effect on this server's own
+  pass-through behavior; and the fix for MCP sign-in from the desktop app
+  failing with "Invalid redirect URI" on servers supporting client ID
+  metadata documents (e.g. Linear) — not applicable, since this server uses
+  pass-through bearer auth, never MCP OAuth or dynamic client registration
+  (same distinction already on record in Troubleshooting's 401 section).
+  2.1.242 and 2.1.244 shipped no separately documented changes, and 2.1.245
+  shipped only a Linux-glibc-2.44 Claude Code startup crash fix — a host
+  binary issue with no MCP-facing surface. Everything else in 2.1.242–2.1.245
+  (auto mode, `/resume`, Remote Control, cross-session messaging, VS Code,
+  billing/settings surfaces) is host- or client-side and touches none of this
+  server's transport, registration, or auth surfaces.
+- **Claude Code target bumped to 2.1.241** (from 2.1.238) in `.claude-code-version`.
+  Reviewed the 2.1.239–2.1.241 delta for MCP-facing changes; none touch this
+  server's transport, registration, or pass-through-auth surfaces, so no
+  server-side or docs change was needed. 2.1.239's items are all host- or
+  billing-side: the 1.1x US-only-inference cost premium for data-residency
+  workspaces (`/cost`, status line, `--max-budget-usd`), a one-time
+  fullscreen-renderer offer on Bedrock/Vertex/Foundry, a `/claude-api upgrade`
+  helper that migrates *Python* projects off the `anthropic` 0.x SDK (this repo
+  ships a TypeScript server and no Python client, so it's not applicable),
+  `name@synced` labeling for plugins synced from claude.ai, a WebFetch
+  cache-duration fix (15 minutes, was session-lifetime), a cloud-session
+  idle-worker-restart/plan-mode fix, and Windows cross-session
+  `SendMessage`/`ListAgents` parity — none of which is an MCP transport,
+  registration, or auth surface. 2.1.240 and 2.1.241 each ship only as "Bug
+  fixes and reliability improvements," with no itemized detail in the public
+  changelog; neither release note names an MCP-protocol, transport, or
+  pass-through-auth change, so there is nothing to act on beyond the version
+  bump itself. Unlike the 2.1.236–2.1.238 bump below, this delta produced no
+  docs change either — 2.1.238's `headersHelper` note in
+  `docs/user/quick-start.md` remains current, since nothing in 2.1.239–2.1.241
+  alters `headersHelper` or any other documented connection flow.
 - **Claude Code target bumped to 2.1.238** (from 2.1.235) in `.claude-code-version`.
   Reviewed the 2.1.236–2.1.238 delta for MCP-facing changes. Two items concern this
   server's own surfaces and needed no server-side change after review: 2.1.238 fixes
