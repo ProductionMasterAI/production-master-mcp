@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Cursor 3.11 (+2026-08-27):** advance `changelog_date` **2026-08-19 → 2026-08-27**; desktop **3.16.29 → 3.18.9**. Document Cloud Agent **Start from scratch** (no SCM), Origin **Create repo**, **browser port-forward preview**, and optional **Vercel publish**. No server-side change. Cursor-only.
+- **Cursor 3.11 (+2026-08-19):** document native **CreateGoal** / **UpdateGoal** beside Agent Window `/goal` in Quick Start (no server change). Cursor-only.
+
 ### Added
 - **OIDC trusted-publishing wiring for `@production-master/mcp` (dev#644).**
   `release.yml` now publishes the package on a `v*` tag via npm OIDC trusted
