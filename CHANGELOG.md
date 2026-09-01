@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Claude Code target bumped to 2.1.252** (from 2.1.251) in `.claude-code-version`.
+  Reviewed the single-version 2.1.252 delta for MCP-facing changes: none found.
+  All four items in that release are host-side reliability fixes with no MCP
+  transport, registration, or pass-through-auth surface here — a Bash "task
+  output swap refused (tasks dir moved or linked)" failure on some Macs, an
+  "always allow" permission rule not saving in a project that has no
+  `.claude/settings.local.json` yet, Remote Control sessions hosted by Claude
+  Desktop or VS Code stalling for minutes after a tool finished when the
+  connection to claude.ai was degraded, and background task notifications
+  with very large failure output overflowing the API request size limit.
+  None of them touches this server's HTTP/stdio transports, the
+  `headersHelper` guidance in Quick Start/Troubleshooting, or MCP
+  server-name handling — no docs or code changes follow from this bump.
+
+### Changed
 - **Cursor 3.11 (+2026-08-27):** advance `changelog_date` **2026-08-19 → 2026-08-27**; desktop **3.16.29 → 3.18.9**. Document Cloud Agent **Start from scratch** (no SCM), Origin **Create repo**, **browser port-forward preview**, and optional **Vercel publish**. No server-side change. Cursor-only.
 - **Cursor 3.11 (+2026-08-19):** document native **CreateGoal** / **UpdateGoal** beside Agent Window `/goal` in Quick Start (no server change). Cursor-only.
 
