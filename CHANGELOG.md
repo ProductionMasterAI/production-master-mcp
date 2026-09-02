@@ -8,6 +8,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Claude Code target bumped to 2.1.257** (from 2.1.252) in `.claude-code-version`.
+  2.1.253–2.1.256 do not exist as public releases, so the whole delta is the single
+  2.1.257 entry. Reviewed it end to end for MCP-facing changes. Two items bear on
+  this server's own documented behavior and got docs-only updates:
+
+  `/mcp reconnect` and `/mcp enable` could previously reconnect a settings-file MCP
+  server that a managed MCP allow/deny list — or `strictPluginOnlyCustomization`
+  loaded after startup — should have blocked, evading the enterprise policy that was
+  supposed to keep it out. `production-master` is registered exactly that way: an
+  ordinary settings-file entry from `claude mcp add`, never a plugin-bundled server
+  (this repo ships no `.claude-plugin/` manifest). An org relying on
+  `strictPluginOnlyCustomization` or an allow/deny list to keep `production-master`
+  out (or in) was relying on that enforcement holding across a reconnect, which it
+  didn't before this fix. Troubleshooting's Connectivity section now names it, so a
+  `production-master` registration that used to survive a reconnect it shouldn't
+  have reads as a host-version answer, not a policy hole in this server.
+
+  Claude Code's own MCP connection and OAuth debug/error logs now redact
+  credentials carried in a server's URL or request headers. This server never
+  implements MCP OAuth — pass-through bearer only, see `upstream.ts`'s
+  `scrubToken` — and never logs the forwarded token on its own side either way. But
+  a verbose or `--mcp-debug` Claude Code session logs *its own* view of the
+  handshake, headers included, and until now that log lived entirely client-side,
+  outside anything this server controls. Troubleshooting's "Still stuck?" section
+  — which already carries the 2.1.234 note about diagnostic output leaking secrets
+  — now also names this one: a debug log captured on Claude Code 2.1.257+ redacts
+  the bearer out of that client-side view too, in addition to (never instead of)
+  this server's own never-log-the-token design.
+
+  Reviewed and not applicable, in roughly the published entry's order: Fable 5.1
+  and gateway model-discovery `description` support (model selection — this
+  server holds no LLM/model-provider SDK of any kind, the hard constraint in
+  `AGENTS.md` §1 and CI's `no-llm-sdk` job); `timeFormat`/`timeZone`, `/effort s`,
+  and the `/doctor` stale-sandbox-mask warning (terminal/session ergonomics with
+  no server surface); the auto-mode Containment Escape rule and
+  `permissions.blockReadsOutsideWorkingDirectories` (this repo's own scripts and
+  CI never fetch cloud metadata credentials or read outside the working
+  directory — nothing here does the kind of thing that rule exists to catch);
+  `CLAUDE_CODE_SUBAGENT_MODEL_FORCE` (this repo defines no `.claude/agents/`
+  sub-agents, only the one build/test/lint skill, which spawns nothing); the
+  WebSocket MCP connection error-logging fix (this server exposes Streamable
+  HTTP and stdio only, never a WebSocket transport); the `claude mcp add/remove`
+  FIFO/device-file-symlink hang fix and the `strictPluginOnlyCustomization`
+  leftover-OAuth-credential cleanup (this repo ships no `.mcp.json` and this
+  server holds no OAuth credentials to leave behind); the Bash `Read()`/`Edit()`
+  deny-rule redirect/`tac`/`egrep` fix and the compound-command/subshell
+  `permissions.ask` fix (`.claude/settings.json` here is an allow-list of
+  specific commands with no security-relevant deny rule for either fix to
+  matter to); the plugin-component symlinked-path fix (no `.claude-plugin/`
+  manifest — this repo is not a plugin); `defaultMode: "bypassPermissions"` in
+  project settings now being ignored (neither `.claude/settings.json` here sets
+  a `defaultMode` at all); the self-hosted-runner git-push-negotiation
+  improvement (`.claude/rules/constraints.md` §6 and every workflow under
+  `.github/workflows/` run GitHub-hosted `ubuntu-latest` only — there is no
+  self-hosted runner here to improve); `/code-review --comment` posting to
+  GitLab via `glab` (this repo is hosted on GitHub only); and the sandboxed
+  trailing-dot denied-domain fix (no `sandbox.network` policy is configured
+  anywhere in this repo). Everything else in 2.1.257 — the VS Code session-list,
+  model-picker, and archive-session changes; rendering-performance and
+  prompt-input-responsiveness improvements; policy-helper, telemetry, and
+  managed-settings diagnostics; Remote Control, `/btw` history, and `/schedule`
+  changes; background-session, subagent-transcript, and prompt-cache
+  reliability fixes; and the rest of the CLI/session-management fixes — is
+  host- or client-side with no MCP transport, registration, or
+  pass-through-auth surface here.
 - **Claude Code target bumped to 2.1.252** (from 2.1.251) in `.claude-code-version`.
   Reviewed the single-version 2.1.252 delta for MCP-facing changes: none found.
   All four items in that release are host-side reliability fixes with no MCP
