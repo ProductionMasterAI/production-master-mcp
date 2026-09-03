@@ -8,6 +8,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Claude Code target bumped to 2.1.259** (from 2.1.258) in `.claude-code-version`.
+  Reviewed the single-version 2.1.259 delta for MCP-facing changes. Three items bear
+  on this server's documented behavior and got docs updates; the rest were reviewed
+  and found not applicable.
+
+  **`managedMcpServers` is new: an org admin can now push an HTTP/SSE MCP server to
+  every user centrally** (same entry shape as `.mcp.json`) instead of asking each
+  engineer to run `claude mcp add`. `production-master` qualifies — it is a
+  Streamable HTTP server, and a `managedMcpServers` entry that names a launch
+  command is skipped, so this reaches the HTTP transport only, never stdio. Quick
+  Start's Claude Code HTTP section now documents this as an alternative rollout
+  path, with the sample entry shape, alongside the existing Cursor Team MCP callout.
+
+  That addition changes what an existing enterprise allow/deny policy actually
+  covers: **`allowedMcpServers` now governs only user-added entries (`claude mcp
+  add`, project `.mcp.json`) — a `managedMcpServers` entry loads regardless of it,
+  and keeping it out now requires `deniedMcpServers`.** `production-master`
+  registered the documented way (`claude mcp add`, no plugin manifest here) is
+  still governed by `allowedMcpServers` exactly as before. But an org that adopts
+  the new `managedMcpServers` rollout path above and also wants it blockable must
+  use `deniedMcpServers`, not `allowedMcpServers` — the new Quick Start callout and
+  the existing allow/deny bullet in Troubleshooting → Connectivity both now say so,
+  so a `managedMcpServers` deployment an org meant to keep optional doesn't
+  silently become mandatory.
+
+  **"Connected but no tools" gets one more version answer.** Before 2.1.259, an MCP
+  server that disconnected while Claude Code was still listing its tools could be
+  left showing as connected with an empty tool list instead of a failed/disconnected
+  state — the same symptom class as the mid-turn-connection bug fixed in 2.1.224,
+  now closed for the tool-listing window too. Troubleshooting → Transport mismatch
+  now names it next to the 2.1.224 note: if `production-master` shows connected in
+  `/mcp` with no tools listed, update Claude Code before re-registering or debugging
+  the server.
+
+  Reviewed and not applicable, in roughly the published entry's order:
+  `--permission-prompts none` (unattended-headless-host ergonomics, not this
+  server's registration flow), `glab` MR recognition (this repo is hosted on GitHub
+  only), `--json` for `claude plugin validate` (no `.claude-plugin/` manifest here),
+  concurrent-session `~/.claude.json` reversion and the rejected-thinking
+  every-later-turn bug (client-side session state), the Bash `Read()` deny-rule
+  gaps fix (`.claude/settings.json` here is an allow-list with no deny rule for the
+  gaps to matter to), the prompt-cache/OAuth-refresh and fullscreen-blank-conversation
+  fixes, auto-mode running an unsupported frontmatter model and
+  `CLAUDE_CODE_MAX_CONTEXT_TOKENS` on Vertex-style IDs (no `.claude/agents/` or model
+  config here), the background GitHub-connection check on claude.ai launches,
+  `--resume` on an empty attachment, frontmatter `model:` ignored interactively (no
+  agents defined), the Artifact-publishing fix, managed `forceRemoteSettingsRefresh`
+  at startup, hook-created-worktree isolation (no hooks defined), OpenTelemetry
+  metrics missing user/org fields (no telemetry config here), the file-edit
+  permission-dialog truncation and repository-detection fixes, managed settings now
+  refusing to start when unparseable (this repo ships no managed-settings file of
+  its own to get that wrong), Stop not stopping background agents and duplicate
+  agents on workflow resume (no background agents or workflows defined), the
+  marketplace trailing-slash `.git` fix (no marketplace here), blocking-Stop-hook
+  reasoning loss (no hooks), the 60-second remote-session stall after a
+  browser-hosted MCP server's page closes (this server is never browser-hosted),
+  worktree-isolated Bash-loop refusals, terminal resize/render performance,
+  `/workflows` JSON rendering (no workflows), the `/install-github-app` GitLab
+  messaging change, and nested background-subagent transcripts (no subagents
+  defined). One more MCP item, reviewed and left undocumented as too minor to
+  warrant a Troubleshooting entry: headless/SDK sessions now finish connecting
+  configured MCP servers roughly 50ms sooner at startup — a host-side speed-up
+  with no behavior for this server's docs to describe.
 - **Claude Code target bumped to 2.1.258** (from 2.1.257) in `.claude-code-version`.
   Reviewed the single-version 2.1.258 delta for MCP-facing changes: none found. Both
   items in that release are host-side fixes with no MCP transport, registration, or
@@ -561,7 +624,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `/code-review` — touches no documented flow here. The registration flows
   (`claude mcp add --transport http` / stdio) and the pass-through-auth design are
   unaffected; no server-side change required.
-
 - **Claude Code target bumped to 2.1.222** (from 2.1.220) in `.claude-code-version`.
   Troubleshooting's headless (`claude -p`) guidance now covers the 2.1.221 fix for
   `--mcp-config` servers not being connected before the first turn in print mode —
