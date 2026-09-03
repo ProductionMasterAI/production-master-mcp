@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Claude Code target bumped to 2.1.258** (from 2.1.257) in `.claude-code-version`.
+  Reviewed the single-version 2.1.258 delta for MCP-facing changes: none found. Both
+  items in that release are host-side fixes with no MCP transport, registration, or
+  pass-through-auth surface here — a macOS 12 (Monterey) launch regression introduced
+  in 2.1.255, and remote/scheduled sessions failing with "user messages must have
+  non-empty content" after a re-sent permission approval could not be applied. Neither
+  touches this server's HTTP/stdio transports, the documented `claude mcp add`
+  registration flows, or the pass-through-auth design — no docs or code changes follow
+  from this bump.
 - **Claude Code target bumped to 2.1.257** (from 2.1.252) in `.claude-code-version`.
   2.1.253–2.1.256 do not exist as public releases, so the whole delta is the single
   2.1.257 entry. Reviewed it end to end for MCP-facing changes. Two items bear on
