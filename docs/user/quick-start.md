@@ -32,6 +32,31 @@ claude mcp add --transport http production-master <server-url>/mcp \
 > re-runs the helper and retries the call, as documented. See Claude Code's MCP docs
 > for `headersHelper` syntax.
 
+> **Organization-wide rollout without per-user `claude mcp add` (Claude Code 2.1.259+).**
+> An admin can push `production-master` to every user centrally instead of each
+> engineer running the command above, via the managed `managedMcpServers` setting —
+> same entry shape as `.mcp.json`:
+>
+> ```jsonc
+> {
+>   "managedMcpServers": {
+>     "production-master": {
+>       "type": "http",
+>       "url": "<server-url>/mcp",
+>       "headers": { "Authorization": "Bearer <your-token>" }
+>     }
+>   }
+> }
+> ```
+>
+> Only the HTTP transport qualifies: `managedMcpServers` entries are HTTP/SSE only —
+> one that names a launch command (the stdio option below) is skipped. If your org
+> also relies on an MCP allow/deny list, note the 2.1.259 semantics change:
+> `allowedMcpServers` now governs only user-added entries, so a `managedMcpServers`
+> entry loads regardless of it — use `deniedMcpServers` if you need this deployment
+> to stay blockable. See [Troubleshooting → Connectivity](troubleshooting.md#connectivity)
+> for the enterprise allow/deny note.
+
 ### Cursor
 
 Add to `.cursor/mcp.json` in your project (or your global Cursor config), or manage
