@@ -1,4 +1,6 @@
 {
+  "bashOutputMaxChars": 128000,
+  "taskOutputMaxChars": 128000,
   "permissions": {
     "allow": [
       "Bash(npm ci)",
