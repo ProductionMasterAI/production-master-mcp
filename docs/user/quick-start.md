@@ -56,6 +56,20 @@ claude mcp add --transport http production-master <server-url>/mcp \
 > entry loads regardless of it — use `deniedMcpServers` if you need this deployment
 > to stay blockable. See [Troubleshooting → Connectivity](troubleshooting.md#connectivity)
 > for the enterprise allow/deny note.
+>
+> **A misspelled field in that entry used to fail silently — fixed in 2.1.260.** Before
+> Claude Code 2.1.260, a Claude apps gateway `desktop` policy that misspelled a field
+> inside a nested `managedMcpServers` (or `orgPluginSettings`) object could be deployed
+> without the typo being caught, leaving the rollout quietly misconfigured instead of
+> reaching every user as intended. On 2.1.260+ the gateway refuses to start and names
+> the offending field instead. If you push the `production-master` entry above via
+> `managedMcpServers`, a typo in it now surfaces at gateway startup rather than as a
+> silent no-op for whoever it failed to reach.
+
+> **VS Code (Claude Code 2.1.261+):** the MCP servers dialog gained an **Add server**
+> form and a **Remove** action, so this HTTP entry can be added (or removed) from
+> inside the IDE without editing a settings file by hand — the same entry shape as
+> above, filled into the form instead of pasted as JSON.
 
 ### Cursor
 
