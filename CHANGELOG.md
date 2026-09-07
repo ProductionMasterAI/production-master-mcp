@@ -10,6 +10,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Cursor 3.11 (+2026-09-02):** advance `changelog_date` **2026-08-27 → 2026-09-02** (feature **3.11** / desktop **3.18.9** unchanged). Document Cursor **Self-Hosted Machines** / Team Pools / partner sandboxes / computer use, and clarify they are not GitHub Actions self-hosted runners (public repo stays on `ubuntu-latest`). No server-side change. Cursor-only.
+- **Claude Code target bumped to 2.1.263** (from 2.1.259) in `.claude-code-version`.
+  2.1.262 does not exist as a public release, so the delta is 2.1.260 → 2.1.261 →
+  2.1.263 (2.1.263 itself ships only "bug fixes and reliability improvements" with no
+  published detail). Reviewed the full three-version delta for MCP-facing changes and
+  for anything this build+test+lint monorepo could put to use.
+
+  **Adopted, both low-risk and directly traceable to a changelog entry:**
+
+  - `bashOutputMaxChars` and `taskOutputMaxChars` (2.1.261) raised to `128000` — the
+    documented maximum — in `.claude/settings.json`. This skill's own contract
+    (`.claude/skills/run-production-master-mcp/SKILL.md`) is to run `npm run build`,
+    `npm test`, `npm run lint`, `npm run typecheck` and cite the output; `vitest`,
+    `tsc`, and `eslint` output on a growing workspace set can exceed the previous
+    30,000-character inline default, which would have made "cite the output" produce
+    a silently truncated citation instead of a complete one. Raising both settings
+    costs nothing at this repo's current size and removes that failure mode as the
+    test/lint surface grows.
+  - Noted `/skill-doctor` (2.1.261) in `CLAUDE.md`'s Claude-only addenda: this repo
+    ships exactly one skill today, so there is nothing to prune yet, but a contributor
+    running Claude Code here alongside other loaded skills can now check what each one
+    costs before it accumulates.
+
+  **Docs updated for two changes that bear on content this repo already documents:**
+
+  - **A `managedMcpServers` (or `orgPluginSettings`) entry with a misspelled nested
+    field used to deploy without complaint — fixed in 2.1.260.** [Quick Start](docs/user/quick-start.md)'s
+    2.1.259 callout documents `managedMcpServers` as an org-wide rollout path for
+    `production-master`. Before 2.1.260, a Claude apps gateway `desktop` policy
+    typo inside that entry's nested object was not caught, so a rollout meant to
+    reach every user could go out silently misconfigured. On 2.1.260+ the gateway
+    refuses to start and names the field. Quick Start's `managedMcpServers` callout
+    now says so, next to the existing 2.1.259 semantics note.
+  - **VS Code's MCP servers dialog (2.1.261) gained an Add server form and a Remove
+    action.** Quick Start already documents Cursor's Customize-page UI path (3.9+)
+    for this same HTTP entry as an alternative to hand-editing config; the VS Code
+    extension now has an equivalent, so Quick Start's Claude Code section notes it.
+
+  **Reviewed and not applicable**, grouped by why: the great majority of this delta
+  (VS Code UI/session-list fixes, Remote Control, agent teams, background/subagent
+  session lifecycle, `/rewind`, terminal rendering, Bedrock/Vertex/Fable model paths,
+  the diff panel, `/advisor`, `/reload-plugins`, plugin marketplaces, OAuth/gcp/OTel
+  gateway plumbing, and the Workflow `agent({schema})` up-front validation) has no
+  surface in this repo: no LLM/model-provider SDK (hard constraint, AGENTS.md §1), no
+  `.claude/agents/` sub-agents or Workflow scripts (so `--append-subagent-system-prompt-file`
+  doesn't apply either — no subagent prompt is ever passed as a CLI arg here), no
+  `.claude-plugin/` manifest, no hooks, and no self-hosted runner (GitHub-hosted
+  `ubuntu-latest` only, per constraint §6). Two items got closer scrutiny before being
+  set aside as not applicable: the Bash `Read()`-deny-rule-on-arguments change from
+  2.1.259 was reverted in 2.1.260 after it broke `npm run build` under a
+  `Read(./**/build/**)` deny rule in every mode — moot here either way, since
+  `.claude/settings.json` is an allow-list with no such deny rule (as already noted for
+  the original 2.1.259 change below); and the managed `skillOverrides`
+  alias/nested-name fix (2.1.260) has nothing to apply to, since this repo's one skill
+  is referenced under its own unaliased, unnested name.
 - **Claude Code target bumped to 2.1.259** (from 2.1.258) in `.claude-code-version`.
   Reviewed the single-version 2.1.259 delta for MCP-facing changes. Three items bear
   on this server's documented behavior and got docs updates; the rest were reviewed
