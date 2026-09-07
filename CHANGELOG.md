@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+
+- **Cursor 3.11 (+2026-09-02):** advance `changelog_date` **2026-08-27 → 2026-09-02** (feature **3.11** / desktop **3.18.9** unchanged). Document Cursor **Self-Hosted Machines** / Team Pools / partner sandboxes / computer use, and clarify they are not GitHub Actions self-hosted runners (public repo stays on `ubuntu-latest`). No server-side change. Cursor-only.
 - **Claude Code target bumped to 2.1.263** (from 2.1.259) in `.claude-code-version`.
   2.1.262 does not exist as a public release, so the delta is 2.1.260 → 2.1.261 →
   2.1.263 (2.1.263 itself ships only "bug fixes and reliability improvements" with no
