@@ -9,6 +9,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Claude Code target bumped to 2.1.267** (from 2.1.263) in `.claude-code-version`.
+  Reviewed the full 2.1.263 → 2.1.267 delta (2.1.264 does not exist as a public
+  release; 2.1.266 is a pure regression fix for `CLAUDE_CODE_USE_GATEWAY`, which
+  this repo doesn't set — no action) for MCP-facing changes and anything this
+  build+test+lint monorepo could put to use.
+
+  **Two items got close scrutiny because they land squarely on this repo's own
+  topic — MCP connectivity — and both turned out not to apply:**
+
+  - **"MCP servers declared `http` with only legacy HTTP+SSE support never
+    connecting — now falls back automatically" (2.1.265).** Checked this against
+    `packages/mcp-server/src/http.ts`: `production-master-mcp` serves `POST /mcp`
+    with `StreamableHTTPServerTransport` only — stateless, JSON-response,
+    POST-only, no legacy SSE stream endpoint alongside it. It was never one of
+    the legacy-only servers this bug affected, and no doc here ever carried a
+    workaround for it to remove.
+  - **Improved handling of remote MCP servers needing sign-in — no OAuth client
+    registered until authentication (2.1.265).** This server is pass-through
+    bearer only and explicitly never implements MCP OAuth (see the `headersHelper`
+    callout in [Quick Start](docs/user/quick-start.md) and the auth-failures
+    section of [Troubleshooting](docs/user/troubleshooting.md)), so there is no
+    sign-in flow of this server's own for the fix to change, and no existing
+    doc caveat about it to update.
+
+  **Also checked and not applicable, each against something this repo actually
+  has:** `--plugin-dir` folder-of-plugins (2.1.265) — no `.claude-plugin/`
+  manifest and exactly one skill, so there's no multi-plugin local-dev setup to
+  simplify; the advisor-tool re-decision fix (2.1.265) — no advisor-tool
+  workflow documented here; `maxEffortLevel` (2.1.267) — this repo gives no
+  `/effort` cost-control guidance to revise; the `effort:` frontmatter fix
+  (2.1.267) — `.claude/skills/run-production-master-mcp/SKILL.md` carries no
+  `effort:` frontmatter.
+
+  **The rest of the delta has no surface here for the same hard constraints as
+  prior reviews below:** telemetry fields, the 1 GB tool-result disk cap,
+  foreground-subagent/`SubagentStart`-hook resume fixes, the plugin-path
+  symlink/backslash security fixes and the marketplace-path security fix
+  (2.1.267), Artifact tool fixes, Cowork scheduled-task sandboxing (2.1.267),
+  Workflow `agent()` schema validation, expired AWS/GCP credential retry
+  behavior, managed `allowedHttpHookUrls`/`httpHookAllowedEnvVars`/
+  `allowedChannelPlugins` fixes, and the `/diff`/Bash-description/`--resume`/
+  artifact-publish polish — no LLM/model-provider SDK, no hooks, no
+  `.claude-plugin/` manifest or marketplace, no Workflow scripts or subagents,
+  no Cowork or Artifact usage, GitHub-hosted `ubuntu-latest` CI only.
+
+  **Nothing adopted this round.** The delta touches no documented behavior or
+  workaround in this repo; `.claude-code-version` is the only change.
 - **Cursor 3.11 (+2026-09-02):** advance `changelog_date` **2026-08-27 → 2026-09-02** (feature **3.11** / desktop **3.18.9** unchanged). Document Cursor **Self-Hosted Machines** / Team Pools / partner sandboxes / computer use, and clarify they are not GitHub Actions self-hosted runners (public repo stays on `ubuntu-latest`). No server-side change. Cursor-only.
 - **Claude Code target bumped to 2.1.263** (from 2.1.259) in `.claude-code-version`.
   2.1.262 does not exist as a public release, so the delta is 2.1.260 → 2.1.261 →
