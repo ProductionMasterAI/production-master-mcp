@@ -9,6 +9,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Claude Code target bumped to 2.1.268** (from 2.1.267) in `.claude-code-version`.
+  Reviewed the single-release 2.1.268 delta for MCP-facing changes and anything this
+  build+test+lint monorepo could put to use.
+
+  **Adopted, both low-risk and directly traceable to a changelog entry:**
+
+  - **[Quick Start](docs/user/quick-start.md): documented a `${VAR}` env-var
+    placeholder as a lighter-weight alternative to `headersHelper` for a static
+    token.** Claude Code has long expanded `${VAR}` from the environment in an
+    MCP header value, but before 2.1.268 a secret resolved that way could still
+    surface in plaintext in `/mcp` server details, `claude mcp list`/`get` output,
+    and MCP login error text — the placeholder kept the token out of `.mcp.json`
+    but not out of the client's own diagnostics. On 2.1.268+ those surfaces redact
+    a `${VAR}`-resolved value exactly like a literal one, which makes it worth
+    recommending for setups that don't need per-connection token minting. The
+    callout also says what to do on an older client (stick with `headersHelper`,
+    or avoid sharing `claude mcp list`/`/mcp` output).
+  - **[Troubleshooting](docs/user/troubleshooting.md): documented "your message
+    came through empty" right after an MCP tool call (fixed in 2.1.268).** This
+    was a host-side rendering bug that could follow *any* MCP tool call,
+    `production-master`'s included, with no relation to what the tool actually
+    returned — exactly the kind of symptom this doc exists to tell apart from a
+    real server failure, matching the pattern of the 2.1.246 "succeeded with
+    nothing" entry already here.
+
+  **Also checked and not applicable, each against something this repo actually
+  has:** MCP server OAuth sign-in failing with "No available ports for OAuth
+  redirect" (2.1.268) — this server is pass-through bearer only and explicitly
+  never implements MCP OAuth (see the auth-failures section of
+  [Troubleshooting](docs/user/troubleshooting.md)), so there is no OAuth redirect
+  of this server's own for the port-binding fix to affect; the "N MCP servers need
+  authentication" startup notice becoming once-per-server (2.1.268) — that notice
+  is for servers using MCP OAuth sign-in, which again this server doesn't use;
+  the workload-identity-federation-via-profile `401 … jti reused` fix (2.1.268) —
+  `.github/workflows/claude.yml` authenticates `claude-code-action` with a plain
+  `anthropic_api_key` secret, no WIF profile configured, so there is no shared
+  profile for the race to hit; Bedrock/Vertex/Foundry sessions keeping the MCP
+  tool list byte-stable across a conversation (2.1.268) — a host-side
+  prompt-cache improvement for any MCP server's tools including this one's, with
+  nothing for the server itself to change or a doc caveat to remove.
+
+  **The rest of the delta has no surface here for the same hard constraints as
+  prior reviews below:** the Claude apps gateway `pricing:`/`allow_cidrs`/
+  `gatewayInternalNetworks` additions (this repo operates no gateway),
+  `claude self-hosted-runner --remove-session-state` (GitHub-hosted `ubuntu-latest`
+  CI only, and this flag is unrelated to that constraint's runner-label concern
+  regardless), `--json` on `claude plugin install`/`uninstall`/`update`/`enable`/
+  `disable` (no `.claude-plugin/` manifest), Artifact-tool fixes and browser-tab
+  icons (no Artifact or Cowork usage), the task-tracking-tool model gating change
+  (no TaskCreate/TodoWrite workflow documented here), and the CPU-busy-loop,
+  WebFetch-deadline, Chrome, MEMORY.md-truncation, and terminal/UI polish fixes —
+  no LLM/model-provider SDK, no hooks, no plugins or marketplace, no Workflow
+  scripts or subagents.
+
+  **Nothing else adopted this round.** `.claude-code-version` plus the two
+  documentation additions above are the only changes.
 - **Claude Code target bumped to 2.1.267** (from 2.1.263) in `.claude-code-version`.
   Reviewed the full 2.1.263 → 2.1.267 delta (2.1.264 does not exist as a public
   release; 2.1.266 is a pure regression fix for `CLAUDE_CODE_USE_GATEWAY`, which

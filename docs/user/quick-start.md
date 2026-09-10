@@ -31,6 +31,26 @@ claude mcp add --transport http production-master <server-url>/mcp \
 > this server, being pass-through-bearer only, never supports. On 2.1.248+ a `401`
 > re-runs the helper and retries the call, as documented. See Claude Code's MCP docs
 > for `headersHelper` syntax.
+>
+> **Simpler option for a static token: a `${VAR}` placeholder, now safe to use.**
+> If your Production Master token doesn't need per-connection minting, you don't need
+> a `headersHelper` script at all — reference an environment variable instead of a
+> literal secret in the header value:
+>
+> ```
+> claude mcp add --transport http production-master <server-url>/mcp \
+>   --header "Authorization: Bearer \${PM_SESSION_JWT}"
+> ```
+>
+> Claude Code expands `${VAR}` from the environment when it connects, so the token
+> itself never lands in `.mcp.json` or shell history. Before Claude Code 2.1.268, a
+> secret resolved this way could still leak in plaintext in `/mcp` server details,
+> `claude mcp list`/`get` output, and MCP login error text — the placeholder syntax
+> hid the token from the config file but not from the client's own diagnostics. On
+> 2.1.268+, those surfaces redact a `${VAR}`-resolved value the same way they already
+> redact a literal one. If you're on an older Claude Code, prefer `headersHelper`
+> above, or avoid running `claude mcp list`/`/mcp` where the output might be shared,
+> until you update.
 
 > **Organization-wide rollout without per-user `claude mcp add` (Claude Code 2.1.259+).**
 > An admin can push `production-master` to every user centrally instead of each
