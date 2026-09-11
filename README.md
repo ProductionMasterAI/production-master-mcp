@@ -38,7 +38,7 @@ Authentication is **pass-through**: the client supplies an `Authorization: Beare
 
 ## Quick Start
 
-> **Status:** the server packages under [`packages/`](packages/) are being populated via PRs. The connection patterns below describe how a client registers an MCP server over each transport; the concrete package name and endpoint land with those PRs. See [CHANGELOG](CHANGELOG.md).
+> **Status:** `@production-master/mcp` is implemented, builds, and passes its tests, but it is **not yet published to npm** and no hosted HTTP endpoint is deployed — so `npx -y @production-master/mcp` and `<server-url>` below are not runnable today. The package name, CLI name, and connection patterns are final; only the publish and the hosted deployment are outstanding. See [Quick Start](docs/user/quick-start.md) and [CHANGELOG](CHANGELOG.md) for status.
 
 Every client connects the same two ways, matching the two transports: point it at the server's HTTP endpoint (`<server-url>/mcp`) with an `Authorization: Bearer <token>` header, or run the server locally over stdio (`npx -y @production-master/mcp`).
 
