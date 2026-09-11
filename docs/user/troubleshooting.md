@@ -45,6 +45,18 @@ For the Streamable HTTP transport the client posts to `<server-url>/mcp`. Verify
 
 **A `production-master` tool call that "succeeded with nothing" in a headless/CI run may have actually been interrupted — fixed in 2.1.246.** Before 2.1.246, an MCP tool call cut off mid-flight by an incoming message in a headless or remote session could be reported to the client as "completed with no output," which reads exactly like a legitimate empty result (for example an investigation with genuinely no actions). That ambiguity is precisely what this server's own relay refuses to produce on its own side — an upstream failure is never returned as an empty-but-successful tool result, see the failure-code table below — but a pre-2.1.246 client could still manufacture that same false signal itself when a call was interrupted rather than genuinely empty. On Claude Code 2.1.246+, an interrupted tool call is reported as an explicit interrupted error instead. If a headless run against this server shows a `production-master` call that "finished empty" in a way that doesn't match what you expect the hosted service to return, update Claude Code before assuming the investigation, action, or resource really is empty.
 
+### Claude replies "your message came through empty" right after a tool call
+
+Before Claude Code 2.1.268, Claude could occasionally reply that your message came
+through empty immediately after any MCP tool call completed — a host-side rendering
+bug with no relation to what the tool actually returned. A `production-master` call
+that succeeded (or failed with one of the `error` codes below) could still be
+followed by this message, which reads like the server sent back something broken. It
+didn't: the server's own relay never fabricates a response, and this bug fires
+after the tool result is already in hand, regardless of which MCP server produced
+it. On Claude Code 2.1.268+ this no longer happens. If you're on an older client and
+hit it, just resend your message — retrying the tool call itself is not necessary.
+
 ### Calls reach the server but fail upstream
 
 If the server is reachable but tool calls fail, the failure happened between the server and the hosted service. Every such failure comes back as a tool error with a specific `error` code, so you can tell the causes apart instead of guessing — and none of them is ever reported as an empty-but-successful result:
