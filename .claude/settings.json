@@ -1,6 +1,7 @@
 {
   "bashOutputMaxChars": 128000,
   "taskOutputMaxChars": 128000,
+  "bashEditDiffEnabled": true,
   "permissions": {
     "allow": [
       "Bash(npm ci)",
