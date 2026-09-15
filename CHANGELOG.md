@@ -10,6 +10,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cursor 3.11 (+2026-09-10 / desktop 3.20.17):** advance Cursor coverage through **Projects** (coordinator agent, shared context, subscriptions) and desktop CLI **3.18.9 → 3.20.17**. Feature pin remains **3.11**. Cursor-only; other platform nightlies untouched.
 ### Changed
 
+- **Claude Code target bumped to 2.1.270** (from 2.1.268) in `.claude-code-version`.
+  2.1.270 ships only a fix for a 2.1.269 regression, so the real review is the
+  2.1.269 delta; 2.1.270 itself is covered by the compatibility note below.
+
+  **Compatibility (2.1.270):** before this release, read-only git commands in Bash
+  could unexpectedly ask for permission after a session had been running for a
+  while — a regression introduced in 2.1.269. `.claude/settings.json` explicitly
+  allow-lists `Bash(git status)`, `Bash(git diff *)`, and `Bash(git log *)` on the
+  premise that they never prompt; a contributor who hit the regression on 2.1.269
+  would have seen exactly those allow-listed commands stop and ask anyway, for no
+  change on this repo's side. 2.1.270 restores the documented behavior — nothing to
+  change here beyond the version pin, but worth citing since this repo's own
+  settings depend on the behavior that regressed.
+
+  **Adopted, both low-risk and directly traceable to a changelog entry (2.1.269):**
+
+  - `bashEditDiffEnabled: true` added to `.claude/settings.json`. When the Bash
+    tool itself edits a file (e.g. `sed -i`, sending output through `tee`, or an
+    in-place patch), the tool result now includes a diff of what changed. This
+    repo's own skill (`.claude/skills/run-production-master-mcp/SKILL.md`) and
+    `AGENTS.md` both expect an agent to cite real command output as proof of a
+    change, and a shell-driven edit previously left that diff for the agent to
+    reconstruct by hand (or skip). Costs nothing at this repo's size.
+
+  **Checked against something this repo already relies on and found already
+  correct, not merely inapplicable (2.1.269):** the fix for the built-in
+  attribution reminder overriding a CLAUDE.md/memory rule against commit/PR
+  attribution. This repo doesn't ask for *no* attribution — `.claude/settings.json`
+  sets `attribution.commit` (a managed-settings-style field, not CLAUDE.md prose),
+  and the fix note itself says managed-settings lines apply either way. So this
+  repo's attribution line was never at risk from the pre-2.1.269 bug in the first
+  place, for the same reason a prose-only CLAUDE.md rule now is on 2.1.269+: it
+  uses the setting the reminder is built to defer to. No change made; confirmed
+  correct.
+
+  **Reviewed and not applicable**, grouped by why: `claude plugin eval`,
+  organization-plugin-loading-headless, plugin-archive extraction permissions/
+  world-writable-bits/stale-file security fixes, and the plugin `headersHelper`
+  consent-prompt host-misread fix all presuppose a bundled Claude Code plugin —
+  this repo ships no `.claude-plugin/` manifest (see the existing note in
+  [Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity));
+  the synced-plugin-MCP-servers-on-remote-resume fix is the same case from the
+  other direction. `OTEL_METRICS_INCLUDE_REPOSITORY` and the managed-settings
+  approval dialog's gRPC-collector-naming fix presuppose OpenTelemetry
+  configuration, which this repo has none of. `CLAUDE_CODE_GATEWAY_MODEL_DISCOVERY_TIMEOUT_MS`
+  presupposes an LLM gateway, which is out of scope under the no-provider-SDK
+  constraint (AGENTS.md §1). `CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS`
+  presupposes the Workflow tool, which this repo doesn't use (no `.claude/agents/`,
+  no workflow scripts). `/output-style` and the `/focus` spinner tip are
+  interactive-session polish with no repository-level surface. The `Edit()`/Bash
+  `tee` deny-rule-bypass and bare-`!`-permission-rule-leak security fixes have
+  nothing to bite on here: `.claude/settings.json` is a plain allow-list with no
+  path-scoped deny rules and no `!`-prefixed entries. The MCP-reconnect-on-
+  query-param-reorder fix has no surface either — every documented client entry
+  in [Quick Start](docs/user/quick-start.md) points at a bare `<server-url>/mcp`,
+  never a URL carrying query parameters. Prompt-cache partial-invalidation
+  reliability, `/ultrareview --post`, Artifact-database scratchpad-read approval,
+  and the `anthropic-skills:<name>` sync-naming change are host-side behavior
+  with no documented workaround or usage in this repo to update (no Artifact
+  usage, no `/ultrareview`, and this repo's one skill lives in `.claude/skills/`,
+  never synced from claude.ai).
+
+  **Future opportunity, not adopted:** if this repo ever ships a bundled Claude
+  Code plugin (e.g. a `.claude-plugin/` manifest that wraps `claude mcp add` for
+  `production-master` into a one-command install), `claude plugin eval` would be
+  worth wiring into `ci.yml` as an automated smoke test for it — noted for later,
+  not built speculatively against a plugin that doesn't exist yet.
+
 - **Claude Code target bumped to 2.1.268** (from 2.1.267) in `.claude-code-version`.
   Reviewed the single-release 2.1.268 delta for MCP-facing changes and anything this
   build+test+lint monorepo could put to use.
