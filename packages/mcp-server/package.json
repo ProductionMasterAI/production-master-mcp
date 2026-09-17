@@ -1,10 +1,10 @@
 {
   "name": "@production-master/mcp",
-  "version": "0.1.0",
-  "description": "Standard MCP server (Streamable HTTP + stdio) for the Production Master hosted incident-investigation service. Protocol boundary only \u2014 no investigation logic.",
+  "version": "0.1.1",
+  "description": "Standard MCP server (Streamable HTTP + stdio) for the Production Master hosted incident-investigation service. Protocol boundary only — no investigation logic.",
   "type": "module",
   "bin": {
-    "production-master-mcp": "./dist/bin.js"
+    "production-master-mcp": "dist/bin.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

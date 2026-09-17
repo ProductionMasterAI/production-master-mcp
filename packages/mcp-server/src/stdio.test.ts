@@ -1,6 +1,7 @@
 import { createServer as createNodeServer, type Server as NodeServer } from 'node:http';
 import { AddressInfo } from 'node:net';
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
@@ -11,6 +12,10 @@ import { wireToolName } from '@production-master/mcp-tool-contract';
 const packageRoot = fileURLToPath(new URL('..', import.meta.url));
 const repoRoot = path.resolve(packageRoot, '..', '..');
 const binPath = path.join(packageRoot, 'dist', 'bin.js');
+// Read off disk, not through src/version.ts, so the assertion can catch that module being wrong.
+const packageJsonVersion = (
+  JSON.parse(readFileSync(path.join(packageRoot, 'package.json'), 'utf8')) as { version: string }
+).version;
 
 /**
  * Seam test for the stdio transport. Builds the real package (so `dist/bin.js`
@@ -67,6 +72,8 @@ describe('stdio transport (seam)', () => {
     });
     await client.connect(transport);
     try {
+      // Reported by the spawned dist build, compared to the manifest npm publishes.
+      expect(client.getServerVersion()?.version).toBe(packageJsonVersion);
       const { tools } = await client.listTools();
       expect(tools.length).toBe(20);
       expect(tools.map((t) => t.name)).toContain(wireToolName('get_summary'));

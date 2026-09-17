@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { registerInvestigationTools } from './register-tools.js';
 import { getStdioSessionBearer } from './config.js';
+import { PACKAGE_VERSION } from './version.js';
 
 /**
  * Starts the stdio transport for local MCP hosts (Claude Desktop, Cursor,
@@ -12,7 +13,7 @@ import { getStdioSessionBearer } from './config.js';
 export async function startStdioServer(): Promise<McpServer> {
   const bearer = getStdioSessionBearer();
   const server = new McpServer(
-    { name: 'production-master-mcp', version: '0.1.0' },
+    { name: 'production-master-mcp', version: PACKAGE_VERSION },
     { capabilities: { tools: {} } },
   );
   registerInvestigationTools(server, { bearer });
