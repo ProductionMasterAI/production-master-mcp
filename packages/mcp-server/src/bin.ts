@@ -1,11 +1,18 @@
 #!/usr/bin/env node
 import { scrubToken } from './tool-router/index.js';
+import { getApiBaseUrl } from './tool-router/config.js';
 import { startHttpServer } from './http.js';
 import { startStdioServer } from './stdio.js';
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   if (args.includes('--http')) {
+    // Resolve the upstream origin BEFORE listening. Otherwise a hosted relay
+    // started without PM_API_URL binds its port, passes `GET /health`, gets
+    // marked ready, and only fails on the first real tool call — a pod that
+    // looks healthy while every request it serves is broken. Failing at
+    // startup makes the misconfiguration a crash loop an operator sees.
+    getApiBaseUrl();
     startHttpServer();
     return;
   }

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Container image for the HTTP transport.** New `Dockerfile` and
+  `.github/workflows/publish-image.yml`: every pull request builds the image and
+  smoke-tests the built container; every push to `main` publishes
+  `ghcr.io/productionmasterai/production-master-mcp:sha-<short>` (and `:<version>` on a
+  `v*` tag) with a build-provenance attestation. There is no `latest` tag — pin an
+  immutable one. No hosted endpoint is live yet; the client badges and the host-test
+  caveat below are unchanged.
+- **`GET /health`** on the HTTP transport — a liveness answer that never calls the
+  upstream, so a hosted-service blip cannot mark every replica unhealthy at once.
+- **`--http` now refuses to start without `PM_API_URL`**, instead of listening, passing
+  health checks, and failing only on the first tool call.
+
 - **Red `main` now escalates to a tracked issue.** New
   `.github/workflows/main-red-escalation.yml`: when `CI` fails on a push to `main`, it opens
   (or comments on) one reused issue titled `main is red: CI`, and closes it on the next green

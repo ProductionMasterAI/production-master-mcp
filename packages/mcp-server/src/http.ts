@@ -81,6 +81,24 @@ function methodNotAllowed(res: ServerResponse): void {
   res.end(JSON.stringify(METHOD_NOT_ALLOWED));
 }
 
+/**
+ * Process liveness for a container orchestrator or load-balancer health
+ * check (`GET /health`). It answers only "is this process serving HTTP" and
+ * deliberately does NOT call the upstream: a hosted-service blip would
+ * otherwise mark every relay replica unhealthy at once and turn a partial
+ * upstream failure into a total outage of the endpoint, instead of each tool
+ * call reporting its own `upstream_*` failure. Needs no bearer and touches no
+ * credential.
+ */
+function handleHealth(req: IncomingMessage, res: ServerResponse): void {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    methodNotAllowed(res);
+    return;
+  }
+  res.writeHead(200, { 'content-type': 'application/json' });
+  res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ status: 'ok' }));
+}
+
 function notFound(res: ServerResponse): void {
   res.writeHead(404, { 'content-type': 'application/json' });
   res.end(JSON.stringify({ error: 'not_found' }));
@@ -90,6 +108,10 @@ function notFound(res: ServerResponse): void {
 export function createHttpServer(): Server {
   return createServer((req, res) => {
     const path = (req.url ?? '').split('?')[0];
+    if (path === '/health') {
+      handleHealth(req, res);
+      return;
+    }
     if (path !== '/mcp') {
       notFound(res);
       return;
