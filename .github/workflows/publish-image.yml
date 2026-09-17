@@ -105,7 +105,43 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Immutability: `sha-<short>` names ONE commit, and deployments pin it.
+      # A re-run, a workflow_dispatch, or a `v*` tag on an already-published
+      # commit would otherwise rebuild and move that tag to a new digest under
+      # a running deployment. So an existing sha tag is never pushed over: the
+      # build is skipped, and any other tag this run owes (a version tag) is
+      # pointed at the EXISTING digest. "Not found" is the only error that
+      # means "absent"; anything else (auth, network) fails the job rather than
+      # being read as "go ahead and push".
       - if: github.event_name != 'pull_request'
+        id: existing
+        env:
+          IMAGE: ${{ steps.name.outputs.image }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          sha_ref="$(printf '%s\n' "${TAGS}" | grep -E ':sha-[0-9a-f]+$' | head -n1)"
+          [ -n "${sha_ref}" ] || { echo "::error::metadata produced no sha-<short> tag"; exit 1; }
+          echo "sha_ref=${sha_ref}" >> "$GITHUB_OUTPUT"
+          set +e
+          out="$(docker buildx imagetools inspect --format '{{json .Manifest}}' "${sha_ref}" 2>&1)"
+          rc=$?
+          set -e
+          if [ "${rc}" -eq 0 ]; then
+            digest="$(printf '%s' "${out}" | jq -r .digest)"
+            case "${digest}" in sha256:*) ;; *) echo "::error::could not read digest of ${sha_ref}: ${out}"; exit 1 ;; esac
+            echo "${sha_ref} already exists at ${digest}; not pushing over it"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+          elif printf '%s' "${out}" | grep -qi 'not found'; then
+            echo "${sha_ref} does not exist yet; will build and push"
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::could not determine whether ${sha_ref} exists: ${out}"
+            exit 1
+          fi
+
+      - if: github.event_name != 'pull_request' && steps.existing.outputs.exists == 'false'
         id: push
         uses: docker/build-push-action@v7
         with:
@@ -116,23 +152,69 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
 
-      - if: github.event_name != 'pull_request'
+      - if: github.event_name != 'pull_request' && steps.existing.outputs.exists == 'false'
         uses: actions/attest-build-provenance@v4
         with:
           subject-name: ${{ steps.name.outputs.image }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
+      # sha tag already published: point any additional tag (e.g. the version
+      # tag of a `v*` push) at that same digest without rebuilding. A tag that
+      # already exists at a DIFFERENT digest is a conflict, never overwritten.
+      - if: github.event_name != 'pull_request' && steps.existing.outputs.exists == 'true'
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          SHA_REF: ${{ steps.existing.outputs.sha_ref }}
+          DIGEST: ${{ steps.existing.outputs.digest }}
+          IMAGE: ${{ steps.name.outputs.image }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' "${TAGS}" | while IFS= read -r ref; do
+            [ -n "${ref}" ] && [ "${ref}" != "${SHA_REF}" ] || continue
+            set +e
+            out="$(docker buildx imagetools inspect --format '{{json .Manifest}}' "${ref}" 2>&1)"
+            rc=$?
+            set -e
+            if [ "${rc}" -eq 0 ]; then
+              have="$(printf '%s' "${out}" | jq -r .digest)"
+              if [ "${have}" = "${DIGEST}" ]; then
+                echo "${ref} already at ${DIGEST}"
+              else
+                echo "::error::${ref} exists at ${have}, not ${DIGEST}; refusing to move it"
+                exit 1
+              fi
+            elif printf '%s' "${out}" | grep -qi 'not found'; then
+              docker buildx imagetools create -t "${ref}" "${IMAGE}@${DIGEST}"
+              echo "tagged ${ref} -> ${DIGEST}"
+            else
+              echo "::error::could not inspect ${ref}: ${out}"
+              exit 1
+            fi
+          done
+
+      # The pin for deployments is `sha-<short>@sha256:...`: the tag for
+      # humans, the digest so the pull can never resolve to other bytes.
       - if: github.event_name != 'pull_request'
         name: Summary
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
-          DIGEST: ${{ steps.push.outputs.digest }}
+          SHA_REF: ${{ steps.existing.outputs.sha_ref }}
+          DIGEST: ${{ steps.push.outputs.digest || steps.existing.outputs.digest }}
+          REUSED: ${{ steps.existing.outputs.exists }}
         run: |
+          set -euo pipefail
+          [ -n "${DIGEST}" ] || { echo "::error::no digest resolved"; exit 1; }
+          echo "Deployment pin: ${SHA_REF}@${DIGEST}"
           {
             echo "### Published image"
             echo '```'
             echo "${TAGS}"
             echo "digest: ${DIGEST}"
+            echo "reused existing sha tag: ${REUSED}"
+            echo '```'
+            echo "Deployment pin (tag@digest):"
+            echo '```'
+            echo "${SHA_REF}@${DIGEST}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
