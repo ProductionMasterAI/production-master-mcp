@@ -4,6 +4,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { scrubToken } from './tool-router/index.js';
 import { registerInvestigationTools } from './register-tools.js';
 import { getHttpPort } from './config.js';
+import { PACKAGE_VERSION } from './version.js';
 
 const METHOD_NOT_ALLOWED = {
   jsonrpc: '2.0' as const,
@@ -38,7 +39,7 @@ async function handleMcpPost(req: IncomingMessage, res: ServerResponse): Promise
   const idempotencyKey = typeof idemHeader === 'string' ? idemHeader : undefined;
 
   const server = new McpServer(
-    { name: 'production-master-mcp', version: '0.1.0' },
+    { name: 'production-master-mcp', version: PACKAGE_VERSION },
     { capabilities: { tools: {} } },
   );
   registerInvestigationTools(server, { bearer, idempotencyKey });

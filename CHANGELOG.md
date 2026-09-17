@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-17
+
+### Fixed
+
+- **The server reports its real version.** Both transports hardcoded `0.1.0` in the MCP
+  `initialize` handshake; they now read `version` from the package's own `package.json`,
+  and the stdio seam test asserts the spawned build reports that version.
+- **`bin` path normalised** to `dist/bin.js`. npm rewrote `./dist/bin.js` at publish
+  time and warned; the published entry point was unaffected.
+
+### Release process
+
+- First release published by GitHub Actions through npm trusted publishing (OIDC) —
+  no npm token exists for this package, and publishing with one is disabled.
+
+## [0.1.0] - 2026-09-17
+
+First npm publish of `@production-master/mcp`, done by hand from `main` at `a1ee120`
+so a trusted publisher could be attached (npm requires the package to exist first).
+It contains every entry below, down to the initial scaffold.
+
 - **Container image for the HTTP transport.** New `Dockerfile` and
   `.github/workflows/publish-image.yml`: every pull request builds the image and
   smoke-tests the built container; every push to `main` publishes
@@ -1023,12 +1044,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   re-auth on 401/403) require no server-side changes to the planned pass-through-auth
   design.
 
-## [0.1.0] - 2026-07-13
+## Initial scaffold - 2026-07-13
 
 ### Added
 - Initial public scaffold of the MCP server repository: README, documentation tree, contributing guide, and CI.
 - Documented the standard-MCP-server-over-hosted-service architecture: Streamable HTTP (`POST /mcp`) and stdio transports, opaque bearer pass-through, tool schemas from `@production-master/mcp-tool-contract`.
 - Empty npm workspaces layout (`packages/*`) ready to be populated.
 
-[Unreleased]: https://github.com/ProductionMasterAI/production-master-mcp/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ProductionMasterAI/production-master-mcp/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.1
 [0.1.0]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.0
