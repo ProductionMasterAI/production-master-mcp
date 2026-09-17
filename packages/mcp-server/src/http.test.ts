@@ -65,6 +65,15 @@ describe('Streamable HTTP transport (seam)', () => {
     expect(res.status).toBe(401);
   });
 
+  it('answers GET /health without a bearer and without calling upstream', async () => {
+    const res = await fetch(new URL('/health', mcpUrl), { method: 'GET' });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ status: 'ok' });
+    expect(upstreamRequests).toHaveLength(0);
+    const postRes = await fetch(new URL('/health', mcpUrl), { method: 'POST' });
+    expect(postRes.status).toBe(405);
+  });
+
   it('rejects GET and DELETE on the stateless endpoint', async () => {
     const getRes = await fetch(mcpUrl, { method: 'GET' });
     expect(getRes.status).toBe(405);
