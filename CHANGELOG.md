@@ -16,6 +16,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cursor 3.11 (+2026-09-10 / desktop 3.20.17):** advance Cursor coverage through **Projects** (coordinator agent, shared context, subscriptions) and desktop CLI **3.18.9 → 3.20.17**. Feature pin remains **3.11**. Cursor-only; other platform nightlies untouched.
 ### Changed
 
+- **Claude Code target bumped to 2.1.273** (from 2.1.272) in `.claude-code-version`.
+  2.1.272 itself shipped no published entries ("bug fixes and reliability
+  improvements"), so the real review is the 2.1.273 delta.
+
+  **Adopted, both low-risk and directly traceable to a changelog entry (2.1.273):**
+
+  - [Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity)
+    gained a note for 2.1.273's new disconnect notification: when Claude Code's
+    automatic reconnection to an MCP server gives up, it now shows an explicit
+    notice naming the server and pointing at `/mcp`, instead of a genuine outage
+    only surfacing as a failed `production-master` tool call or an emptied tool
+    list. This extends the existing 2.1.243/2.1.246 reconnect-reliability notes in
+    the same section — nothing to change in the server itself, since it owns no
+    part of the client's reconnect loop, but it's worth documenting as the
+    clearest signal yet that a connection is genuinely down rather than merely
+    slow.
+
+  **Reviewed and not applicable (2.1.273):** "Improved the error shown when an
+  MCP server's sign-in expires mid-session to say how to re-authenticate (`/mcp`)"
+  presupposes an MCP server with its own sign-in/OAuth flow — this server's auth
+  is opaque pass-through bearer with no sign-in state of its own to expire, the
+  same reasoning that ruled out the 2.1.271 MCP OAuth client-registration fixes
+  above. The `x-claude-code-request-class`/`-agent-type`/`-prev-tool-durations`/
+  `-compaction`/`-context-compacted` gateway hint headers and the
+  `OTEL_LOG_TOOL_DETAILS` real-server-name change are both about an LLM gateway or
+  OTEL collector sitting in front of the *model* API — this repo has no LLM/
+  model-provider SDK anywhere (AGENTS.md hard constraint 1, ip-guard-enforced) and
+  no telemetry docs of its own to update. `--accept-command <sha256>` for
+  `claude plugin install`/`update` and the `modelPricing` multiplier again
+  presuppose a bundled plugin or a chargeback billing setup, neither of which
+  this repo has (no `.claude-plugin/` manifest, consistent with the 2.1.269 note
+  below). Per-command `allowed_domains` for Bash/PowerShell/Monitor sandboxing
+  and `omitClaudeMd` agent frontmatter are the same non-applicable cases already
+  recorded for 2.1.271 (no sandbox network policy surface in
+  `.claude/settings.json`, no `.claude/agents/` here). The rest of the 2.1.273
+  delta (Remote Control session forking and fast mode, `/config` mouse support,
+  `--drain-marker-file`, spinner tips, the Bash-permission-checker and
+  `blockReadsOutsideWorkingDirectories` fixes, prompt-cache/thinking-retention
+  fixes, `.git/info/exclude` and stale-symlink-permission fixes, the
+  context-meter/auto-compact accounting fix, `/tui`/scheduled-task/SDK-subagent-
+  background fixes, `/install-github-app` SAML wording, the doubled-ellipsis
+  spinner glitch, the frontend-design-plugin false-positive tip, the 2.1.268
+  Read/Edit-deny-rule revert, and every VSCode/Windows/Claude-Code-on-the-web/
+  Claude-Tag/Code-Review platform-specific item) is host-side UI, terminal,
+  workflow, or platform behavior with no MCP transport, registration, or auth
+  surface this server or its docs touch.
+
 - **Claude Code target bumped to 2.1.272** (from 2.1.270) in `.claude-code-version`.
   2.1.272 itself is "bug fixes and reliability improvements" with no published
   entries, so the real review is the 2.1.271 delta.
