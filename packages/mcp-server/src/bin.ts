@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import { scrubToken } from './tool-router/index.js';
-import { getApiBaseUrl } from './tool-router/config.js';
+import { getApiBaseUrl, scrubToken } from './tool-router/index.js';
 import { startHttpServer } from './http.js';
 import { startStdioServer } from './stdio.js';
 

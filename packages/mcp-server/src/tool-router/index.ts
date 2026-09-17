@@ -14,6 +14,7 @@ export {
   type UpstreamFailure,
   type UpstreamResult,
 } from './upstream.js';
+export { getApiBaseUrl } from './config.js';
 
 /**
  * Result of routing one `investigation.*` tool call.
