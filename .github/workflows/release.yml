@@ -23,7 +23,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-          registry-url: https://registry.npmjs.org
+          # No `registry-url` (release v0.1.1 failed E403 "OIDC permission denied"):
+          # it makes setup-node write `_authToken=${NODE_AUTH_TOKEN}` to .npmrc, npm
+          # treats that configured token as auth already present and never performs
+          # the OIDC exchange (actions/setup-node#1551). npmjs.org is npm's default
+          # registry, so dropping it changes nothing else.
 
       # Trusted publishing needs npm >= 11.5.1; .nvmrc's Node 22.15.0 ships an
       # older npm, so the floor is upgraded in-job rather than by bumping Node.
