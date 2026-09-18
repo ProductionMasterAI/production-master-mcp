@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Claude Code target bumped to 2.1.274** (from 2.1.273) in `.claude-code-version`.
+
+  **Adopted, both low-risk and directly traceable to a changelog entry (2.1.274):**
+
+  - [Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity) gained
+    four notes for the 2.1.274 delta, each tied to this server's actual transport
+    surface rather than added speculatively:
+    - Streamable HTTP MCP tool calls no longer hit a hard ~5 minute client-side
+      timeout — directly relevant since `http.ts` implements exactly that transport,
+      and some investigation tool calls legitimately run longer than a few seconds.
+    - A `type: "http"` entry whose negotiation fell back to legacy HTTP+SSE no longer
+      mishandles a 4xx/422 from the server it reaches — relevant because this
+      server's `POST /mcp` can itself answer with an ordinary 401 (missing/invalid
+      bearer) before MCP negotiation even starts.
+    - Bedrock/Vertex/Foundry/telemetry-disabled sessions now default to MCP client v2
+      (opt out via `MCP_SDK_GENERATION=v1` or `MCP_PROTOCOL_NEGOTIATION=legacy`),
+      documented alongside the existing 2.1.233/2.1.247/2.1.271 notes for the same
+      gateway-backed client population in the same section.
+    - `CLAUDE_CODE_MCP_STARTUP_WAIT_MS` bounds how long a non-interactive
+      (`claude -p`/CI) first turn waits on this server's stdio startup, or skips the
+      wait entirely with `0` — a direct answer for a CI pipeline spawning
+      `production-master-mcp` over stdio, extending the existing 2.1.221 headless
+      note in the same section.
+
+  **Reviewed and not applicable (2.1.274):** "fixed MCP tool calls refused with 403
+  `insufficient_scope` being misreported as expired sign-in" presupposes an MCP
+  server with its own OAuth sign-in/scope model — this server's auth is opaque
+  pass-through bearer with no sign-in state and no OAuth scopes of its own, the same
+  reasoning that already ruled out the 2.1.271 MCP OAuth client-registration fixes
+  and the 2.1.273 sign-in-expiry wording change. "Fixed MCP prompts/resources not
+  refreshing without a `listChanged` capability declaration" doesn't apply either:
+  this server's `McpServer` is constructed with `capabilities: { tools: {} }` only
+  (`http.ts` / `stdio.ts` — no `prompts`/`resources`), so there is nothing here for a
+  client to refresh via `listChanged`. "Fixed sessions stuck endlessly retrying
+  'unexpected tool_use_id' 400 errors" is a model-API tool-use-block reliability fix
+  with no dependency on which MCP server supplied the tool, the same bucket as other
+  host-side model-protocol fixes excluded from prior reviews. The visible low-memory
+  warning, the `effort` attribute on the `claude_code.llm_request` OTel span, the new
+  `claude_code.managed_settings_resolved` OTel event, and the leaner `/code-review`
+  inline prompts are all host UI/telemetry/workflow behavior with no MCP transport,
+  registration, or auth surface this server or its docs touch — the same bucket as
+  the OTEL/gateway-header exclusions already recorded for 2.1.273.
+
 ## [0.1.1] - 2026-09-17
 
 ### Fixed
