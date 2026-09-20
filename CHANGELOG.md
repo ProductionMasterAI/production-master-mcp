@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Cursor 3.11 (+2026-09-10 / desktop 3.21.13):** bump desktop CLI pin **3.20.17 → 3.21.13** (download line 2026-09-18; feature **3.11** / date **2026-09-10** unchanged). Advance `cli_changelog_date` **2026-08-11 → 2026-08-26** (document CLI persistent sessions for long local `agent` smoke of this MCP server). No server code or MCP schema change. Cursor-only; other platform nightlies untouched.
+
 - **Claude Code target bumped to 2.1.274** (from 2.1.273) in `.claude-code-version`.
 
   **Adopted, both low-risk and directly traceable to a changelog entry (2.1.274):**
