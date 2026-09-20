@@ -9,6 +9,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Claude Code target bumped to 2.1.278** (from 2.1.274) in `.claude-code-version`. Covers
+  the 2.1.275–2.1.278 delta; nothing in it is a compatibility break for this repo (confirmed
+  below), so this is a documentation-only advancement pass.
+
+  **Adopted, both low-risk and directly traceable to a changelog entry:**
+
+  - [Quick Start → stdio](docs/user/quick-start.md#option-b--run-over-stdio-local) now
+    proactively recommends `CLAUDE_CODE_MCP_STARTUP_WAIT_MS` for headless/CI consumers of
+    this server, instead of leaving it as a troubleshooting-only explanation. The variable
+    itself shipped in 2.1.274 and was already documented there, but only as an answer to
+    "why did my first turn hang for a while" — a CI pipeline running a cold
+    `npx -y @production-master/mcp` install on every job (no npm cache) benefits from setting
+    it up front rather than discovering it after a slow run. Troubleshooting still carries the
+    full explanation; Quick Start now cross-references it as an actionable default for that
+    audience.
+
+  **Reviewed and not applicable:**
+
+  - **Removed the deprecated TaskOutput tool (2.1.277).** Grepped the whole repo (source,
+    docs, workflows, skills) for any reference — there is none. This server is the MCP
+    *server*, not a Claude Code client or agent script, so it never itself calls Claude Code's
+    own tools; the removal has no surface here.
+  - **AGENTS.md support (2.1.277)** — Claude Code now reads `AGENTS.md` natively when a
+    project has no `CLAUDE.md`. This repo has both, and `CLAUDE.md` already starts with
+    `@AGENTS.md` by design (see AGENTS.md's own header), so Claude Code keeps reading
+    `CLAUDE.md` exactly as before; nothing changes. Recorded as a future opportunity below
+    since the manual `@AGENTS.md` pointer becomes redundant *for Claude Code specifically*
+    once native discovery lands, but Cursor and Codex still need their own adapter files, so
+    nothing to remove yet without a multi-client decision.
+  - **Syncing claude.ai-enabled skills/plugins into terminal sessions, opt-out via
+    `syncClaudeAiSkills`/`syncClaudeAiPlugins` (2.1.275)** — this is a personal-account
+    convenience for a contributor's own terminal session, not a project-level toggle this
+    repo's tracked `.claude/settings.json` should force either way; AGENTS.md's "Skills
+    bridge" section already keeps `.claude/skills/` as the single canonical location
+    regardless of what syncs into any one contributor's session. Recorded as a future
+    opportunity below in case it's ever observed to cause inconsistent behavior across
+    contributors.
+  - `/plugin install <plugin> --marketplace <source>` (2.1.275) and `--accept-command
+    <sha256>`-style plugin flags again presuppose a bundled plugin, which this repo has
+    never had (no `.claude-plugin/` manifest, the same reasoning already recorded for
+    2.1.269/2.1.273 above). The plugin/marketplace secret-leak fix and the
+    marketplace-update deletion-on-fetch-failure fix are host-side plugin CLI bugs with the
+    same non-applicability. The send-now key binding is interactive-terminal UX, irrelevant
+    to a non-interactive MCP server.
+  - `CLAUDE_GATEWAY_PROXY_IS_EGRESS_BOUNDARY` and the gateway `headers:` map (2.1.277) are
+    Claude apps gateway configuration — the same gateway-config bucket already excluded for
+    prior releases; this repo has no gateway config of its own.
+  - **Auto mode's server-side classifier default and the `/status` "Auto mode server" row
+    (2.1.278)**, opt-out via `CLAUDE_CODE_AUTO_MODE_SERVER`, are model-routing/billing
+    behavior. This server has no LLM/model-provider SDK of any kind (AGENTS.md hard
+    constraint 1, ip-guard-enforced) and no gateway config, so there is nothing for this
+    change to touch.
+  - The Grep/Glob/Write/Edit tool reliability fixes, plugin install/reload fixes, and
+    sandboxed-Bash fixes (2.1.277) are host-side coding-tool internals with no dependency on
+    this repo's own code or docs.
+
+### Future opportunities
+
+- **Drop the manual `@AGENTS.md` pointer in `CLAUDE.md` once every agent this repo targets
+  supports native `AGENTS.md` discovery.** Claude Code does as of 2.1.277; Cursor and Codex
+  don't yet, and `.cursor/rules/000-project.mdc` still exists as a thin pointer for Cursor.
+  Revisit once (or if) the other targets converge, rather than diverging Claude Code's setup
+  from theirs now.
+- **Consider `syncClaudeAiSkills: false` / `syncClaudeAiPlugins: false` in
+  `.claude/settings.json`** if a contributor's personal claude.ai-synced skills or plugins
+  are ever observed to produce session behavior that diverges from what `.claude/skills/`
+  alone would produce. Not adopted now — this task found no evidence of the problem, and a
+  settings change without one would be speculative.
+
 - **Claude Code target bumped to 2.1.274** (from 2.1.273) in `.claude-code-version`.
 
   **Adopted, both low-risk and directly traceable to a changelog entry (2.1.274):**
