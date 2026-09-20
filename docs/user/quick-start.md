@@ -134,6 +134,23 @@ Run the server as a local subprocess of your client instead of hosting it.
 claude mcp add production-master --env PM_SESSION_JWT=<your-token> -- npx -y @production-master/mcp
 ```
 
+> **Headless / CI: bound the first-turn wait on a cold stdio start (Claude Code 2.1.274+).**
+> `claude -p` and other non-interactive runs spawn and initialize the `production-master-mcp`
+> subprocess before the first turn can use its tools, and by default wait for that startup to
+> finish. If your pipeline runs a fresh `npx -y @production-master/mcp` install on every job (no
+> npm cache), that first install can be the slowest part of startup. Set
+> `CLAUDE_CODE_MCP_STARTUP_WAIT_MS` to cap the wait to a known bound instead of leaving it
+> unbounded, or `0` to skip waiting altogether so the first turn proceeds immediately (the tools
+> become available on a later turn once startup completes):
+>
+> ```bash
+> CLAUDE_CODE_MCP_STARTUP_WAIT_MS=15000 claude -p "..."
+> ```
+>
+> This is a client-side timing knob — nothing to configure on the server — but it's worth setting
+> deliberately in CI rather than relying on whatever the client's default wait is. See
+> [Troubleshooting → Connectivity](troubleshooting.md#connectivity) for the full explanation.
+
 ### Codex
 
 Add to `.codex/config.toml`:
