@@ -16,14 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   **Adopted, both low-risk and directly traceable to a changelog entry:**
 
   - [Quick Start → stdio](docs/user/quick-start.md#option-b--run-over-stdio-local) now
-    proactively recommends `CLAUDE_CODE_MCP_STARTUP_WAIT_MS` for headless/CI consumers of
-    this server, instead of leaving it as a troubleshooting-only explanation. The variable
-    itself shipped in 2.1.274 and was already documented there, but only as an answer to
-    "why did my first turn hang for a while" — a CI pipeline running a cold
-    `npx -y @production-master/mcp` install on every job (no npm cache) benefits from setting
-    it up front rather than discovering it after a slow run. Troubleshooting still carries the
-    full explanation; Quick Start now cross-references it as an actionable default for that
-    audience.
+    proactively covers headless/CI consumers of this server. A CI pipeline that runs a cold
+    `npx -y @production-master/mcp` install on every job should **preinstall or cache** the
+    package, leave (or raise) `CLAUDE_CODE_MCP_STARTUP_WAIT_MS` rather than capping it at
+    15s/`0`, and **retry or assert MCP registration** before a one-shot prompt that needs
+    these tools. The variable itself shipped in 2.1.274 and remains documented in
+    Troubleshooting, whose 2.1.274 note now points at that Quick Start guidance instead of
+    recommending a short or zero wait for tool-dependent CI. Quick Start treats a short or
+    zero wait as the wrong default for tool-dependent CI, because a one-shot `claude -p`
+    has no later turn once the wait expires.
 
   **Reviewed and not applicable:**
 
