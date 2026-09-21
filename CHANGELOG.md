@@ -66,6 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     sandboxed-Bash fixes (2.1.277) are host-side coding-tool internals with no dependency on
     this repo's own code or docs.
 
+- **Cursor 3.11 (+2026-09-10 / desktop 3.21.13):** bump desktop CLI pin **3.20.17 → 3.21.13** (download line 2026-09-18; feature **3.11** / date **2026-09-10** unchanged). Advance `cli_changelog_date` **2026-08-11 → 2026-08-26** (document CLI persistent sessions for long local `agent` smoke of this MCP server). No server code or MCP schema change. Cursor-only; other platform nightlies untouched.
+
 ### Future opportunities
 
 - **Drop the manual `@AGENTS.md` pointer in `CLAUDE.md` once every agent this repo targets
