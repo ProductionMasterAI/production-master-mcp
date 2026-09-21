@@ -136,6 +136,30 @@ Run the server as a local subprocess of your client instead of hosting it.
 claude mcp add production-master --env PM_SESSION_JWT=<your-token> -- npx -y @production-master/mcp
 ```
 
+> **Headless / CI: make sure this server is registered before a tool-dependent prompt (Claude Code 2.1.274+).**
+> `claude -p` and other one-shot runs spawn the `production-master-mcp` subprocess and can only
+> use its tools once startup has finished. A cold `npx -y @production-master/mcp` install on every
+> job (no npm cache) is often the slowest part of that startup. Do **not** cap the wait at 15s or
+> set `CLAUDE_CODE_MCP_STARTUP_WAIT_MS=0` for a prompt that needs these tools: a one-shot `-p` has
+> no later turn, so the job can finish as if the tools were absent.
+>
+> Prefer, in order:
+>
+> 1. **Preinstall or cache the package** so stdio startup is a process launch, not an npm
+>    download — e.g. `npm i -g @production-master/mcp` (or restore an npm cache) in an earlier CI
+>    step, then point the client at the installed binary instead of `npx -y`.
+> 2. **Leave the wait unbounded, or set `CLAUDE_CODE_MCP_STARTUP_WAIT_MS` high enough** for a
+>    worst-case cold start on your runners (minutes, not 15 seconds) if you must still `npx -y`
+>    in the job.
+> 3. **Retry or assert registration** before the prompt that needs the tools — `claude mcp list`
+>    / the init event's `mcp_server_errors` field (see [Troubleshooting → Connectivity](troubleshooting.md#connectivity)).
+>    Fail the job if `production-master` is missing rather than running the prompt anyway.
+>
+> `CLAUDE_CODE_MCP_STARTUP_WAIT_MS=0` is only for jobs that do **not** need these tools on the
+> first (and often only) turn. This is a client-side timing knob — nothing to configure on the
+> server. See [Troubleshooting → Connectivity](troubleshooting.md#connectivity) for the full
+> explanation.
+
 ### Codex
 
 Add to `.codex/config.toml`:
