@@ -9,10 +9,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Claude Code target bumped to 2.1.280** (from 2.1.278) in `.claude-code-version`. There is
+- **Claude Code target bumped to 2.1.281** (from 2.1.278) in `.claude-code-version`. There is
   no published 2.1.279 (2.1.278 → 2.1.280 is the whole delta), so the real review is the
-  2.1.280 release notes. No compatibility break for this repo and nothing adopted — this is
-  a documentation-only bump, reviewed as thoroughly as every prior one.
+  2.1.280 and 2.1.281 release notes. No compatibility break for this repo. One small
+  documentation improvement adopted (below); everything else reviewed and not applicable.
+
+  **Adopted (2.1.281):**
+
+  - [Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity) gains a note
+    covering three 2.1.281 MCP-client fixes that a `production-master` user can actually hit:
+    the same server no longer connects twice when a plugin or claude.ai connector and a
+    configured entry spell its URL differently (host letter case, default port, trailing
+    slash), the prompt cache is no longer lost when an MCP server disconnects or is still
+    reconnecting mid-conversation with tool search off (proxy/gateway), and
+    `MCP_CONNECTION_NONBLOCKING=0` now honors `MCP_CONNECT_TIMEOUT_MS` for claude.ai
+    connectors. All client-side; server transport, tools, and error codes unchanged.
+
+  **Reviewed and not applicable (2.1.281), grouped by why:**
+
+  - **MCP URL-mode elicitation on 2026-07-28 protocol connections.** Considered as a
+    replacement for pass-through bearer tokens and not adopted: it would need this server to
+    run or broker a browser login and hold the resulting credentials, which contradicts
+    AGENTS.md's opaque pass-through design and hard constraints 3 and 5 (never store or log
+    tokens, no secrets), and the hosted service's auth is the boundary's decision, not this
+    repo's. Recorded as a future opportunity below.
+  - **`claude plugin validate` MCP checks (silently dropped `.mcp.json` entries, undeclared
+    `${user_config.*}`, insecure URLs) and the unquoted `${CLAUDE_PLUGIN_ROOT}` hook warning.**
+    This repo ships no `.mcp.json`, `.claude-plugin/` manifest, or plugin hooks, so there is
+    nothing for the validator to check. Likewise the `--plugin-dir`, `--channels`, and
+    `claude plugin uninstall/update` fixes.
+  - **MCP resource lists now skip MCP Apps UI resources.** This server registers no MCP
+    resources (only `investigation.*` tools), so there is nothing to skip.
+  - **`mcp_tool` hooks waiting for their server to connect.** No hooks are configured in
+    `.claude/settings.json`.
+  - **`"attribution": false` in `settings.json`.** Not adopted: AGENTS.md requires the
+    `Co-Authored-By` trailer on every commit, and `.claude/settings.json` deliberately keeps
+    the object form (which older CLI versions also accept; they skip a file containing the
+    boolean).
+  - **Self-hosted runner system prompt files (`--system-prompt-file`), Claude apps gateway
+    changes (`assume_role`, `guardrail`, `telemetry.resource_attributes`, desktop policy
+    keys, `envHelper` path refusal), and the server-side auto-mode classifier changes /
+    `CLAUDE_CODE_AUTO_MODE_SERVER`.** No self-hosted runners (hard constraint 4), no gateway
+    config, and no model-provider SDK (hard constraint 1).
+  - The remaining 2.1.281 items (session resume/prompt-cache fixes, stream/proxy handling,
+    dangerous-`rm` and permission-rule hardening, sandbox fixes, `--agents` file path,
+    `/insights` auto mode recommendation, vim mode and other TUI/dialog/list fixes, Windows
+    fixes, VS Code, Claude Code on the web, Claude Tag, and Code Review items) are host-side
+    session, UI, or cloud internals with no MCP transport, registration, tool-description,
+    or auth surface here.
 
   **Reviewed and not applicable (2.1.280), grouped by why:**
 
@@ -113,6 +157,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Future opportunities
 
+- **MCP URL-mode elicitation for login (Claude Code 2.1.281, 2026-07-28 protocol).** A server
+  can ask the client to open a browser-based flow, which could one day replace hand-managed
+  bearer tokens with a sign-in link. That is an auth-model change for the hosted service (a
+  browser flow, token issuance, and storage), not something to build in this pass-through
+  relay, and it only works on 2026-07-28 protocol connections. Revisit if the hosted service
+  adds a browser sign-in and wants this server to surface it, keeping hard constraints 3 and 5
+  (no stored or logged tokens) intact.
 - **Consider richer per-tool descriptions in `registerInvestigationTools` (`register-tools.ts`)
   now that Claude Code 2.1.280 raises the MCP tool-description cap** via
   `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH`. Today every `investigation.*` tool gets the same
