@@ -9,6 +9,93 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Claude Code target bumped to 2.1.281** (from 2.1.278) in `.claude-code-version`. There is
+  no published 2.1.279 (2.1.278 → 2.1.280 is the whole delta), so the real review is the
+  2.1.280 and 2.1.281 release notes. No compatibility break for this repo. One small
+  documentation improvement adopted (below); everything else reviewed and not applicable.
+
+  **Adopted (2.1.281):**
+
+  - [Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity) gains a note
+    covering three 2.1.281 MCP-client fixes that a `production-master` user can actually hit:
+    the same server no longer connects twice when a plugin or claude.ai connector and a
+    configured entry spell its URL differently (host letter case, default port, trailing
+    slash), the prompt cache is no longer lost when an MCP server disconnects or is still
+    reconnecting mid-conversation with tool search off (proxy/gateway), and
+    `MCP_CONNECTION_NONBLOCKING=0` now honors `MCP_CONNECT_TIMEOUT_MS` for claude.ai
+    connectors. All client-side; server transport, tools, and error codes unchanged.
+
+  **Reviewed and not applicable (2.1.281), grouped by why:**
+
+  - **MCP URL-mode elicitation on 2026-07-28 protocol connections.** Considered as a
+    replacement for pass-through bearer tokens and not adopted: it would need this server to
+    run or broker a browser login and hold the resulting credentials, which contradicts
+    AGENTS.md's opaque pass-through design and hard constraints 3 and 5 (never store or log
+    tokens, no secrets), and the hosted service's auth is the boundary's decision, not this
+    repo's. Recorded as a future opportunity below.
+  - **`claude plugin validate` MCP checks (silently dropped `.mcp.json` entries, undeclared
+    `${user_config.*}`, insecure URLs) and the unquoted `${CLAUDE_PLUGIN_ROOT}` hook warning.**
+    This repo ships no `.mcp.json`, `.claude-plugin/` manifest, or plugin hooks, so there is
+    nothing for the validator to check. Likewise the `--plugin-dir`, `--channels`, and
+    `claude plugin uninstall/update` fixes.
+  - **MCP resource lists now skip MCP Apps UI resources.** This server registers no MCP
+    resources (only `investigation.*` tools), so there is nothing to skip.
+  - **`mcp_tool` hooks waiting for their server to connect.** No hooks are configured in
+    `.claude/settings.json`.
+  - **`"attribution": false` in `settings.json`.** Not adopted: AGENTS.md requires the
+    `Co-Authored-By` trailer on every commit, and `.claude/settings.json` deliberately keeps
+    the object form (which older CLI versions also accept; they skip a file containing the
+    boolean).
+  - **Self-hosted runner system prompt files (`--system-prompt-file`), Claude apps gateway
+    changes (`assume_role`, `guardrail`, `telemetry.resource_attributes`, desktop policy
+    keys, `envHelper` path refusal), and the server-side auto-mode classifier changes /
+    `CLAUDE_CODE_AUTO_MODE_SERVER`.** No self-hosted runners (hard constraint 4), no gateway
+    config, and no model-provider SDK (hard constraint 1).
+  - The remaining 2.1.281 items (session resume/prompt-cache fixes, stream/proxy handling,
+    dangerous-`rm` and permission-rule hardening, sandbox fixes, `--agents` file path,
+    `/insights` auto mode recommendation, vim mode and other TUI/dialog/list fixes, Windows
+    fixes, VS Code, Claude Code on the web, Claude Tag, and Code Review items) are host-side
+    session, UI, or cloud internals with no MCP transport, registration, tool-description,
+    or auth surface here.
+
+  **Reviewed and not applicable (2.1.280), grouped by why:**
+
+  - **Added `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH`, raising the previously-fixed 2,048-char
+    cap on MCP tool descriptions and server instructions.** This server's own tool
+    descriptions (`registerInvestigationTools` in `register-tools.ts`, currently the generic
+    `Production Master investigation tool: <name>`, well under 100 characters each) and its
+    `McpServer` construction (`http.ts` / `stdio.ts`, no `instructions` field set at all) sit
+    nowhere near the *old* 2,048-char cap, so nothing here was ever truncated and nothing
+    needs the new higher one. Recorded as a future opportunity below rather than acted on now
+    — richer per-tool descriptions were already possible under the old cap, so this variable
+    doesn't newly unlock anything for this repo today, and writing them is a documentation
+    judgment call, not a compatibility fix.
+  - **Claude Opus 5.5 (`claude-opus-5-5`) as the new default Opus model** is model-routing
+    behavior. AGENTS.md hard constraint 1 (ip-guard-enforced) means this server never imports
+    a model-provider SDK or selects a model of any kind, the same reasoning that already
+    excluded the 2.1.278 auto-mode-classifier default.
+  - **Fixed several crash/hang bugs in resume, background agents, and MCP tool messaging
+    (including background subagent messages silently lost in headless/SDK sessions).** This
+    is Claude Code's own subagent-to-parent messaging inside a single client session — a
+    different mechanism from an MCP tool call's request/response cycle, which is what this
+    server's transports (`http.ts` / `stdio.ts`) actually implement. It doesn't touch how a
+    `production-master` tool call is sent, relayed, or answered; the same distinction that
+    already separated the 2.1.243/2.1.246 MCP-reconnect fixes (which *do* apply here) from
+    other host-side session-reliability fixes (which don't).
+  - **`hook_execution_complete` OTel event gaining hook output size stats** presupposes
+    configured hooks. This repo's `.claude/settings.json` defines none.
+  - The symlink-write permission-rule fix, the auto-mode safety-check retry backoff, the
+    Write-tool alt-param-name validation fix, mouse support in more fullscreen lists, the TUI
+    /keyboard/dialog fixes, the model-switch prompt-cache-miss fix, resumed-fork-subagent tool
+    list handling, `installed_plugins.json` losing commit info, the manifest.json skill
+    name-collision fix (no `.claude-plugin/` manifest in this repo, the same reasoning already
+    recorded for 2.1.269/2.1.273/2.1.275), background-shell-task exit-code misreporting, and
+    the Artifact-tool fixes are all host-side coding-tool/UI internals with no MCP transport,
+    registration, tool-description, or auth surface this server or its docs touch.
+  - **Cloud/self-hosted runner reliability fixes** don't apply either way: AGENTS.md hard
+    constraint 4 already restricts this repo's CI to GitHub-hosted `ubuntu-latest` runners
+    only, so there is no self-hosted runner fleet here for a self-hosted-runner fix to reach.
+
 - **Claude Code target bumped to 2.1.278** (from 2.1.274) in `.claude-code-version`. Covers
   the 2.1.275–2.1.278 delta; nothing in it is a compatibility break for this repo (confirmed
   below), so this is a documentation-only advancement pass.
@@ -70,6 +157,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Future opportunities
 
+- **MCP URL-mode elicitation for login (Claude Code 2.1.281, 2026-07-28 protocol).** A server
+  can ask the client to open a browser-based flow, which could one day replace hand-managed
+  bearer tokens with a sign-in link. That is an auth-model change for the hosted service (a
+  browser flow, token issuance, and storage), not something to build in this pass-through
+  relay, and it only works on 2026-07-28 protocol connections. Revisit if the hosted service
+  adds a browser sign-in and wants this server to surface it, keeping hard constraints 3 and 5
+  (no stored or logged tokens) intact.
+- **Consider richer per-tool descriptions in `registerInvestigationTools` (`register-tools.ts`)
+  now that Claude Code 2.1.280 raises the MCP tool-description cap** via
+  `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH`. Today every `investigation.*` tool gets the same
+  generic `Production Master investigation tool: <name>` string, which was already free to be
+  longer and more specific under the *old* 2,048-char cap — the new variable doesn't unlock
+  this, it just raises the ceiling further. `@production-master/mcp-tool-contract` attaches no
+  `.describe()` metadata to its zod schemas (checked directly against the published package),
+  so there is no contract-sourced text to surface without hand-writing it here, and picking the
+  right level of protocol detail to expose per tool (without drifting into describing
+  investigation *behavior*, which belongs upstream) is a documentation judgment call best made
+  deliberately rather than as a nightly maintenance pass.
 - **Drop the manual `@AGENTS.md` pointer in `CLAUDE.md` once every agent this repo targets
   supports native `AGENTS.md` discovery.** Claude Code does as of 2.1.277; Cursor and Codex
   don't yet, and `.cursor/rules/000-project.mdc` still exists as a thin pointer for Cursor.
