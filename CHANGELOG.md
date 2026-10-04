@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Cursor 3.11 (+2026-09-23 / desktop 3.23.12):** bump desktop pin **3.22.7 → 3.23.12** (stable download API 2026-10-01; public feature changelog still **3.11** / **2026-09-23**). Document desktop **3.23** team/org MCP allowlists, service tokens, Origin MCP endpoint, xAI linking; note removal of applying team marketplace **Required** plugins. Feature pin remains **3.11**. CLI still **2026-08-26**. Cursor-only; other platform nightlies untouched.
+
+- **Cursor 3.11 (+2026-09-23 / desktop 3.22.7):** advance `changelog_date` **2026-09-10 → 2026-09-23**; desktop CLI **3.21.13 → 3.22.7** (stable download API). Document Cursor **Security Review** + **Rollouts** (Teams/Enterprise Automations; `/review-security` pre-push). Feature pin remains **3.11**. CLI still **2026-08-26**. Cursor-only; other platform nightlies untouched.
+
 - **Claude Code target bumped to 2.1.278** (from 2.1.274) in `.claude-code-version`. Covers
   the 2.1.275–2.1.278 delta; nothing in it is a compatibility break for this repo (confirmed
   below), so this is a documentation-only advancement pass.
@@ -66,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     sandboxed-Bash fixes (2.1.277) are host-side coding-tool internals with no dependency on
     this repo's own code or docs.
 
-- **Cursor 3.11 (+2026-09-10 / desktop 3.21.13):** bump desktop CLI pin **3.20.17 → 3.21.13** (download line 2026-09-18; feature **3.11** / date **2026-09-10** unchanged). Advance `cli_changelog_date` **2026-08-11 → 2026-08-26** (document CLI persistent sessions for long local `agent` smoke of this MCP server). No server code or MCP schema change. Cursor-only; other platform nightlies untouched.
+- **Cursor 3.11 (+2026-09-10 / desktop 3.22.7):** bump desktop CLI pin **3.20.17 → 3.22.7** (download line 2026-09-18; feature **3.11** / date **2026-09-10** unchanged). Advance `cli_changelog_date` **2026-08-11 → 2026-08-26** (document CLI persistent sessions for long local `agent` smoke of this MCP server). No server code or MCP schema change. Cursor-only; other platform nightlies untouched.
 
 ### Future opportunities
 
