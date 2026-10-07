@@ -9,6 +9,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Claude Code target bumped to 2.1.293** (from 2.1.286) in `.claude-code-version`. Covers
+  the 2.1.287–2.1.293 delta, reviewed one release at a time with nothing skipped. No
+  compatibility break for this repo; 2.1.289–2.1.291 have nothing MCP-relevant for this repo
+  at all. Two documentation improvements adopted (below), each tied to this server's actual
+  transport surface rather than added speculatively.
+
+  **Adopted (2.1.292–2.1.293):**
+
+  - [Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity) gains a note
+    for **2.1.292**: a local stdio connection to this server now negotiates MCP protocol
+    version `2026-07-28` by default. The server's pinned SDK doesn't need to recognize that
+    version for the handshake to succeed — an unsupported requested version makes the SDK
+    answer with the newest version it does support instead, and a well-behaved client accepts
+    that answer rather than failing the connection, which is exactly what happens here.
+    Nothing to configure server-side; `MCP_PROTOCOL_NEGOTIATION=legacy` (already documented
+    for 2.1.274) remains the client-side escape hatch if ever needed.
+  - The same section gains a note for **2.1.293**: a long-lived Claude Code session connected
+    to this server's Streamable HTTP transport could leak memory client-side over time; fixed
+    in 2.1.293. This server's own HTTP handling is already stateless per request (the
+    2.1.283 404-resilience note above), so there was never anything server-side accumulating
+    — this was purely the client's own connection bookkeeping.
+
+  **Reviewed and not applicable:**
+
+  - **MCP tool names over 128 characters broke every request (2.1.292).** Checked directly:
+    this server's 20 tools register under short contract names (`investigation.*`, up to 35
+    characters, via `wireToolName` in `register-tools.ts`), and the longest full
+    client-facing name Claude Code constructs from that
+    (`mcp__production-master__investigation.invalidate_hypothesis`) is 59 characters — well
+    clear of the 128-character limit this release fixed. Nothing here was ever at risk, but
+    worth confirming explicitly given this release's severity.
+  - **`CLAUDE_CODE_DISABLE_STRUCTURED_OUTPUTS` (2.1.288).** Every tool in
+    `register-tools.ts` returns `{ content: [{ type: 'text', ... }] }` only — this server has
+    never emitted MCP structured tool output (`structuredContent`), so there is nothing for
+    this flag to disable.
+  - **MCP server URL prompts/elicitation now wait for "I'm done, continue", plus a new
+    `"bareElicitationCapability": true` config knob (2.1.287).** This server declares
+    `capabilities: { tools: {} }` only (`http.ts` / `stdio.ts`) and never sends an MCP
+    elicitation request, so neither change has anything to apply to today. Tracked as part of
+    the existing "MCP URL-mode elicitation for login" future opportunity below, not adopted.
+  - **`alwaysLoad: false` now defers *all* of a server's tools behind tool search, even ones
+    individually marked `_meta['anthropic/alwaysLoad']` (2.1.287).** This sharpens, but
+    doesn't change the status of, the existing "per-tool `alwaysLoad`" future opportunity
+    below: it's a client-side config-precedence clarification with no server action needed,
+    since this repo's own [Quick Start](docs/user/quick-start.md) examples never set
+    `alwaysLoad` either way.
+  - **Claude Mods, the built-in "You should know" mod, and the mod-hook/mod-API additions
+    across 2.1.287–2.1.290** (`$.ui.selection()`, `agent.spawn`, `prompt.autocomplete`,
+    `isDeferred` on `$.tool.register`, plugin-hook typings, etc.). This repo ships no
+    `.claude-plugin/` manifest and no mod — same reasoning already recorded for every prior
+    plugin-hook item.
+  - **2.1.289, 2.1.290, and 2.1.291 have no further MCP-relevant entry for this repo**:
+    2.1.289 is plugin/mod-only fixes, 2.1.290 is mod-hook additions plus a self-hosted-runner
+    (`--environment`) change and a `WebFetch` truncation fix, and 2.1.291 is two unrelated
+    regression fixes (cloud-session permission-prompt answers, lost final messages on quit).
+  - The remaining items across this range (Claude Haiku 5.5 / Sonnet default-context changes,
+    `effort` on the Agent tool, `--marketplace` for `claude plugin install`, scheduled-task
+    and cloud-session reliability fixes, sandbox/security hardening, `claude attach`/`claude
+    logs` CLI additions, `/model` and dialog-timeout bug fixes) fall into the same excluded
+    buckets as every prior bump: no model-provider SDK (hard constraint 1), no self-hosted
+    runners (hard constraint 4), or host-side session/UI/mod internals with no MCP transport,
+    registration, tool-description, or auth surface this server or its docs touch.
+
 - **Claude Code target bumped to 2.1.286** (from 2.1.281) in `.claude-code-version`. Covers
   the 2.1.282–2.1.286 delta. No compatibility break for this repo — 2.1.282 has nothing
   MCP-relevant at all (confirmed below); the rest is a documentation-only advancement pass
@@ -253,7 +316,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   frequently-used tool (e.g. starting or listing an investigation) from a rarely-used one
   that would be fine staying deferred. Using this would first need someone to decide which
   of the 20 tools are "core" — a usage-pattern judgment call, not a nightly maintenance
-  decision — so it's recorded here rather than guessed at.
+  decision — so it's recorded here rather than guessed at. **Sharper since Claude Code
+  2.1.287:** a server-level `alwaysLoad: false` now defers *every* tool behind tool search
+  regardless of this per-tool meta flag — the per-tool opt-out only ever mattered against a
+  server-level `alwaysLoad: true`. This repo's own Quick Start examples set `alwaysLoad`
+  neither way, so the clarification changes nothing here today, but it narrows what adopting
+  this would actually buy a deployment that does set `alwaysLoad: false`.
 - **Rename the `run-production-master-mcp` skill to `verify` (Claude Code 2.1.286 commit
   guidance).** Claude Code now runs a project or user skill literally named `verify` right
   before committing (skipped for docs-only and tests-only commits), which would make
@@ -270,7 +338,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser flow, token issuance, and storage), not something to build in this pass-through
   relay, and it only works on 2026-07-28 protocol connections. Revisit if the hosted service
   adds a browser sign-in and wants this server to surface it, keeping hard constraints 3 and 5
-  (no stored or logged tokens) intact.
+  (no stored or logged tokens) intact. **Claude Code 2.1.287** added a
+  `"bareElicitationCapability": true` client config knob and made MCP URL prompts wait for
+  "I'm done, continue" — both client-side refinements to the same elicitation path this
+  opportunity already tracks; neither changes the assessment above on its own.
 - **Consider richer per-tool descriptions in `registerInvestigationTools` (`register-tools.ts`)
   now that Claude Code 2.1.280 raises the MCP tool-description cap** via
   `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH`. Today every `investigation.*` tool gets the same
