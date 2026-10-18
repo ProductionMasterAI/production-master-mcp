@@ -1,10 +1,11 @@
 ## [Unreleased]
 
 ### Changed
+
+- **Cursor 3.11 (+2026-10-16 / desktop 3.25.9):** advance `changelog_date` **2026-09-23 → 2026-10-16**; desktop CLI **3.24.12 → 3.25.9** (stable download API 2026-10-18). Public feature pin remains **3.11**. Cover date-only changelog: **Remote Control** for local agents (2026-10-06), **Origin App Marketplace** (2026-10-13), and **Cloud Agent canvases + Environments API + 300-repo / 5× faster environments** (2026-10-16). CLI still **2026-08-26**. Cursor-only; other platform nightlies untouched.
 - **Cursor desktop pin 3.23.12 → 3.24.12** (feature changelog still 3.11 / 2026-09-23). Document IDE 3.24 MCP OAuth hosted-callback reliability and hook `tool_use_id` correlation for operators running this MCP server from Cursor.
 
 
-### Changed
 
 - **Cursor 3.11 (+2026-09-23 / desktop 3.23.12):** bump desktop pin **3.22.7 → 3.23.12** (stable download API 2026-10-01; public feature changelog still **3.11** / **2026-09-23**). Document desktop **3.23** team/org MCP allowlists, service tokens, Origin MCP endpoint, xAI linking; note removal of applying team marketplace **Required** plugins. Feature pin remains **3.11**. CLI still **2026-08-26**. Cursor-only; other platform nightlies untouched.
 
