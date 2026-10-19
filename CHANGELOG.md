@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-20
+
 ### Added
 
 - **Run the HTTP server on Google Cloud Run.** New guide
@@ -1594,6 +1596,7 @@ It contains every entry below, down to the initial scaffold.
 - Documented the standard-MCP-server-over-hosted-service architecture: Streamable HTTP (`POST /mcp`) and stdio transports, opaque bearer pass-through, tool schemas from `@production-master/mcp-tool-contract`.
 - Empty npm workspaces layout (`packages/*`) ready to be populated.
 
-[Unreleased]: https://github.com/ProductionMasterAI/production-master-mcp/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/ProductionMasterAI/production-master-mcp/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.2
 [0.1.1]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.1
 [0.1.0]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.0
