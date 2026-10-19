@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Codex target bumped to 0.163.0** (from 0.155.1) in `.codex-version`. Pin-only
+  advancement: no server code, MCP tool schema, or documented `.codex/config.toml` stdio
+  registration changes with it, and the pass-through-auth design is unaffected.
+
 - **Claude Code target bumped to 2.1.300** (from 2.1.293) in `.claude-code-version`. Covers
   the 2.1.294–2.1.300 delta, reviewed one release at a time with nothing skipped. There is no
   published 2.1.297 or 2.1.298 — the official changelog jumps 2.1.296 → 2.1.299 — the same kind
