@@ -8,7 +8,7 @@ Placeholders used throughout — replace them with your own values:
 |-------------|---------|
 | `PROJECT_ID` | Your Google Cloud project |
 | `REGION` | A Cloud Run region, e.g. `europe-west1` |
-| `VERSION` | A published image tag, e.g. `0.1.1` ([releases](https://github.com/ProductionMasterAI/production-master-mcp/releases)) |
+| `VERSION` | A published image tag, `0.1.2` or later, e.g. `0.1.2` ([releases](https://github.com/ProductionMasterAI/production-master-mcp/releases)). Earlier images ignore `PORT` and will not start on Cloud Run. |
 | `PM_API_HOST` | Host of the Production Master hosted API your account uses |
 
 ## What the container needs
@@ -36,7 +36,7 @@ gcloud iam service-accounts create pm-mcp-runtime \
 
 ## 1. Choose an image source
 
-The published image is `ghcr.io/productionmasterai/production-master-mcp` (public, `linux/amd64` — Cloud Run runs Linux x86_64 images). Tags are immutable version tags (`0.1.1`) and commit tags (`sha-<short>`); there is no `latest`. Pin a version, or a digest (`...@sha256:<digest>`) so a redeploy can never pull different bytes.
+The published image is `ghcr.io/productionmasterai/production-master-mcp` (public, `linux/amd64` — Cloud Run runs Linux x86_64 images). Tags are immutable version tags (`0.1.2`) and commit tags (`sha-<short>`); there is no `latest`. Pin a version, or a digest (`...@sha256:<digest>`) so a redeploy can never pull different bytes.
 
 ### Option A — Artifact Registry remote repository (recommended)
 
