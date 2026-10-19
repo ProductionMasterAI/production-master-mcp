@@ -1,0 +1,75 @@
+# Example Cloud Run service for the production-master-mcp Streamable HTTP server.
+#
+# Replace every UPPER_CASE placeholder, then deploy with:
+#
+#   gcloud run services replace deploy/cloud-run/service.yaml --region=REGION
+#
+# Full walkthrough (image source, auth, connecting a client):
+# docs/deploy/cloud-run.md
+#
+# What this service holds: no credentials. Every MCP request carries its
+# caller's own `Authorization: Bearer <token>`, which the server relays to
+# PM_API_URL and never stores. There is deliberately no secret mounted here —
+# the token belongs to each client, not to the service (keep it in Secret
+# Manager on the client side; see the guide's "Auth" section).
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: production-master-mcp
+spec:
+  template:
+    metadata:
+      annotations:
+        # Scale to zero when idle; cap the fleet so a traffic spike can't
+        # run up an unbounded bill.
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+    spec:
+      # One instance serves many concurrent requests: each request builds its
+      # own MCP server and transport and shares nothing with any other request,
+      # and the work is I/O-bound relaying to the hosted service.
+      containerConcurrency: 80
+      # Per-request limit (max 3600). Some tool calls wait on the hosted
+      # service for a while; raise this if yours time out at the edge.
+      timeoutSeconds: 300
+      # A runtime identity with no IAM roles: the server calls no Google APIs.
+      serviceAccountName: RUNTIME_SA_NAME@PROJECT_ID.iam.gserviceaccount.com
+      containers:
+        # Through an Artifact Registry remote repository that proxies ghcr.io
+        # (recommended), or an image you pushed to Artifact Registry yourself.
+        # Pin a version tag or, better, a digest (@sha256:...); there is no
+        # `latest` tag.
+        - image: REGION-docker.pkg.dev/PROJECT_ID/REMOTE_REPO/productionmasterai/production-master-mcp:VERSION
+          # Cloud Run sets PORT to this value; the server listens on it.
+          # Don't set PORT (or PM_MCP_HTTP_PORT, which would override it)
+          # under `env` — Cloud Run sets PORT itself.
+          ports:
+            - name: http1
+              containerPort: 8080
+          env:
+            # Public origin of the Production Master hosted API. Required: the
+            # server exits at startup without it, so a misconfigured revision
+            # never becomes ready.
+            - name: PM_API_URL
+              value: "https://PM_API_HOST"
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          # GET /health answers without a bearer and never calls the hosted
+          # service, so an upstream blip cannot fail every instance's probe.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 2
+            timeoutSeconds: 1
+            failureThreshold: 15
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 3

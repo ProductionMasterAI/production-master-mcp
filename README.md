@@ -82,6 +82,10 @@ args = ["-y", "@production-master/mcp"]
 
 Any MCP-capable client works: give it the `<server-url>/mcp` HTTP endpoint plus the bearer header, or a stdio server entry launching `npx -y @production-master/mcp`. Full walkthrough: [docs/user/quick-start.md](docs/user/quick-start.md).
 
+### Self-host the HTTP endpoint
+
+The container image `ghcr.io/productionmasterai/production-master-mcp` serves `POST /mcp` and `GET /health` and listens on `$PORT`. To run it on Google Cloud Run, see [Deploy on Cloud Run](docs/deploy/cloud-run.md) and the example manifest in [`deploy/cloud-run/service.yaml`](deploy/cloud-run/service.yaml).
+
 ## Architecture
 
 The server is a thin protocol boundary: it terminates MCP, forwards tool calls to the hosted service, and streams results back. It holds no investigation logic and no stored credentials.
@@ -110,6 +114,7 @@ Three concerns live here: **transport** (Streamable HTTP `POST /mcp` and stdio),
 | [Usage](docs/user/usage.md) | Common workflows — connect from each client, bearer pass-through |
 | [Commands](docs/user/reference/commands.md) | Endpoint, transports, and config reference |
 | [Troubleshooting](docs/user/troubleshooting.md) | Auth (401), connectivity, Node version, transport mismatch |
+| [Deploy on Cloud Run](docs/deploy/cloud-run.md) | Run your own HTTP endpoint on Google Cloud Run from the published image |
 | [Contributing](docs/CONTRIBUTING.md) | How to contribute |
 | [Changelog](CHANGELOG.md) | Release history |
 
