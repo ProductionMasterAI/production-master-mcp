@@ -6,7 +6,10 @@
 # (the hosted service's public origin); the server refuses to start without it.
 #
 #   PM_API_URL        required, e.g. https://api.example.com
-#   PM_MCP_HTTP_PORT  optional, default 3000
+#   PM_MCP_HTTP_PORT  optional; else PORT (set by Cloud Run and similar
+#                     platforms); else 3000. Binds 0.0.0.0.
+#
+# Cloud Run: docs/deploy/cloud-run.md
 
 FROM node:22.15.0-alpine AS build
 WORKDIR /app

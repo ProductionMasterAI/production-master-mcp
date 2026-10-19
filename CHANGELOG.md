@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Run the HTTP server on Google Cloud Run.** New guide
+  [Deploy on Cloud Run](docs/deploy/cloud-run.md) and example manifest
+  [`deploy/cloud-run/service.yaml`](deploy/cloud-run/service.yaml): deploy the published
+  `ghcr.io/productionmasterai/production-master-mcp` image through an Artifact Registry
+  remote repository (recommended), straight from ghcr.io, or from your own Cloud Build;
+  scale-to-zero, concurrency, `/health` startup and liveness probes, and how the
+  pass-through bearer combines with Cloud Run IAM (`X-Serverless-Authorization`) and a
+  client-side token kept in Secret Manager.
+- **The HTTP transport honours `PORT`.** `production-master-mcp --http` now listens on
+  `PM_MCP_HTTP_PORT`, else `PORT` (set by Cloud Run and similar platforms), else `3000`, and
+  binds `0.0.0.0` explicitly. An invalid `PORT` fails at startup naming the variable.
+
 ### Changed
 
 - **Claude Code target bumped to 2.1.278** (from 2.1.274) in `.claude-code-version`. Covers
