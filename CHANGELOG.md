@@ -25,6 +25,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Cursor target advanced to 3.11 (+2026-10-16 / desktop 3.25.9)** (from 3.11 +2026-09-10 /
+  desktop 3.21.13) in `.cursor-version`: `changelog_date` 2026-09-10 → 2026-10-16 and
+  `desktop_cli` 3.21.13 → 3.25.9. The public feature pin stays 3.11 and `cli_changelog_date`
+  stays 2026-08-26. The Cursor pin references in [Quick start](docs/user/quick-start.md) are
+  updated to match, and its working tips gain the date-only changelog items through
+  2026-10-16 — Remote Control for local agents (2026-10-06), Origin App Marketplace
+  (2026-10-13), Cloud Agent canvases and the Environments API beta (2026-10-16) — plus a
+  desktop 3.25.9 note: add this server to the team/org MCP allowlist, prefer service tokens
+  for Cloud Agent / Automation clients that call the hosted service, and Security Review +
+  Rollouts (2026-09-23). No server code or MCP schema change. Cursor-only; other platform
+  pins untouched.
+
 - **Codex target bumped to 0.163.0** (from 0.155.1) in `.codex-version`. Pin-only
   advancement: no server code, MCP tool schema, or documented `.codex/config.toml` stdio
   registration changes with it, and the pass-through-auth design is unaffected.
