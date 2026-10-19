@@ -38,7 +38,7 @@ Authentication is **pass-through**: the client supplies an `Authorization: Beare
 
 ## Quick Start
 
-> **Status:** `@production-master/mcp` is implemented, builds, and passes its tests, but it is **not yet published to npm** and no hosted HTTP endpoint is deployed — so `npx -y @production-master/mcp` and `<server-url>` below are not runnable today. The package name, CLI name, and connection patterns are final; only the publish and the hosted deployment are outstanding. See [Quick Start](docs/user/quick-start.md) and [CHANGELOG](CHANGELOG.md) for status.
+> **Status:** `@production-master/mcp` is **published on npm**, so `npx -y @production-master/mcp` runs the stdio server. For HTTP, run the server yourself with `--http`, or deploy it ([Deploy on Cloud Run](docs/deploy/cloud-run.md)), and use that address as `<server-url>` below. A public hosted endpoint is not announced yet. Validation in each editor is still pending. See [Quick Start](docs/user/quick-start.md) and [CHANGELOG](CHANGELOG.md).
 
 Every client connects the same two ways, matching the two transports: point it at the server's HTTP endpoint (`<server-url>/mcp`) with an `Authorization: Bearer <token>` header, or run the server locally over stdio (`npx -y @production-master/mcp`).
 
