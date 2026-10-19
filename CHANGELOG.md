@@ -19,7 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   client-side token kept in Secret Manager.
 - **The HTTP transport honours `PORT`.** `production-master-mcp --http` now listens on
   `PM_MCP_HTTP_PORT`, else `PORT` (set by Cloud Run and similar platforms), else `3000`, and
-  binds `0.0.0.0` explicitly. An invalid `PORT` fails at startup naming the variable.
+  binds `0.0.0.0` explicitly. Both port variables must be plain digits naming a port from 1
+  to 65535 (an empty value counts as unset); anything else, such as `8080junk`, `8080.5` or
+  ` 8080`, fails at startup naming the variable instead of being read as 8080.
 
 ### Changed
 

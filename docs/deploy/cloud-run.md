@@ -26,6 +26,7 @@ Every `POST /mcp` builds a fresh MCP server for that one request and reads the c
 
 ```sh
 gcloud config set project PROJECT_ID
+# Option C (build it yourself) additionally needs Cloud Build — see that section.
 gcloud services enable run.googleapis.com artifactregistry.googleapis.com
 
 # A runtime identity with no roles: the server calls no Google APIs.
@@ -62,9 +63,10 @@ Cloud Run can deploy public GitHub Container Registry images directly, so `ghcr.
 
 ### Option C — build and push to Artifact Registry yourself
 
-To run your own build of this repository (for example, a fork), build it with Cloud Build — no local Docker needed:
+To run your own build of this repository (for example, a fork), build it with Cloud Build — no local Docker needed. This option also needs the Cloud Build and Compute Engine APIs, which Google's [Cloud Build quickstart](https://docs.cloud.google.com/build/docs/build-push-docker-image) lists as prerequisites:
 
 ```sh
+gcloud services enable cloudbuild.googleapis.com compute.googleapis.com
 gcloud artifacts repositories create pm-mcp \
   --repository-format=docker --location=REGION
 gcloud builds submit \
