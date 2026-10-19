@@ -4,7 +4,7 @@ Connect an MCP client to `production-master-mcp` and drive the Production Master
 
 > **Prerequisites:** Node.js 22, an MCP-capable client, and a Production Master token (your client sends it; the server forwards it opaquely upstream).
 
-> **Status:** the server package (`@production-master/mcp`, launched as `production-master-mcp`) is implemented but not yet published to npm, and no hosted HTTP endpoint is deployed yet — so `npx -y @production-master/mcp` and `<server-url>` below are not runnable today. The package name, CLI name, and connection patterns are final.
+> **Status:** the server package (`@production-master/mcp`, launched as `production-master-mcp`) is published on npm, so `npx -y @production-master/mcp` works. A public hosted endpoint is not announced yet. For Option A, run the server yourself with `--http`, or deploy it ([Deploy on Cloud Run](../deploy/cloud-run.md)), and use that address as `<server-url>`.
 
 ## Option A — connect over HTTP (`POST /mcp`)
 
