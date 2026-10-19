@@ -33,11 +33,12 @@ The server reads all configuration from the environment at runtime — it ships 
 |----------|-----------|----------|---------|
 | `PM_API_URL` | both transports | yes | Base URL of the Production Master hosted `/v1/*` REST API the server forwards tool calls to. There is no built-in default — the server refuses to start a request without it rather than silently pointing at the wrong host. |
 | `PM_SESSION_JWT` | stdio only | yes | Your Production Master session token, fixed for the process's whole run (stdio has no per-request header, unlike HTTP). Missing → the server exits immediately with an error, not a confusing failure on the first tool call. |
-| `PM_MCP_HTTP_PORT` | HTTP only | no (default `3000`) | Port the Streamable HTTP transport listens on for `POST /mcp`. |
+| `PM_MCP_HTTP_PORT` | HTTP only | no (default `3000`) | Port the Streamable HTTP transport listens on for `POST /mcp`. Takes precedence over `PORT`. |
+| `PORT` | HTTP only | no | Fallback port when `PM_MCP_HTTP_PORT` is unset — the variable container platforms such as Cloud Run set for you. Neither set → `3000`. |
 
 Over HTTP, auth is per-request instead: the caller's `Authorization: Bearer <token>` header is forwarded opaquely to `PM_API_URL` on every call — nothing is read from the environment for it.
 
-Launch: `production-master-mcp` for stdio (default), `production-master-mcp --http` for the Streamable HTTP transport.
+Launch: `production-master-mcp` for stdio (default), `production-master-mcp --http` for the Streamable HTTP transport. Over HTTP the server binds all interfaces (`0.0.0.0`) and also answers `GET /health` with `{"status":"ok"}` — no bearer needed, and it never calls the hosted service, so it is safe for container startup and liveness probes.
 
 ## Scope
 

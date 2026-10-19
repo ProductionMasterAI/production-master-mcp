@@ -12,6 +12,7 @@ Start with the [project README](../README.md) for the elevator pitch and connect
 | [Usage](user/usage.md) | You know the basics and want the common workflows (connect each client, bearer pass-through) |
 | [Troubleshooting](user/troubleshooting.md) | A 401 upstream, connectivity, Node version, or transport mismatch is blocking you |
 | [Command reference](user/reference/commands.md) | You want the endpoint shape, transports, and config reference |
+| [Deploy on Cloud Run](deploy/cloud-run.md) | You want to run your own HTTP endpoint on Google Cloud Run |
 
 ## Engineering docs
 

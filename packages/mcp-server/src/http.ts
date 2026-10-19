@@ -3,7 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { scrubToken } from './tool-router/index.js';
 import { registerInvestigationTools } from './register-tools.js';
-import { getHttpPort } from './config.js';
+import { getHttpPort, HTTP_HOST } from './config.js';
 import { PACKAGE_VERSION } from './version.js';
 
 const METHOD_NOT_ALLOWED = {
@@ -141,11 +141,16 @@ export function createHttpServer(): Server {
   });
 }
 
-/** Starts the Streamable HTTP transport, listening on `PM_MCP_HTTP_PORT` (default 3000). */
+/**
+ * Starts the Streamable HTTP transport on `0.0.0.0`, port `PM_MCP_HTTP_PORT`,
+ * else `PORT`, else 3000 (see `getHttpPort`).
+ */
 export function startHttpServer(port: number = getHttpPort()): Server {
   const server = createHttpServer();
-  server.listen(port, () => {
-    console.log(`production-master-mcp: Streamable HTTP transport listening on :${port}/mcp`);
+  server.listen(port, HTTP_HOST, () => {
+    console.log(
+      `production-master-mcp: Streamable HTTP transport listening on ${HTTP_HOST}:${port}/mcp`,
+    );
   });
   return server;
 }
