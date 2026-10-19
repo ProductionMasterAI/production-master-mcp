@@ -14,14 +14,13 @@ Start with the [project README](../README.md) for the elevator pitch and connect
 | [Command reference](user/reference/commands.md) | You want the endpoint shape, transports, and config reference |
 | [Deploy on Cloud Run](deploy/cloud-run.md) | You want to run your own HTTP endpoint on Google Cloud Run |
 
-## Engineering docs
+## Contributor docs
 
 | Doc | Read it when |
 |-----|--------------|
-| [Architecture overview](engineering/architecture/overview.md) | You want to understand the server's components and data flow |
-| [ADR-001 — Standard MCP server over hosted service](engineering/decisions/ADR-001-initial-architecture.md) | You want the rationale behind the transport, auth, and contract choices |
-| [Getting started (dev)](engineering/guides/getting-started.md) | You're setting up the repo to contribute |
-| [Build & release](engineering/build-and-release/README.md) | You want the build, test, and release process |
+| [Architecture](../README.md#architecture) | You want the server's components and request flow |
+| [Development setup](CONTRIBUTING.md#development-setup) | You're setting up the repo to contribute |
+| [Releasing](CONTRIBUTING.md#releasing) | You want the build, test, and release process |
 
 ## Project docs
 

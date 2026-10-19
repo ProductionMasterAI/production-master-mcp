@@ -17,9 +17,24 @@ Thanks for your interest in improving **production-master-mcp**. This is the sta
    - `fix/<short-description>` for bug fixes
    - `docs/<short-description>` for documentation-only changes
    - `chore/<short-description>` for tooling and housekeeping
-3. **Develop** — see [getting started](engineering/guides/getting-started.md) for setup (`nvm use`, `npm ci`, `npm run build`, `npm test`).
+3. **Develop** — see [Development setup](#development-setup) below.
 4. **Commit** using [Conventional Commits](https://www.conventionalcommits.org/) (see below).
 5. **Open a PR** against `main`, fill in the description, and wait for CI.
+
+## Development setup
+
+Requires Node.js 22 or later; `.nvmrc` pins the version CI uses.
+
+```sh
+nvm use          # Node version from .nvmrc
+npm ci           # or: make install
+npm run build
+npm run lint
+npm run typecheck
+npm test
+```
+
+`make help` lists the same tasks as Makefile targets.
 
 ## Commit convention
 
@@ -54,6 +69,45 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 4. Update [CHANGELOG.md](../CHANGELOG.md) under `## [Unreleased]` for any user-facing change.
 5. Address review feedback; keep the branch green.
 6. A maintainer merges once all checks — including `ip-guard` — pass and the review is approved.
+
+## Releasing
+
+Maintainers only. A release is a version-bump PR, then a `v*` tag on its merge commit.
+Pushing the tag is the whole publish step. Don't create the GitHub release by hand,
+because the release workflow creates it.
+
+1. **Open a release PR** titled `chore(release): vX.Y.Z` (SemVer):
+   - Bump the version with
+     `npm version X.Y.Z --no-git-tag-version --workspaces --include-workspace-root`.
+     This updates `package.json`, `packages/mcp-server/package.json` and `package-lock.json`.
+     The server reads the version it reports to MCP clients from
+     `packages/mcp-server/package.json`.
+   - In [CHANGELOG.md](../CHANGELOG.md), move the `[Unreleased]` entries under
+     `## [X.Y.Z] - YYYY-MM-DD`, leave an empty `[Unreleased]`, and update the compare
+     links at the bottom.
+   - Update the version badge in the [README](../README.md) and any example image tags
+     in the docs.
+2. **Merge it** once CI is green.
+3. **Wait for the `Publish image` run on `main` to finish.** It publishes
+   `ghcr.io/productionmasterai/production-master-mcp:sha-<short>` for the merge commit.
+4. **Tag that commit and push the tag:**
+
+   ```sh
+   git fetch origin
+   git tag vX.Y.Z <merge-commit-sha>
+   git push origin vX.Y.Z
+   ```
+
+The tag triggers two workflows:
+
+- **`release.yml`** checks that the tag matches the version in
+  `packages/mcp-server/package.json`, then builds and runs the tests. It publishes
+  `@production-master/mcp` to npm through trusted publishing (OIDC; no npm token exists
+  for this package), then creates the GitHub release with generated notes.
+- **`publish-image.yml`** adds the `X.Y.Z` tag to the image already published for that
+  commit, without rebuilding it. Every published image is smoke-tested before it is
+  pushed and carries a signed build-provenance attestation. Image tags are immutable: an
+  existing tag is never moved to a different digest, and there is no `latest`.
 
 ## Reporting issues
 
