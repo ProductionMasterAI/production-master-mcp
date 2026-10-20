@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Bump transitive `proxy-addr` 2.0.7 → 2.0.8 (GHSA-jqcg-44mw-7w3h: IP spoofing via an
+  IPv4-mapped IPv6 trust subnet).
+
 ## [0.1.2] - 2026-10-20
 
 ### Added
