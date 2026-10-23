@@ -30,6 +30,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `source-map-js` 1.2.1 → 1.2.2 and `brace-expansion` 5.0.9 → 5.0.12. Clears every `npm audit`
   finding including dev dependencies; the published package and runtime image are unchanged.
 
+### Changed
+
+- **Claude Code target bumped to 2.1.306** (from 2.1.300) in `.claude-code-version`. Covers
+  the 2.1.301–2.1.306 delta, reviewed one release at a time. 2.1.301 and 2.1.302 shipped
+  together; 2.1.303 published bug fixes and reliability improvements only, with no
+  itemized entries. No compatibility break for this repo. One documentation improvement
+  adopted directly to this server's own MCP transport surface, one existing managed-settings
+  note extended, and one headless-reliability item documented for operators running many
+  MCP servers alongside this one.
+
+  **Adopted (2.1.301/2.1.302):**
+
+  - [Troubleshooting → Transport mismatch](docs/user/troubleshooting.md#transport-mismatch)
+    gains a seventh "connected but no tools" case: a stdio connection that negotiated the
+    `2026-07-28` MCP protocol version could show as connected with no tools listed. This
+    server's stdio transport ([`stdio.ts`](packages/mcp-server/src/stdio.ts)) has defaulted
+    to answering with `2026-07-28` since Claude Code 2.1.292 negotiated it (documented in the
+    2.1.293 entry below), so this display bug could in principle have shown for a
+    `production-master` stdio connection on an affected client. The server's own tool
+    listing is unconditional either way (see [Commands](docs/user/reference/commands.md#tools))
+    — this was purely a client-side display bug, fixed in 2.1.301/2.1.302. If you ever saw
+    `production-master` connected over stdio with an empty tool list on an older client,
+    update Claude Code rather than re-registering the server.
+
+  **Adopted (2.1.306):**
+
+  - [Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity) gains a note:
+    a headless/SDK session with a large number of MCP tools in scope could hit a false
+    "prompt is too long" error purely from tool-description overhead, not from the actual
+    conversation. This server registers 20 `investigation.*` tools
+    ([`register-tools.ts`](packages/mcp-server/src/register-tools.ts)), so a deployment that
+    also registers several other MCP servers alongside it is exactly the shape of session
+    this bug could affect. Fixed in 2.1.306; nothing to change on this server's side — its
+    tool count and description lengths are unchanged.
+
+  **Reviewed and extended:**
+
+  - The existing 2.1.259 note on `allowedMcpServers` vs. `managedMcpServers` scope
+    ([Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity)) is extended
+    for 2.1.301/2.1.302: the `allowedMcpServers` filter narrowed further for a
+    `managed-mcp.json` stdio entry specifically. If your organization rolls `production-master`
+    out via `managedMcpServers` (as [Quick Start](docs/user/quick-start.md) documents as an
+    alternative to per-user `claude mcp add`) *and* fronts it with a `managed-mcp.json` stdio
+    entry, re-check that entry's `allowedMcpServers` match still covers `production-master`
+    after upgrading — this is a managed-settings policy-matching change, not something this
+    server's own registration or admission behavior affects either way.
+
+  **Reviewed and not applicable:**
+
+  - **2.1.301/2.1.302's `.catch` on a mod hook now running only on throw or timeout,
+    `$.env.set` resolving `{}`/`{ deny }`, the 12-concurrent-hook-per-event cap, fork subagents
+    defaulting on, subagents always backgrounding in Desktop/VS Code, a mod's `tool.check`
+    event gaining `decider`/`isReadOnly`, the 1,024-hooks/16,384-character skill-source cap,
+    and `sandbox.allowNestedUserNamespaces`** — no hooks, mods, subagents, or sandbox
+    configuration of this server's own (hard constraint 5 — this is a protocol boundary, not
+    an agent).
+  - **2.1.301/2.1.302's `-p`/SDK sessions starting in `default` permission mode on
+    third-party integrations or with telemetry off** — this repo makes no model calls and
+    sets no Claude Code permission mode of its own.
+  - **2.1.304's `/auto-mode-setup`, `/claude-api managed-agents-secure`, and tool search on
+    by default behind a custom `ANTHROPIC_BASE_URL`** — no Claude apps gateway or custom base
+    URL of this repo's own, and this server's 20-tool surface is small and always fully
+    listed regardless of tool-search defaults (see [Commands](docs/user/reference/commands.md#tools)).
+  - **2.1.305's `CLAUDE_CODE_RETRY_WATCHDOG_USAGE_LIMIT_RECHECK_MS` and the `/artifacts`
+    delete-confirmation keybinding change** — no retry-watchdog or Artifact-tool surface of
+    this repo's own.
+  - **2.1.306's `claude -p` cloud-session "Not logged in" false-error fix** — host-side cloud
+    session authentication, unrelated to this server's own opaque bearer pass-through.
+  - **2.1.301/2.1.302's `Input`'s new `rows` option and hook `ask` prompts now naming the
+    plugin that raised them** — host-side UI and hooks/plugin surface; no hooks or plugin
+    manifest here.
+
 ## [0.1.2] - 2026-10-20
 
 ### Added
