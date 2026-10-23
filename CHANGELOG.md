@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   subnet checks, unbounded parse cost).
 - Bump transitive `qs` 6.15.3 → 6.16.1 (GHSA-x5fp-wj9c-mxmx, GHSA-4mjr-xmp4-gh2g: array-limit
   bypass and denial of service).
+- Bump the dev-only test toolchain: `vitest` 3.2.4 → 5.0.5 (drops the vulnerable `tinypool` and
+  `@vitest/mocker` 3.x), `vite` 7.3.6 → 8.3.5, `postcss` 8.5.19 → 8.5.31, `nanoid` 3.3.16 → 3.3.20,
+  `source-map-js` 1.2.1 → 1.2.2 and `brace-expansion` 5.0.9 → 5.0.12. Clears every `npm audit`
+  finding including dev dependencies; the published package and runtime image are unchanged.
 
 ## [0.1.2] - 2026-10-20
 
