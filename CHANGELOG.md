@@ -11,6 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bump transitive `proxy-addr` 2.0.7 → 2.0.8 (GHSA-jqcg-44mw-7w3h: IP spoofing via an
   IPv4-mapped IPv6 trust subnet).
+- Bump `@modelcontextprotocol/sdk` 1.30.0 → 1.32.1 (GHSA-46jr-4wx8-v453, GHSA-rvq5-wwqv-78pq,
+  GHSA-22jm-h49p-29qw, GHSA-6qxp-vccf-f47h, GHSA-6prh-2h8m-c8cw: unbounded request-body
+  validation, bearer tokens accepted across services, task/session binding, and client-side
+  OAuth and redirect handling).
+- Bump transitive `fast-uri` 3.1.5 → 3.1.9 (GHSA-5jgf-p345-68v8, GHSA-f65p-4m7j-42xc,
+  GHSA-fph4-wmhf-6fwf, GHSA-jqff-g426-hqxp, GHSA-qw65-cvwx-89v3, GHSA-hrr3-gc8f-f4qj: host
+  confusion, SSRF and authority injection in URI normalization).
+- Bump transitive `hono` 4.13.3 → 4.13.13 (GHSA-gqvv-2mrq-wpjv, GHSA-g6gw-c38x-mqfc,
+  GHSA-crvj-82cr-hjcx, GHSA-hxh3-vqpv-xpqv, GHSA-5r4p-p66f-jhc7).
+- Bump transitive `ip-address` 10.5.0 → 10.7.4 (GHSA-rpw4-54j3-4h4q, GHSA-2vr4-cq9g-pvrc,
+  GHSA-j6r3-76f7-8jcv, GHSA-h3mg-xc3c-68pw, GHSA-rxp7-6hxx-x8q5: IPv6 classification and
+  subnet checks, unbounded parse cost).
+- Bump transitive `qs` 6.15.3 → 6.16.1 (GHSA-x5fp-wj9c-mxmx, GHSA-4mjr-xmp4-gh2g: array-limit
+  bypass and denial of service).
 
 ## [0.1.2] - 2026-10-20
 
