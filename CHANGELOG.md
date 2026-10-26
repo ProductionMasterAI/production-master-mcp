@@ -30,6 +30,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `source-map-js` 1.2.1 → 1.2.2 and `brace-expansion` 5.0.9 → 5.0.12. Clears every `npm audit`
   finding including dev dependencies; the published package and runtime image are unchanged.
 
+### Changed
+
+- **Codex 0.164.0:** pin-only bump in `.codex-version`. Native `/presets`, inline `/model` and `/permissions`, enterprise MCP account-grant/OAuth and credential masking, session compaction/recovery, Windows proxy authentication, and macOS sandbox path protections. Local stdio MCP registration and device-code login unchanged. No server code or MCP schema change.
+- **Cursor 3.11 (+2026-10-16 / desktop 3.27.12):** bump desktop CLI pin **3.25.9 → 3.27.12** (stable download API 2026-10-23). Feature pin remains **3.11** / **2026-10-16**. Document IDE **3.26**/**3.27** notes in Quick Start (resumable agents; sticky Always Run; `parent_agent_id` on subagent hooks; Mermaid preview). No server code or MCP schema change. Cursor-only; other platform nightlies untouched.
+- **Claude Code target is 2.1.307** in `.claude-code-version`. 2.1.307 retries only read-only or idempotent HTTP MCP tools when a connection closes mid-call; mutating `investigation.*` calls are not retried and already accept an optional `Idempotency-Key`.
+- **Claude Code target bumped to 2.1.306** (from 2.1.300) in `.claude-code-version`. Covers
+  the 2.1.301–2.1.306 delta, reviewed one release at a time. 2.1.301 and 2.1.302 shipped
+  together; 2.1.303 published bug fixes and reliability improvements only, with no
+  itemized entries. No compatibility break for this repo. One documentation improvement
+  adopted directly to this server's own MCP transport surface, one existing managed-settings
+  note extended, and one headless-reliability item documented for operators running many
+  MCP servers alongside this one.
+
+  **Adopted (2.1.301/2.1.302):**
+
+  - [Troubleshooting → Transport mismatch](docs/user/troubleshooting.md#transport-mismatch)
+    records that the 2.1.302 empty-tool bug does not apply here. It fires only when a
+    server negotiates `2026-07-28` and omits `resultType`, `ttlMs`, or `cacheScope`.
+    This server's SDK (`@modelcontextprotocol/sdk@1.32.1`) answers that proposal with
+    `2025-11-25`, so a stdio connection with no tools has one of the earlier causes.
+
+  **Adopted (2.1.306):**
+
+  - [Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity) gains a note:
+    when an API request fails in a session with many MCP tools, 2.1.306 no longer
+    replaces that real error with "prompt is too long" or starts an unneeded compaction.
+    This is not tool-description overflow, and it is not limited to headless or SDK
+    sessions. This server registers 20 `investigation.*` tools
+    ([`register-tools.ts`](packages/mcp-server/src/register-tools.ts)); their count and
+    description lengths are unchanged.
+
+  **Reviewed and extended:**
+
+  - The existing 2.1.259 note on `allowedMcpServers` vs. `managedMcpServers` scope
+    ([Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity)) is extended
+    for 2.1.305: `allowedMcpServers` no longer filters a `managed-mcp.json` stdio server
+    whose `${VAR}` expansion appears only in `env`. An omitted entry now loads;
+    `deniedMcpServers` is what blocks it. This is not a 2.1.301/2.1.302 matching change,
+    and this server still makes no admission decision of its own.
+
+  **Reviewed and not applicable:**
+
+  - **2.1.301/2.1.302's `.catch` on a mod hook now running only on throw or timeout,
+    `$.env.set` resolving `{}`/`{ deny }`, the 12-concurrent-hook-per-event cap, fork subagents
+    defaulting on, subagents always backgrounding in Desktop/VS Code, a mod's `tool.check`
+    event gaining `decider`/`isReadOnly`, the 1,024-hooks/16,384-character skill-source cap,
+    and `sandbox.allowNestedUserNamespaces`** — no hooks, mods, subagents, or sandbox
+    configuration of this server's own (hard constraint 5 — this is a protocol boundary, not
+    an agent).
+  - **2.1.301/2.1.302's `-p`/SDK sessions starting in `default` permission mode on
+    third-party integrations or with telemetry off** — this repo makes no model calls and
+    sets no Claude Code permission mode of its own.
+  - **2.1.304's `/auto-mode-setup`, `/claude-api managed-agents-secure`, and tool search on
+    by default behind a custom `ANTHROPIC_BASE_URL`** — no Claude apps gateway or custom base
+    URL of this repo's own, and this server's 20-tool surface is small and always fully
+    listed regardless of tool-search defaults (see [Commands](docs/user/reference/commands.md#tools)).
+  - **2.1.305's `CLAUDE_CODE_RETRY_WATCHDOG_USAGE_LIMIT_RECHECK_MS` and the `/artifacts`
+    delete-confirmation keybinding change** — no retry-watchdog or Artifact-tool surface of
+    this repo's own.
+  - **2.1.306's `claude -p` cloud-session "Not logged in" false-error fix** — host-side cloud
+    session authentication, unrelated to this server's own opaque bearer pass-through.
+  - **2.1.301/2.1.302's `Input`'s new `rows` option and hook `ask` prompts now naming the
+    plugin that raised them** — host-side UI and hooks/plugin surface; no hooks or plugin
+    manifest here.
+
 ## [0.1.2] - 2026-10-20
 
 ### Added
