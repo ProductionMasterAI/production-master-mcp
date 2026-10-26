@@ -32,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Codex 0.164.0:** pin-only bump in `.codex-version`. Native `/presets`, inline `/model` and `/permissions`, enterprise MCP account-grant/OAuth and credential masking, session compaction/recovery, Windows proxy authentication, and macOS sandbox path protections. Local stdio MCP registration and device-code login unchanged. No server code or MCP schema change.
+- **Cursor 3.11 (+2026-10-16 / desktop 3.27.12):** bump desktop CLI pin **3.25.9 → 3.27.12** (stable download API 2026-10-23). Feature pin remains **3.11** / **2026-10-16**. Document IDE **3.26**/**3.27** notes in Quick Start (resumable agents; sticky Always Run; `parent_agent_id` on subagent hooks; Mermaid preview). No server code or MCP schema change. Cursor-only; other platform nightlies untouched.
+- **Claude Code target is 2.1.307** in `.claude-code-version`. 2.1.307 retries only read-only or idempotent HTTP MCP tools when a connection closes mid-call; mutating `investigation.*` calls are not retried and already accept an optional `Idempotency-Key`.
 - **Claude Code target bumped to 2.1.306** (from 2.1.300) in `.claude-code-version`. Covers
   the 2.1.301–2.1.306 delta, reviewed one release at a time. 2.1.301 and 2.1.302 shipped
   together; 2.1.303 published bug fixes and reliability improvements only, with no
@@ -43,39 +46,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   **Adopted (2.1.301/2.1.302):**
 
   - [Troubleshooting → Transport mismatch](docs/user/troubleshooting.md#transport-mismatch)
-    gains a seventh "connected but no tools" case: a stdio connection that negotiated the
-    `2026-07-28` MCP protocol version could show as connected with no tools listed. This
-    server's stdio transport ([`stdio.ts`](packages/mcp-server/src/stdio.ts)) has defaulted
-    to answering with `2026-07-28` since Claude Code 2.1.292 negotiated it (documented in the
-    2.1.293 entry below), so this display bug could in principle have shown for a
-    `production-master` stdio connection on an affected client. The server's own tool
-    listing is unconditional either way (see [Commands](docs/user/reference/commands.md#tools))
-    — this was purely a client-side display bug, fixed in 2.1.301/2.1.302. If you ever saw
-    `production-master` connected over stdio with an empty tool list on an older client,
-    update Claude Code rather than re-registering the server.
+    records that the 2.1.302 empty-tool bug does not apply here. It fires only when a
+    server negotiates `2026-07-28` and omits `resultType`, `ttlMs`, or `cacheScope`.
+    This server's SDK (`@modelcontextprotocol/sdk@1.32.1`) answers that proposal with
+    `2025-11-25`, so a stdio connection with no tools has one of the earlier causes.
 
   **Adopted (2.1.306):**
 
   - [Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity) gains a note:
-    a headless/SDK session with a large number of MCP tools in scope could hit a false
-    "prompt is too long" error purely from tool-description overhead, not from the actual
-    conversation. This server registers 20 `investigation.*` tools
-    ([`register-tools.ts`](packages/mcp-server/src/register-tools.ts)), so a deployment that
-    also registers several other MCP servers alongside it is exactly the shape of session
-    this bug could affect. Fixed in 2.1.306; nothing to change on this server's side — its
-    tool count and description lengths are unchanged.
+    when an API request fails in a session with many MCP tools, 2.1.306 no longer
+    replaces that real error with "prompt is too long" or starts an unneeded compaction.
+    This is not tool-description overflow, and it is not limited to headless or SDK
+    sessions. This server registers 20 `investigation.*` tools
+    ([`register-tools.ts`](packages/mcp-server/src/register-tools.ts)); their count and
+    description lengths are unchanged.
 
   **Reviewed and extended:**
 
   - The existing 2.1.259 note on `allowedMcpServers` vs. `managedMcpServers` scope
     ([Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity)) is extended
-    for 2.1.301/2.1.302: the `allowedMcpServers` filter narrowed further for a
-    `managed-mcp.json` stdio entry specifically. If your organization rolls `production-master`
-    out via `managedMcpServers` (as [Quick Start](docs/user/quick-start.md) documents as an
-    alternative to per-user `claude mcp add`) *and* fronts it with a `managed-mcp.json` stdio
-    entry, re-check that entry's `allowedMcpServers` match still covers `production-master`
-    after upgrading — this is a managed-settings policy-matching change, not something this
-    server's own registration or admission behavior affects either way.
+    for 2.1.305: `allowedMcpServers` no longer filters a `managed-mcp.json` stdio server
+    whose `${VAR}` expansion appears only in `env`. An omitted entry now loads;
+    `deniedMcpServers` is what blocks it. This is not a 2.1.301/2.1.302 matching change,
+    and this server still makes no admission decision of its own.
 
   **Reviewed and not applicable:**
 
@@ -122,7 +115,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Cursor 3.11 (+2026-10-16 / desktop 3.27.12):** bump desktop CLI pin **3.25.9 → 3.27.12** (stable download API 2026-10-23). Feature pin remains **3.11** / **2026-10-16**. Document IDE **3.26**/**3.27** notes in Quick Start (resumable agents; sticky Always Run; `parent_agent_id` on subagent hooks; Mermaid preview). No server code or MCP schema change. Cursor-only; other platform nightlies untouched.
 - **Cursor target advanced to 3.11 (+2026-10-16 / desktop 3.25.9)** (from 3.11 +2026-09-10 /
   desktop 3.21.13) in `.cursor-version`: `changelog_date` 2026-09-10 → 2026-10-16 and
   `desktop_cli` 3.21.13 → 3.25.9. The public feature pin stays 3.11 and `cli_changelog_date`
