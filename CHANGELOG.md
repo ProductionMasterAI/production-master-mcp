@@ -122,6 +122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Cursor 3.11 (+2026-10-16 / desktop 3.27.12):** bump desktop CLI pin **3.25.9 → 3.27.12** (stable download API 2026-10-23). Feature pin remains **3.11** / **2026-10-16**. Document IDE **3.26**/**3.27** notes in Quick Start (resumable agents; sticky Always Run; `parent_agent_id` on subagent hooks; Mermaid preview). No server code or MCP schema change. Cursor-only; other platform nightlies untouched.
 - **Cursor target advanced to 3.11 (+2026-10-16 / desktop 3.25.9)** (from 3.11 +2026-09-10 /
   desktop 3.21.13) in `.cursor-version`: `changelog_date` 2026-09-10 → 2026-10-16 and
   `desktop_cli` 3.21.13 → 3.25.9. The public feature pin stays 3.11 and `cli_changelog_date`
