@@ -34,7 +34,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Codex 0.164.0:** pin-only bump in `.codex-version`. Native `/presets`, inline `/model` and `/permissions`, enterprise MCP account-grant/OAuth and credential masking, session compaction/recovery, Windows proxy authentication, and macOS sandbox path protections. Local stdio MCP registration and device-code login unchanged. No server code or MCP schema change.
 - **Cursor 3.11 (+2026-10-16 / desktop 3.27.12):** bump desktop CLI pin **3.25.9 → 3.27.12** (stable download API 2026-10-23). Feature pin remains **3.11** / **2026-10-16**. Document IDE **3.26**/**3.27** notes in Quick Start (resumable agents; sticky Always Run; `parent_agent_id` on subagent hooks; Mermaid preview). No server code or MCP schema change. Cursor-only; other platform nightlies untouched.
-- **Claude Code target is 2.1.307** in `.claude-code-version`. 2.1.307 retries only read-only or idempotent HTTP MCP tools when a connection closes mid-call; mutating `investigation.*` calls are not retried and already accept an optional `Idempotency-Key`.
+- **Claude Code target bumped to 2.1.312** (from 2.1.307) in `.claude-code-version`. Covers
+  the 2.1.308–2.1.312 delta (2.1.308 shipped bug fixes and reliability improvements only,
+  with no itemized entries). This run's installed `claude` CLI reports `2.1.316`, ahead of
+  the changelog's newest published entry (2.1.312, dated 2026-10-27); the pin tracks the
+  changelog, not the local binary — a future pass should re-review 2.1.313–2.1.316 once
+  those are published. No compatibility break for this server's HTTP or stdio transport,
+  and nothing in this delta is adopted — this server's Streamable HTTP transport is exactly
+  the surface the 2.1.307 double-dispatch fix (above) already covers; nothing in
+  2.1.308–2.1.312 touches MCP transport behavior again.
+
+  **Reviewed and not applicable:**
+
+  - **2.1.307's Code Review subscription controls (`@claude review stop`/`off`/`pause`),
+    the `claude_code.safety_event` OpenTelemetry event, VSCode-extension TLS/certificate
+    handling, a WebSearch-budget notice wording tweak, an `axScreenReader` settings-tier
+    restriction, self-hosted-runner changes, and fork subagents launched together now each
+    knowing which launch is their own** — this server is reached purely as an MCP
+    server (HTTP or stdio) from a caller's own Claude Code session; it is never the VS
+    Code extension, configures no OpenTelemetry exporter or Claude-apps-gateway of its
+    own, runs no CI on a self-hosted runner (hard constraint 6), and spawns no subagents
+    of its own.
+  - **2.1.309's worktree-create change that no longer fetches on demand** — this repo's
+    own contributor workflow is branch-per-change off `main` (see
+    [AGENTS.md → Branch & commit conventions](AGENTS.md#branch--commit-conventions)),
+    never `claude agents` teleport/worktrees.
+  - **2.1.310's `Monitor` tool provider expansion** — this server uses no `Monitor` watch
+    or `Workflow` tool script of its own.
+  - **2.1.311's one-way `/compact`-disable setting and output-format control-character
+    escaping** — session-level client behavior with no `.claude/settings.json` field or
+    scripted `--output-format` parsing of this repo's own to affect; both benefit any
+    caller's session automatically with no change here.
+  - **2.1.311's dropped `-1m` model-name-suffix convention** — this server makes no model
+    calls of its own (hard constraint 5) — no model name of this repo's own to rename.
+  - **2.1.312's lower-bound fix to subagent `autoCompactWindow` and the per-event
+    hook-concurrency cap raised from 12 to 24** — this server defines no subagents or
+    hooks of its own.
 - **Claude Code target bumped to 2.1.306** (from 2.1.300) in `.claude-code-version`. Covers
   the 2.1.301–2.1.306 delta, reviewed one release at a time. 2.1.301 and 2.1.302 shipped
   together; 2.1.303 published bug fixes and reliability improvements only, with no
@@ -94,152 +129,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **2.1.301/2.1.302's `Input`'s new `rows` option and hook `ask` prompts now naming the
     plugin that raised them** — host-side UI and hooks/plugin surface; no hooks or plugin
     manifest here.
-
-## [0.1.2] - 2026-10-20
-
-### Added
-
-- **Run the HTTP server on Google Cloud Run.** New guide
-  [Deploy on Cloud Run](docs/deploy/cloud-run.md) and example manifest
-  [`deploy/cloud-run/service.yaml`](deploy/cloud-run/service.yaml): deploy the published
-  `ghcr.io/productionmasterai/production-master-mcp` image through an Artifact Registry
-  remote repository (recommended), straight from ghcr.io, or from your own Cloud Build;
-  scale-to-zero, concurrency, `/health` startup and liveness probes, and how the
-  pass-through bearer combines with Cloud Run IAM (`X-Serverless-Authorization`) and a
-  client-side token kept in Secret Manager.
-- **The HTTP transport honours `PORT`.** `production-master-mcp --http` now listens on
-  `PM_MCP_HTTP_PORT`, else `PORT` (set by Cloud Run and similar platforms), else `3000`, and
-  binds `0.0.0.0` explicitly. Both port variables must be plain digits naming a port from 1
-  to 65535 (an empty value counts as unset); anything else, such as `8080junk`, `8080.5` or
-  ` 8080`, fails at startup naming the variable instead of being read as 8080.
-
-### Changed
-
-- **Cursor target advanced to 3.11 (+2026-10-16 / desktop 3.25.9)** (from 3.11 +2026-09-10 /
-  desktop 3.21.13) in `.cursor-version`: `changelog_date` 2026-09-10 → 2026-10-16 and
-  `desktop_cli` 3.21.13 → 3.25.9. The public feature pin stays 3.11 and `cli_changelog_date`
-  stays 2026-08-26. The Cursor pin references in [Quick start](docs/user/quick-start.md) are
-  updated to match, and its working tips gain the date-only changelog items through
-  2026-10-16 — Remote Control for local agents (2026-10-06), Origin App Marketplace
-  (2026-10-13), Cloud Agent canvases and the Environments API beta (2026-10-16) — plus a
-  desktop 3.25.9 note: add this server to the team/org MCP allowlist, prefer service tokens
-  for Cloud Agent / Automation clients that call the hosted service, and Security Review +
-  Rollouts (2026-09-23). No server code or MCP schema change. Cursor-only; other platform
-  pins untouched.
-
-- **Codex target bumped to 0.163.0** (from 0.155.1) in `.codex-version`. Pin-only
-  advancement: no server code, MCP tool schema, or documented `.codex/config.toml` stdio
-  registration changes with it, and the pass-through-auth design is unaffected.
-
-- **Claude Code target bumped to 2.1.300** (from 2.1.293) in `.claude-code-version`. Covers
-  the 2.1.294–2.1.300 delta, reviewed one release at a time with nothing skipped. There is no
-  published 2.1.297 or 2.1.298 — the official changelog jumps 2.1.296 → 2.1.299 — the same kind
-  of gap already recorded for 2.1.279, so the real review is 2.1.294–2.1.296 and 2.1.299–2.1.300.
-  No compatibility break for this repo. Six documentation improvements adopted (below); the
-  most significant completes a rollout already partly documented here: Claude Code's default
-  MCP protocol-version negotiation moves to `2026-07-28` on every remaining client path (it
-  already had for local stdio, 2.1.292).
-
-  **Adopted (2.1.295, 2.1.299, 2.1.300):**
-
-  - [Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity): the existing
-    2.1.292 stdio note is extended to also cover **2.1.295** (claude.ai connectors) and
-    **2.1.299** (cloud sessions and Remote Control) defaulting to MCP protocol version
-    `2026-07-28` — these three releases complete the rollout across every Claude Code MCP
-    client path this server can be reached through. Re-verified directly against this
-    server's pinned SDK rather than assumed from the stdio case: protocol-version negotiation
-    lives in the shared `Server`/`McpServer` `initialize` handler
-    (`@modelcontextprotocol/sdk` `dist/esm/server/index.js`), used identically regardless of
-    which transport (`http.ts` or `stdio.ts`) connects it, and `types.js` still pins
-    `LATEST_PROTOCOL_VERSION = '2025-11-25'` in the installed `1.30.0`. An unrecognized
-    requested version is answered with that newest supported version instead of failing the
-    handshake, and a well-behaved client accepts the answer — so nothing breaks on any of the
-    three paths, by the same mechanism already documented for stdio.
-  - The same section gains a note for **2.1.295**: "a server's error reply happening to
-    contain a network error name could get a remote MCP connection dropped." This server's
-    `upstream_unreachable` failure embeds exactly that shape — a short network-error code
-    inside an ordinary tool-result message (`describeTransportError` in `upstream.ts`
-    produces text like `could not reach the Production Master API (ECONNREFUSED)`), which is
-    an upstream-outage *tool result*, never a transport-level failure. Documented so that
-    message isn't mistaken on an older client for the MCP connection itself flapping.
-  - The same section gains a note for **2.1.295**: Claude is now told when you stop a
-    long-running MCP tool call from the tasks panel or a connected client, instead of being
-    left unaware the call was cancelled. Relevant since an `investigation.*` call over this
-    server's Streamable HTTP transport can legitimately run long (see the existing 2.1.274
-    long-call note just above it).
-  - The same section gains a note for **2.1.299**: MCP tool calls in headless/SDK sessions
-    sometimes failing, or running twice, when a background reconnect closed the connection
-    they were running on. Worth calling out specifically here because this server's mutating
-    tools already accept an `Idempotency-Key` for exactly this class of risk
-    (`ToolCallContext.idempotencyKey`, forwarded by `routeInvestigationTool` in
-    `tool-router/index.ts`) — the client-side fix and the server's own idempotency support
-    now defend the same failure mode from both ends.
-  - The same section gains a note for **2.1.300**: a server that never properly ends the HTTP
-    body of its reply to a notification could hang a connection for 30 seconds before failing
-    it. This server's Streamable HTTP transport (`http.ts`) is built on the official SDK's
-    `StreamableHTTPServerTransport`, which already ends every response correctly, so this was
-    a client-side hang on a bug this server could never trigger — documented so an occasional
-    30-second HTTP stall on an older client isn't misdiagnosed as a server defect.
-  - [Troubleshooting → Transport mismatch](docs/user/troubleshooting.md#transport-mismatch)
-    gains a sixth "connected but no tools" case, for **2.1.300**: Claude not being told about
-    an MCP server's tools and instructions until its *next* tool call, when the server
-    finished connecting right after a compaction. Same bucket as the existing mid-turn
-    (2.1.224), mid-listing-disconnect (2.1.259), and claude.ai-connector-cache (2.1.286)
-    cases above it — this one specific to a reconnect landing right after a compaction.
-
-  **Reviewed and not applicable:**
-
-  - **2.1.294's two hook-judging fixes** (`prompt`/`agent` hooks written as instructions
-    wrongly allowing what they should block; improved Stop/SubagentStop prompt-hook
-    judging) — no hooks are configured in `.claude/settings.json`.
-  - **2.1.295's `onFailure: "block"` for command/HTTP hooks, `$.ui.notify` and `Button`
-    children for mods, the plugin-validate hooks-module error detail, and the long list of
-    plugin/mod/marketplace fixes** — no hooks, no mod, no `.claude-plugin/` manifest (the
-    same reasoning recorded for every prior release).
-  - **2.1.295's WebSocket (`ws`) MCP server 16 MiB message cap** — this server implements
-    Streamable HTTP and stdio only (no `ws` transport, per AD-23).
-  - **2.1.295's MCP-tool-description-via-tool-search cut, raised 2,048 → 16,384 characters,
-    and 2.1.296's default MCP tool-description/server-instructions cap, raised 2,048 → 4,096
-    characters** — same bucket as 2.1.280's `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH`: this
-    server's descriptions remain the short generic `Production Master investigation tool:
-    <name>` string and its `McpServer` construction (`http.ts` / `stdio.ts`) sets no
-    `instructions` field, so nothing here was ever truncated by any of the three caps. Folded
-    into the existing "richer per-tool descriptions" future opportunity below, with the new
-    numbers.
-  - **2.1.295's pagination-cursor-repeated-20-times fix and the CSS/JS/XML/font
-    file-extension fix for MCP tool results** — this server has no resources or paginated
-    listings, and every tool returns `{ type: 'text', ... }` (JSON-stringified data), never a
-    file or image result.
-  - **2.1.296's `.mcp.json`/plugin-MCP-server-switched-off-for-folder fix, the "cloud
-    sessions suggesting `/mcp`/`claude mcp` when a server needs auth" fix, and
-    `CLAUDE_CODE_RESUME_INTERRUPTED_TURN` re-running a finished turn after a restart** — this
-    repo ships no `.mcp.json` and no plugin; this server's auth is opaque pass-through with
-    no sign-in state of its own to prompt about; and the resume behavior is generic to any
-    MCP tool result ending a turn, not something this server's transports do differently.
-  - **2.1.299's MCP allow-rule scoping fix** (`mcp__a` no longer matching a server named
-    `a__b`/`a_`) **and the matching agent `tools:` list change** — checked directly: this
-    server's name, `production-master`, contains no double underscore, and neither
-    [Quick Start](docs/user/quick-start.md) nor any other doc here shows a permission-rule or
-    agent `tools:` example for it, so there was never a collision for this fix to matter to.
-  - **2.1.299's uncapped tool descriptions/instructions for Anthropic's own
-    `api.anthropic.com` MCP servers, the `UserPromptSubmit`-before-skill-expansion change,
-    the deny/ask-rule double-underscore fix, and the remaining plugin/mod/workflow items** —
-    none apply: this isn't an Anthropic first-party server, no hooks are configured, and (as
-    above) the server name has no double underscore.
-  - **2.1.300's MCP-server-added-before-policy-check fix and the `claude mcp
-    list`/`get`/subagent-server policy-block fix** — this repo documents no managed/
-    enterprise MCP policy of its own for either to interact with.
-  - **2.1.300's `constructor`/`toString`-named-server permission fix** — this server is named
-    `production-master`, not either reserved name.
-  - The remaining items across 2.1.294–2.1.300 (virtualText mod decorations, `agent.spawn`
-    prompt/model rewriting, the `prompt.change` mod hook, OTel GenAI span attributes,
-    `/advisor` on AWS, `updatedInput` hook-input validation, Cowork cloud-session
-    `PermissionRequest`/`setMode` changes, `$.http.fetch` body-limit edge cases, and VS
-    Code/Slack/TUI items) fall into the same excluded buckets as every prior bump: no
-    model-provider SDK (hard constraint 1), no mod or plugin, no hooks, no self-hosted
-    runners (hard constraint 4), or host-side session/UI internals with no MCP transport,
-    registration, tool-description, or auth surface this server or its docs touch.
-
 - **Claude Code target bumped to 2.1.293** (from 2.1.286) in `.claude-code-version`. Covers
   the 2.1.287–2.1.293 delta, reviewed one release at a time with nothing skipped. No
   compatibility break for this repo; 2.1.289–2.1.291 have nothing MCP-relevant for this repo
@@ -894,7 +783,7 @@ It contains every entry below, down to the initial scaffold.
   of this server's own for the port-binding fix to affect; the "N MCP servers need
   authentication" startup notice becoming once-per-server (2.1.268) — that notice
   is for servers using MCP OAuth sign-in, which again this server doesn't use;
-  the workload-identity-federation-via-profile `401 … jti reused` fix (2.1.268) —
+  the workload-identity-federation-via-profile "401 … jti reused" fix (2.1.268) —
   `.github/workflows/claude.yml` authenticates `claude-code-action` with a plain
   `anthropic_api_key` secret, no WIF profile configured, so there is no shared
   profile for the race to hit; Bedrock/Vertex/Foundry sessions keeping the MCP
