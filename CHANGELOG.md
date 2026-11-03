@@ -32,9 +32,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Cursor 3.11 (+2026-10-20 / desktop 3.27.22):** advance pins; document Agent SDK GA as orthogonal to MCP transport (public API only). Cursor-only.
 - **Codex 0.164.0:** pin-only bump in `.codex-version`. Native `/presets`, inline `/model` and `/permissions`, enterprise MCP account-grant/OAuth and credential masking, session compaction/recovery, Windows proxy authentication, and macOS sandbox path protections. Local stdio MCP registration and device-code login unchanged. No server code or MCP schema change.
 - **Cursor 3.11 (+2026-10-16 / desktop 3.27.12):** bump desktop CLI pin **3.25.9 → 3.27.12** (stable download API 2026-10-23). Feature pin remains **3.11** / **2026-10-16**. Document IDE **3.26**/**3.27** notes in Quick Start (resumable agents; sticky Always Run; `parent_agent_id` on subagent hooks; Mermaid preview). No server code or MCP schema change. Cursor-only; other platform nightlies untouched.
-- **Claude Code target is 2.1.307** in `.claude-code-version`. 2.1.307 retries only read-only or idempotent HTTP MCP tools when a connection closes mid-call; mutating `investigation.*` calls are not retried and already accept an optional `Idempotency-Key`.
+- **Claude Code target bumped to 2.1.312** (from 2.1.307) in `.claude-code-version`. Covers
+  the 2.1.308–2.1.312 delta (2.1.308 shipped bug fixes and reliability improvements only,
+  with no itemized entries). This run's installed `claude` CLI reports `2.1.316`, ahead of
+  the changelog's newest published entry (2.1.312, dated 2026-10-27); the pin tracks the
+  changelog, not the local binary — a future pass should re-review 2.1.313–2.1.316 once
+  those are published. No compatibility break for this server's HTTP or stdio transport,
+  and nothing in this delta is adopted — this server's Streamable HTTP transport is exactly
+  the surface the 2.1.307 double-dispatch fix (above) already covers; nothing in
+  2.1.308–2.1.312 touches MCP transport behavior again.
+
+  **Reviewed and not applicable:**
+
+  - **2.1.307's Code Review subscription controls (`@claude review stop`/`off`/`pause`),
+    the `claude_code.safety_event` OpenTelemetry event, VSCode-extension TLS/certificate
+    handling, a WebSearch-budget notice wording tweak, an `axScreenReader` settings-tier
+    restriction, self-hosted-runner changes, and fork subagents launched together now each
+    knowing which launch is their own** — this server is reached purely as an MCP
+    server (HTTP or stdio) from a caller's own Claude Code session; it is never the VS
+    Code extension, configures no OpenTelemetry exporter or Claude-apps-gateway of its
+    own, runs no CI on a self-hosted runner (hard constraint 6), and spawns no subagents
+    of its own.
+  - **2.1.309's worktree-create change that no longer fetches on demand** — this repo's
+    own contributor workflow is branch-per-change off `main` (see
+    [AGENTS.md → Branch & commit conventions](AGENTS.md#branch--commit-conventions)),
+    never `claude agents` teleport/worktrees.
+  - **2.1.310's `Monitor` tool provider expansion** — this server uses no `Monitor` watch
+    or `Workflow` tool script of its own.
+  - **2.1.311's one-way `/compact`-disable setting and output-format control-character
+    escaping** — session-level client behavior with no `.claude/settings.json` field or
+    scripted `--output-format` parsing of this repo's own to affect; both benefit any
+    caller's session automatically with no change here.
+  - **2.1.311's dropped `-1m` model-name-suffix convention** — this server makes no model
+    calls of its own (hard constraint 5) — no model name of this repo's own to rename.
+  - **2.1.312's lower-bound fix to subagent `autoCompactWindow` and the per-event
+    hook-concurrency cap raised from 12 to 24** — this server defines no subagents or
+    hooks of its own.
 - **Claude Code target bumped to 2.1.306** (from 2.1.300) in `.claude-code-version`. Covers
   the 2.1.301–2.1.306 delta, reviewed one release at a time. 2.1.301 and 2.1.302 shipped
   together; 2.1.303 published bug fixes and reliability improvements only, with no
