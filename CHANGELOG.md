@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Cursor 3.11 (+2026-10-20 / desktop 3.27.22):** advance pins; document Agent SDK GA as orthogonal to MCP transport (public API only). Cursor-only.
 - **Codex 0.164.0:** pin-only bump in `.codex-version`. Native `/presets`, inline `/model` and `/permissions`, enterprise MCP account-grant/OAuth and credential masking, session compaction/recovery, Windows proxy authentication, and macOS sandbox path protections. Local stdio MCP registration and device-code login unchanged. No server code or MCP schema change.
 - **Cursor 3.11 (+2026-10-16 / desktop 3.27.12):** bump desktop CLI pin **3.25.9 → 3.27.12** (stable download API 2026-10-23). Feature pin remains **3.11** / **2026-10-16**. Document IDE **3.26**/**3.27** notes in Quick Start (resumable agents; sticky Always Run; `parent_agent_id` on subagent hooks; Mermaid preview). No server code or MCP schema change. Cursor-only; other platform nightlies untouched.
 - **Claude Code target bumped to 2.1.312** (from 2.1.307) in `.claude-code-version`. Covers
