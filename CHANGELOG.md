@@ -32,6 +32,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Claude Code target bumped to 2.1.318** (from 2.1.312) in `.claude-code-version`. Covers
+  the 2.1.313–2.1.318 delta (2.1.313 and 2.1.315 were not published; a gap at those numbers
+  is expected, matching 2.1.308's precedent). No compatibility break for this server's HTTP
+  or stdio transport. Three items interact with this server's documented stdio/headersHelper
+  surface closely enough to need a documentation update (no server code change — this server
+  makes no handshake, env-passthrough, or admission decision of its own either way):
+
+  - **2.1.318 fixes stdio MCP servers being re-probed for their protocol version on every
+    start, and as part of that fix now pins a server that exits in under 3 seconds for its
+    own reason to the legacy MCP handshake for 7 days.** This server's documented stdio
+    behavior — a missing `PM_SESSION_JWT` exits immediately with an error rather than
+    failing on the first tool call, see
+    [Commands → Configuration](docs/user/reference/commands.md#configuration) — is exactly
+    the kind of fast self-exit this targets. It is harmless here either way: this server's
+    `initialize` handler answers every client proposal with the one protocol version its
+    pinned SDK supports regardless of whether the client proposes the legacy or the
+    2026-07-28 shape (see the 2.1.292/2.1.295/2.1.299 note in
+    [Troubleshooting → Transport mismatch](docs/user/troubleshooting.md#transport-mismatch)),
+    so a client pinned to the legacy proposal for a week gets the same answer as one that isn't. Net
+    effect for an operator who fixes a missing-token misconfiguration: fewer repeated
+    version probes afterward, not a new failure mode. Documented as a seventh
+    "connected but no tools" case in Troubleshooting so it isn't mistaken for one.
+  - **2.1.317 fixes project and local MCP servers disconnecting after the first turn in
+    some Claude Desktop sessions.** This server is exactly a project/local entry when run
+    over stdio from Claude Desktop. Purely client-side; documented as an eighth
+    "connected but no tools" case in Troubleshooting with "update Claude Desktop" as the
+    only remedy.
+  - **2.1.316 fixes a plugin-distributed MCP `headersHelper` script receiving a corrupted
+    `CLAUDE_PLUGIN_ROOT` and server URL when a credential-named environment variable (one
+    whose name contains something like `TOKEN` or `KEY`) was set to a switch value such as
+    `1`.** This repo ships no `.claude-plugin/` manifest and the documented `headersHelper`
+    and `managedMcpServers` setups in
+    [Quick Start](docs/user/quick-start.md#option-a--connect-over-http-post-mcp) are both
+    plain `.mcp.json`/gateway-pushed entries, not plugin-bundled ones — so this bug doesn't
+    reach a `production-master` entry set up either documented way. Noted in Quick Start
+    only as a caution for an organization that chooses to wrap this server's config in its
+    own internal plugin for distribution.
+
+  **Reviewed and not applicable:** 2.1.314's `permissions.blockWritesOutsideWorkingDirectories`,
+  Claude apps gateway `groups`/`guardrail_trace` upstream additions, and VS Code/Claude
+  Desktop idle compaction (no writes, gateway config, or conversation state of this
+  server's own); 2.1.317's account-email network-send check, Agent SDK `onFailure: "block"`
+  hook callbacks, and the Claude apps gateway cost-report API (no shell/web tool call, SDK
+  hook, or gateway of this server's own to affect); 2.1.318's mod-opt-in record, `mantle`
+  upstream `assume_role`, and the `$.model.fork` `effort` option (no mod, gateway upstream,
+  or model call of this server's own — hard constraint 1).
 - **Codex 0.166.0:** pin-only bump in `.codex-version` (from 0.165.0). This tracks the release reviewed in Codex's published changelog (2026-10-29); it is not a live validation run against 0.166.0. New host features (`codex doctor --network-only`, `codex queue --resume`, transcript keyboard selection) need no change here. Local stdio MCP registration and device-code login unchanged. No server code or MCP schema change.
 - **Cursor 3.11 (+2026-10-20 / desktop 3.27.22):** advance pins; document Agent SDK GA as orthogonal to MCP transport (public API only). Cursor-only.
 - **Codex 0.164.0:** pin-only bump in `.codex-version`. Native `/presets`, inline `/model` and `/permissions`, enterprise MCP account-grant/OAuth and credential masking, session compaction/recovery, Windows proxy authentication, and macOS sandbox path protections. Local stdio MCP registration and device-code login unchanged. No server code or MCP schema change.
