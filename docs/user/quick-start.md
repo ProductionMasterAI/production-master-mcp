@@ -86,6 +86,8 @@ claude mcp add --transport http production-master <server-url>/mcp \
 > `managedMcpServers`, a typo in it now surfaces at gateway startup rather than as a
 > silent no-op for whoever it failed to reach.
 
+> **Packaging this entry inside your own internal plugin? Mind the 2.1.316 `headersHelper` env-var bug.** The `headersHelper` and `managedMcpServers` setups documented here are both plain `.mcp.json` / gateway-pushed entries — this repo ships no `.claude-plugin/` manifest of its own, so neither documented path is affected. But if your organization wraps this server's config in its own internal Claude Code plugin for distribution and that plugin's `headersHelper` script runs with a credential-named environment variable (one whose name contains something like `TOKEN` or `KEY`) set to a switch value such as `1`, versions before 2.1.316 could hand that script a corrupted `CLAUDE_PLUGIN_ROOT` and server URL. Update to Claude Code 2.1.316+ before shipping a plugin-bundled `headersHelper` this way.
+
 > **VS Code (Claude Code 2.1.261+):** the MCP servers dialog gained an **Add server**
 > form and a **Remove** action, so this HTTP entry can be added (or removed) from
 > inside the IDE without editing a settings file by hand — the same entry shape as
