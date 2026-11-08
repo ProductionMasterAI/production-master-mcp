@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Cursor 3.11 (+2026-11-06 / desktop 3.29.9):** advance pins; document Voice Chat + Live Apps as orthogonal to MCP transport (public API only). Cursor-only.
+
 ### Security
 
 - Bump transitive `proxy-addr` 2.0.7 → 2.0.8 (GHSA-jqcg-44mw-7w3h: IP spoofing via an
