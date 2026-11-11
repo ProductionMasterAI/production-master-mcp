@@ -32,6 +32,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Claude Code target bumped to 2.1.322** (from 2.1.318) in `.claude-code-version`. Covers
+  the 2.1.319–2.1.322 delta (2.1.320 was not published; a gap at that number is expected,
+  matching 2.1.308's and 2.1.313/2.1.315's precedent). No compatibility break for this
+  server's HTTP or stdio transport.
+
+  - **2.1.319 fixes MCP servers on the older handshake failing to connect, or returning
+    empty results, because Claude Code declared a protocol extension it only uses with
+    newer servers.** This server's `initialize` handler answers every client proposal —
+    legacy or `2026-07-28` — with whatever version its pinned SDK supports (see
+    [Troubleshooting → Connectivity](docs/user/troubleshooting.md#connectivity) and the
+    2.1.318 "seventh case" note), so it was never the server declining the extension; a
+    client stuck proposing the legacy handshake (including one pinned there by the
+    2.1.318 fast-exit fix) now connects cleanly either way. No server change; documented
+    as an addendum to the existing seventh-case note.
+  - **2.1.319 adds MCP tasks in the terminal** — background execution for long-running
+    tool calls, with the result reported to Claude when it finishes
+    (`CLAUDE_CODE_DISABLE_MCP_TASK_BACKGROUND` to opt out). This repo's own Troubleshooting
+    doc already notes that some `investigation.*` calls legitimately run for minutes; having
+    this server *declare* a call as a task (rather than relying on the client to background
+    it implicitly) is a real adoption candidate, but it needs confirming whether the pinned
+    `@modelcontextprotocol/sdk@1.32.1` (npm's latest is only a 1.32.2 patch, with no
+    documented task-capability primitive) exposes any task API at all. Tracked in Future
+    opportunities rather than implemented against an unconfirmed SDK surface.
+  - **2.1.319 fixes `claude -p --resume` losing a deferred tool call when its MCP server is
+    missing from the resumed config; the run now exits 1, keeps the call, and refuses
+    later input** instead of silently dropping it. Relevant to CI/headless use of this
+    server over stdio: a resumed `-p` run whose `.mcp.json`/`--mcp-config` entry for
+    `production-master` was edited out or broken between the original run and the resume
+    now fails loudly instead of continuing as if an outstanding `investigation.*` call had
+    been answered. Added as a new Connectivity note.
+  - **2.1.321 fixes an MCP server sometimes showing connected with no tools after it was
+    reconnected, or the session's directory changed, while its tools were still loading** —
+    added as a ninth "connected but no tools" case in Troubleshooting.
+  - **2.1.321 fixes a project's MCP server disconnecting after the first message in a
+    Claude Desktop Code tab session when the desktop app has an MCP server or extension of
+    the same name.** Distinct from the 2.1.317 "eighth case" (a general Claude Desktop
+    session disconnect): this one is specific to the Code tab and a same-name collision.
+    Added as a tenth case.
+  - **2.1.321 fixes context usage estimates overcounting tool definitions when exact token
+    counts are unavailable.** This server contributes 20 fixed-description
+    `investigation.*` tool definitions to a session's context (see the 2.1.306 note below);
+    this purely improves the accuracy of what Claude Code reports back about that cost. No
+    server change.
+  - **2.1.321's MCP OAuth-redirect secret-leak fix and its `mcp_tool` PreToolUse-hook 16
+    MiB-answer fix are both reviewed and not applicable:** this server uses pass-through
+    bearer auth, never MCP OAuth (see [Auth failures](docs/user/troubleshooting.md#auth-failures));
+    and that 16 MiB limit is on a *hook's own answer* intercepting a tool call, not on this
+    server's tool-result payload size, which the hosted service — not this repo — controls.
+  - **2.1.322's Vertex fast-mode addition is reviewed and not applicable** — this server
+    makes no model-provider calls of its own (hard constraint 1).
+
+  **Reviewed and not applicable (the rest of 2.1.319/2.1.321/2.1.322):** auto mode
+  changes, `/claude-api` additions, feature-flag/env toggles, Claude apps gateway
+  additions (spend tracking, `login_notice`, JSON logs, boot warnings), `/tasks`/`/loop`
+  UI changes, diff/`HEAD`-file bugs, slash-command parsing, `/context` grid payload, NFS
+  project listing, feedback-draft bugs, Bash deny/ask-rule and `cp`/`mv` path-check
+  changes, subagent hand-back/hook/plugin-update/marketplace items (no subagents, hooks,
+  or plugin manifest of this repo's own), self-hosted-runner items (hard constraint 4 —
+  GitHub-hosted CI only), sandbox-escape and TLS/certificate fixes (no sandboxed Bash
+  tool or TLS termination of this repo's own), Fable/model-naming/billing items (hard
+  constraint 1), and every VSCode/Claude Tag/Code Review/Cowork/Remote Control item (no
+  extension, Tag, Code Review, or Remote Control integration of this repo's own).
 - **Claude Code target bumped to 2.1.318** (from 2.1.312) in `.claude-code-version`. Covers
   the 2.1.313–2.1.318 delta (2.1.313 and 2.1.315 were not published; a gap at those numbers
   is expected, matching 2.1.308's precedent). No compatibility break for this server's HTTP
