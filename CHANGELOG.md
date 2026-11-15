@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- **Cursor 3.11 (+2026-11-06 / desktop 3.29.9):** advance pins; document Voice Chat + Live Apps as orthogonal to MCP transport (public API only). Cursor-only.
+- **Cursor 3.11 (+2026-11-06 / desktop 3.30.14):** advance desktop pin **3.29.9 → 3.30.14** (download API 2026-11-15); feature pin remains **3.11** / **2026-11-06**. Voice Chat + Live Apps remain orthogonal to MCP transport (public API only). Desktop 3.30 fixes Agents Window usage panel / chat text-size / EOL nag — no MCP registration change. Cursor-only.
 
 ### Security
 
