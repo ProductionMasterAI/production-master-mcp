@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- Bump transitive `hono` 4.13.13 → 4.13.19, `@hono/node-server` 2.1.1 → 2.1.9 and `body-parser`
+  2.3.0 → 2.4.0 (lockfile only, all within existing ranges). Clears 8 Dependabot alerts:
+  GHSA-27r3-jxmh-p828 (body-parser DoS via trailing bytes), GHSA-jpvv-r467-5p4w and
+  GHSA-qv5m-9pm6-hqp3 (@hono/node-server path parsing, unhandled ECONNRESET), GHSA-3gg2-335m-rxc6,
+  GHSA-46wx-v44x-9hh2, GHSA-4m76-xfj5-7975, GHSA-h7mg-cq63-vhpq, GHSA-4h7h-rv7c-7m2v (hono). The
+  zod alert (GHSA-mrhx-c7xc-m3w5) stays open: its only fix is zod 4.6.6, a major upgrade.
 - Bump transitive `proxy-addr` 2.0.7 → 2.0.8 (GHSA-jqcg-44mw-7w3h: IP spoofing via an
   IPv4-mapped IPv6 trust subnet).
 - Bump `@modelcontextprotocol/sdk` 1.30.0 → 1.32.1 (GHSA-46jr-4wx8-v453, GHSA-rvq5-wwqv-78pq,
