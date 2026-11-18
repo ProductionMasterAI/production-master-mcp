@@ -53,6 +53,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Claude Code target bumped to 2.1.327** (from 2.1.322) in `.claude-code-version`. Covers
+  the 2.1.323–2.1.327 delta (2.1.324 was not published; a gap at that number is expected,
+  matching 2.1.308's, 2.1.313/2.1.315's, and 2.1.320's precedent). No compatibility break
+  for this server's HTTP or stdio transport.
+
+  - **2.1.326 fixes a tool argument matching a non-first branch of a root `anyOf`/`oneOf`
+    schema being reshaped into the first branch's form before Claude Code sent it.**
+    `investigation.add_evidence`'s `{ type, payload }` generic evidence variant (see the
+    Security section above, where the zod 4 migration made `payload` required there) is
+    exactly this shape. No server change — this server performs no argument coercion of
+    its own; it validates whatever the client sends against the schema from
+    `@production-master/mcp-tool-contract` and forwards it as-is. Documented as a new note
+    in [Troubleshooting](docs/user/troubleshooting.md#connectivity).
+  - **2.1.326 fixes two parallel MCP tool calls reading each other's saved result when both
+    finished within the same millisecond** (anthropics/claude-code#105138). Relevant here
+    because firing several `investigation.*` calls at once against the same session is an
+    expected usage pattern; this server's own per-request statelessness (see the 2.1.283
+    note below) was never the cause — this was purely client-side result bookkeeping. No
+    server change. Documented as a new Connectivity note.
+  - **2.1.327 extends the background-retry window for a dropped remote MCP connection (a
+    VPN drop, a network change) from the shorter window the 2.1.243/2.1.273 fixes cover to
+    about a day**, for servers reached by hostname over HTTPS — exactly this server's HTTP
+    deployment shape (see [Deploy on Cloud Run](docs/deploy/cloud-run.md)). No server
+    change; documented as a new Connectivity note.
+  - **2.1.323's Code Mode addition, `plugin.json engines["claude-code"]`, and the
+    `claude mcp add --scope project` top-level-`.mcp.json` fix are reviewed and not
+    applicable:** this repo ships no `.claude-plugin/` manifest and no mod, and the
+    documented `claude mcp add` commands in [Quick Start](docs/user/quick-start.md) never
+    hand-edit `.mcp.json`'s top level.
+  - **2.1.325's zstd-decoding security fix, MCP elicitation-cancellation fix, and
+    MCP-OAuth-adjacent items are reviewed and not applicable:** this server sends no
+    compressed response bodies of its own, never uses MCP elicitation (a stateless
+    per-request relay with no interactive prompts — see `register-tools.ts` / `http.ts`),
+    and uses pass-through bearer auth, never MCP OAuth (see
+    [Auth failures](docs/user/troubleshooting.md#auth-failures)).
+
+  **Reviewed and not applicable (the rest of 2.1.323/2.1.325/2.1.326/2.1.327):** auto mode
+  and Bash/PowerShell sandbox changes (no sandboxed Bash tool of this repo's own), Claude
+  Desktop/Remote Control/VSCode/Claude Tag/Code Review/Cowork items (no such integration of
+  this repo's own), self-hosted-runner items (hard constraint 6 — GitHub-hosted CI only),
+  Fable/billing/model-naming items (hard constraint 5 — no model-provider calls of its own),
+  plugin marketplace/hook/skill-loading changes (no plugin manifest, hooks, or bundled
+  skills of this repo's own — `.claude/skills/run-production-master-mcp` is a dev-time CI
+  helper, not something this server ships to MCP clients), and terminal rendering, UI, and
+  accessibility fixes (no terminal UI of this repo's own).
 - **Claude Code target bumped to 2.1.322** (from 2.1.318) in `.claude-code-version`. Covers
   the 2.1.319–2.1.322 delta (2.1.320 was not published; a gap at that number is expected,
   matching 2.1.308's and 2.1.313/2.1.315's precedent). No compatibility break for this
