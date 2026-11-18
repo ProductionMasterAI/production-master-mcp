@@ -12,6 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- Move every copy of `zod` to 4.6.7 (GHSA-mrhx-c7xc-m3w5: memory exhaustion validating
+  oversized collections; no 3.x fix exists). `@production-master/mcp-tool-contract@0.1.0` still
+  declares `zod ^3`, so the root `package.json` gains `overrides: { zod: ^4.6.6 }` and
+  `packages/mcp-server` declares `zod ^4.6.6`. One visible change: in `investigation.add_evidence`
+  the generic evidence variant `{ type, payload }` now requires `payload` (zod 4 no longer treats
+  a `z.unknown()` key as optional); the advertised tool schema says so too. Advertised schemas
+  also drop `additionalProperties: false` (unknown keys are still stripped) and give integer
+  fields `maximum: 2^53-1`. A test fails if any package resolves zod below 4.6.6 again.
+  Scope: this fixes the repo and the Docker image (both install from this lockfile). npm
+  ignores `overrides` outside the installing project's root, so users of the published
+  `@production-master/mcp` package still get zod 3 under the contract until contract 0.1.1 ships
+  (https://github.com/ProductionMasterAI/production-master-service/issues/1801).
 - Bump transitive `hono` 4.13.13 → 4.13.19, `@hono/node-server` 2.1.1 → 2.1.9 and `body-parser`
   2.3.0 → 2.4.0 (lockfile only, all within existing ranges). Clears 8 Dependabot alerts:
   GHSA-27r3-jxmh-p828 (body-parser DoS via trailing bytes), GHSA-jpvv-r467-5p4w and
