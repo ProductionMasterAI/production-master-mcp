@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-11-19
+
 - **Codex 0.169.1:** pin-only bump in `.codex-version` (from 0.169.0). Tracks the release reviewed in Codex's published changelog (2026-11-17); not a live validation run against 0.169.1. Note for this server: since 0.169.0, headless `codex exec` does not load project config or MCP servers in an untrusted directory, even with workspace-write, so a headless run that needs this server must trust the project (`--trust`). `features.multi_agent` is deprecated in favour of `agents.enabled`. Local stdio MCP registration and device-code login unchanged. No server code or MCP schema change.
 - **Cursor 3.11 (+2026-11-06 / desktop 3.30.14):** advance desktop pin **3.29.9 → 3.30.14** (download API 2026-11-15); feature pin remains **3.11** / **2026-11-06**. Voice Chat + Live Apps remain orthogonal to MCP transport (public API only). Desktop 3.30 fixes Agents Window usage panel / chat text-size / EOL nag — no MCP registration change. Cursor-only.
 
@@ -1857,7 +1859,8 @@ It contains every entry below, down to the initial scaffold.
 - Documented the standard-MCP-server-over-hosted-service architecture: Streamable HTTP (`POST /mcp`) and stdio transports, opaque bearer pass-through, tool schemas from `@production-master/mcp-tool-contract`.
 - Empty npm workspaces layout (`packages/*`) ready to be populated.
 
-[Unreleased]: https://github.com/ProductionMasterAI/production-master-mcp/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/ProductionMasterAI/production-master-mcp/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.3
 [0.1.2]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.2
 [0.1.1]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.1
 [0.1.0]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.0
