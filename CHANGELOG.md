@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- Require `@production-master/mcp-tool-contract ^0.1.1` and drop the root `overrides: { zod }`.
+  Contract 0.1.1 accepts `zod ^3.25.0 || ^4.6.6`, so npm dedupes it onto the server's zod 4.6.7
+  without an override, and that now also holds for installs of the published
+  `@production-master/mcp` package once it is released with this change (npm never applied the
+  override there). Contract 0.1.1 also makes the generic evidence `payload` optional again, which
+  undoes the one visible change from the zod 4 move below, and caps session-mint `scopes` at 2
+  entries. Closes https://github.com/ProductionMasterAI/production-master-service/issues/1801.
 - Move every copy of `zod` to 4.6.7 (GHSA-mrhx-c7xc-m3w5: memory exhaustion validating
   oversized collections; no 3.x fix exists). `@production-master/mcp-tool-contract@0.1.0` still
   declares `zod ^3`, so the root `package.json` gains `overrides: { zod: ^4.6.6 }` and
