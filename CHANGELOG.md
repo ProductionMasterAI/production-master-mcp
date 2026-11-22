@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Cursor 3.11 (+2026-11-06 / desktop 3.31.15):** desktop pin **3.30.14 → 3.31.15** (download API 2026-11-22); `cli_changelog_date` **2026-08-26 → 2026-11-17**. Feature pin **3.11** / **2026-11-06**. Document IDE notes through **3.30** (MCP tool-description search) and CLI through **2026-11-17**. Enrich MCP tool descriptions so Cursor 3.30+/CLI description search can match by intent. Cursor-only.
+
 ## [0.1.4] - 2026-11-22
 
 ### Security

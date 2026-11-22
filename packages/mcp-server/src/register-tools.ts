@@ -31,7 +31,11 @@ export function registerInvestigationTools(server: McpServer, context: ToolCallC
     server.registerTool(
       name,
       {
-        description: `Production Master investigation tool: ${shortName}`,
+        description:
+          `Relay the Production Master hosted investigation API tool "${name}" ` +
+          `(short name ${shortName}): start, list, update, or inspect incident ` +
+          `investigations and evidence over the public API. Auth is opaque bearer ` +
+          `pass-through; this server holds no credentials and never runs model logic.`,
         inputSchema: schema,
       },
       async (args): Promise<CallToolResult> => {
