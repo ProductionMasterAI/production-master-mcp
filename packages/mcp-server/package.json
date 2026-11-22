@@ -1,6 +1,6 @@
 {
   "name": "@production-master/mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Standard MCP server (Streamable HTTP + stdio) for the Production Master hosted incident-investigation service. Protocol boundary only — no investigation logic.",
   "type": "module",
   "bin": {
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
-    "@production-master/mcp-tool-contract": "^0.1.0",
+    "@production-master/mcp-tool-contract": "^0.1.1",
     "zod": "^4.6.6"
   },
   "repository": {

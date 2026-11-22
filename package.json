@@ -1,6 +1,6 @@
 {
   "name": "production-master-mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Standalone MCP server for the Production Master hosted incident-investigation service.",
   "license": "MIT",
@@ -26,8 +26,5 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4",
     "vitest": "^5.0.5"
-  },
-  "overrides": {
-    "zod": "^4.6.6"
   }
 }
