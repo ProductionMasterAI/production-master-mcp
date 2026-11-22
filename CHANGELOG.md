@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Require `@production-master/mcp-tool-contract ^0.2.0`. That release is zod-4-only (`zod ^4.6.6`), comes from production-master-service's zod 4 migration (service#1807), and was the first release published through npm trusted publishing. `tools/list` output is byte-identical to the 0.1.1-based server (20 tools). A refreshed lockfile also clears the 9 moderate dev-only `minimatch` advisories, so `npm audit` (full) reports 0.
+
 ## [0.1.3] - 2026-11-19
 
 - **Codex 0.169.1:** pin-only bump in `.codex-version` (from 0.169.0). Tracks the release reviewed in Codex's published changelog (2026-11-17); not a live validation run against 0.169.1. Note for this server: since 0.169.0, headless `codex exec` does not load project config or MCP servers in an untrusted directory, even with workspace-write, so a headless run that needs this server must trust the project (`--trust`). `features.multi_agent` is deprecated in favour of `agents.enabled`. Local stdio MCP registration and device-code login unchanged. No server code or MCP schema change.
