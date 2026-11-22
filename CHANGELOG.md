@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-11-22
+
 ### Security
 
 - Require `@production-master/mcp-tool-contract ^0.2.0`. That release is zod-4-only (`zod ^4.6.6`), comes from production-master-service's zod 4 migration (service#1807), and was the first release published through npm trusted publishing. `tools/list` output is byte-identical to the 0.1.1-based server (20 tools). A refreshed lockfile also clears the 9 moderate dev-only `minimatch` advisories, so `npm audit` (full) reports 0.
@@ -1908,7 +1910,8 @@ It contains every entry below, down to the initial scaffold.
 - Documented the standard-MCP-server-over-hosted-service architecture: Streamable HTTP (`POST /mcp`) and stdio transports, opaque bearer pass-through, tool schemas from `@production-master/mcp-tool-contract`.
 - Empty npm workspaces layout (`packages/*`) ready to be populated.
 
-[Unreleased]: https://github.com/ProductionMasterAI/production-master-mcp/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/ProductionMasterAI/production-master-mcp/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.4
 [0.1.3]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.3
 [0.1.2]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.2
 [0.1.1]: https://github.com/ProductionMasterAI/production-master-mcp/releases/tag/v0.1.1
