@@ -10,6 +10,99 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Cursor 3.11 (+2026-11-06 / desktop 3.31.15):** desktop pin **3.30.14 → 3.31.15** (download API 2026-11-22); `cli_changelog_date` **2026-08-26 → 2026-11-17**. Feature pin **3.11** / **2026-11-06**. Document IDE notes through **3.30** (MCP tool-description search) and CLI through **2026-11-17**. Enrich MCP tool descriptions so Cursor 3.30+/CLI description search can match by intent. Cursor-only.
+- **Claude Code target bumped to 2.1.332** (from 2.1.327) in `.claude-code-version`.
+  Covers the 2.1.328–2.1.332 delta, reviewed one release at a time. No
+  compatibility break for this server's HTTP or stdio transport. Several
+  documentation improvements adopted into
+  [Troubleshooting](docs/user/troubleshooting.md), each tied to this server's
+  actual transport and usage surface rather than added speculatively.
+
+  **Adopted:**
+
+  - [Connectivity](docs/user/troubleshooting.md#connectivity) gains notes for:
+    **2.1.328**'s drop-the-largest-result fix for "Prompt is too long"
+    context-overflow dead-ends in some Claude Desktop sessions on third-party
+    providers; **2.1.329**'s new "Server message" row in `/mcp` showing a
+    refused HTTP connection's JSON-RPC error text; **2.1.329**'s automatic
+    reconnect of HTTP MCP servers left on a stale protocol version, which used
+    to stall a background task; **2.1.330**'s fix so a server declared by
+    several subagents isn't shut down the moment the first one finishes
+    (relevant given the existing 2.1.326 note that parallel `investigation.*`
+    calls are an expected pattern); three **2.1.330** claude.ai connector
+    URL-matching fixes (duplicate connectors at the same URL no longer
+    merged to one, a false "not connected" when the connector's URL omits a
+    query string the local config has, and `claude mcp remove` now pointing at
+    `/mcp`/claude.ai for a connector entry instead of silently doing nothing);
+    **2.1.330**'s background-session task-following fix, with its documented
+    stdio/custom-header exception — relevant since stdio is one of this
+    server's two transports; and **2.1.331**'s fix for an MCP tool call
+    hanging up to 30 minutes on a malformed reply from a local or WebSocket
+    server (this server's stdio transport is SDK-built and has no WebSocket
+    transport, so not known to trigger it, but documented for anyone chasing
+    an unexplained stdio hang).
+  - [Transport mismatch](docs/user/troubleshooting.md#transport-mismatch)
+    gains an eleventh "connected but no tools" case, for **2.1.329**: Claude
+    is now told when a connected server's tools genuinely failed to load,
+    instead of that being indistinguishable from a server with no tools. This
+    server's own tool listing is unconditional (see
+    [Commands](docs/user/reference/commands.md#tools)), so it was never
+    actually the "no tools" case, but the distinction now surfaces a real
+    problem instead of masking it.
+  - A further Connectivity note for **2.1.331**: a Workflow agent's
+    background shells and MCP connections are now cleaned up after it hands
+    back its report. This server's HTTP transport was never at risk
+    (stateless per request, closed on `res.close`, see the 2.1.283 note), so
+    this targets a `production-master` stdio subprocess specifically.
+
+  **Reviewed and not applicable:**
+
+  - **2.1.328's `anyOf`/`oneOf`/`allOf`-rooted and invalid-input-schema
+    MCP-tool-listing fixes, and 2.1.330's "JSON schema is invalid" /
+    session-file-growth fix for sessions with many such tools.** Same
+    boundary as the existing 2.1.326 schema note above: tool input schemas
+    come from `@production-master/mcp-tool-contract`, reviewed and released
+    independently of this repo, never redefined here. Worth tracking there,
+    not here.
+  - **2.1.329's fix for PDFs, images, and Office files sent as
+    `application/octet-stream` being saved as `.bin`.** Every tool in
+    `register-tools.ts` returns `{ type: 'text', ... }` JSON — this server
+    has never returned binary content for the fix to apply to.
+  - **2.1.330's fix to MCP resources from claude.ai connectors and plugin
+    servers not being attached when @-mentioned.** Same bucket as the
+    existing 2.1.281 "MCP Apps UI resources" exclusion: this server declares
+    `capabilities: { tools: {} }` only (`http.ts` / `stdio.ts`) and registers
+    no MCP resources, so there's nothing here to attach. Recorded as a future
+    opportunity below.
+  - **2.1.330's partial fix to Claude replying to its own commit-attribution
+    reminder and ending a turn early, "where managed settings set the PR
+    attribution line."** AGENTS.md requires the `Co-Authored-By` trailer on
+    every commit (see
+    [Branch & commit conventions](AGENTS.md#branch--commit-conventions)) —
+    exactly the kind of managed attribution setting the quoted residual case
+    names. Noted here since it's a contributor-workflow annoyance, not a
+    tool/transport bug; no server-side surface to fix it on, and the upstream
+    fix is already only partial.
+  - **2.1.330's link-reference-definitions-dropped-by-an-HTML-comment fix for
+    CLAUDE.md and memory files.** Checked directly: neither `CLAUDE.md` nor
+    `AGENTS.md` here contains an HTML comment, so this never fired against
+    this repo's own agent policy files.
+  - **2.1.332's beta "skills from MCP servers"** (surfaced as `server:skill`
+    in the `/` menu) **and the 2.1.332 malformed-task-handle fix raising the
+    ID limit to 1,024 characters.** The skills beta is tracked as a future
+    opportunity below rather than guessed at while it's still beta and
+    unconfirmed against the pinned SDK; the task-handle fix is a no-op for a
+    stateless server that issues no task handles of its own.
+  - The remaining items across 2.1.328–2.1.332 (auto mode, Code Mode, and
+    Bash/sandbox changes; Claude Desktop/Remote Control/VSCode/Claude
+    Tag/Code Review/Cowork items; self-hosted-runner items; model-naming/
+    billing/Fable items; plugin marketplace/hook/mod items; and terminal
+    rendering, UI, dictation, and accessibility fixes) fall into the same
+    excluded buckets as every prior bump: no sandboxed Bash tool, Code Mode,
+    or auto-mode surface of this repo's own; no such integration of this
+    repo's own; hard constraint 4 (GitHub-hosted CI only); hard constraint 5
+    (no model-provider calls); no plugin manifest, hooks, mods, or subagents
+    of this repo's own beyond the one 2.1.330 note above; and no terminal UI
+    of this repo's own.
 
 ## [0.1.4] - 2026-11-22
 
@@ -826,6 +919,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   are ever observed to produce session behavior that diverges from what `.claude/skills/`
   alone would produce. Not adopted now — this task found no evidence of the problem, and a
   settings change without one would be speculative.
+- **MCP skills from MCP servers (Claude Code 2.1.332, beta).** Claude Code can now surface
+  a server's prompts as invocable skills (`server:skill` in the `/` menu). If this server's
+  pinned `@modelcontextprotocol/sdk@1.32.1` supports registering MCP prompts — not yet
+  confirmed here — a prompt such as "triage this investigation" could become a genuinely
+  useful user-invoked skill rather than only something the model reaches for via tool
+  calls. Not adopted now: it's a new primitive (`capabilities: { tools: {} }` in
+  `http.ts`/`stdio.ts` would need to grow a `prompts` capability), the feature is still
+  beta, and which workflows deserve a prompt is a product decision, not a nightly
+  pin-and-document bump.
+- **MCP resources, surfaced by the Claude Code 2.1.330 @-mention-attachment fix.** This
+  server exposes evidence and investigation state only as tool-call results. Registering
+  some of it as MCP resources instead (or in addition) would let a user @-mention an
+  investigation or a piece of evidence directly, but needs a design decision on a URI
+  scheme and coordination with what the hosted service's API can address by resource — out
+  of scope for this protocol-boundary repo without product sign-off from the service side.
 
 - **Claude Code target bumped to 2.1.274** (from 2.1.273) in `.claude-code-version`.
 
